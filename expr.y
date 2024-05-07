@@ -5,34 +5,41 @@
 
 int yyerror(const char *);
 int yylex();
-
 %}
+
 %define parse.error verbose
 
 %token TNUM
 
 // Abre e fecha () e {}
-%token TAPAR TFPAR TACHA TFCHA 
+%token SIM_ABREPARENTESES SIM_FECHAPARENTESES SIM_ABRECHAVES SIM_FECHACHAVES 
 // Virgula ,
-%token TVIR
+%token SIM_VIRGULA
 // Operadores aritmeticos + * - /
-%token TADD TMUL TSUB TDIV
+%token SIM_ADICAO SIM_MULTIPLICACAO SIM_SUBTRACAO SIM_DIVISAO
 // Igual =
-%token TEQU 
+%token SIM_IGUAL 
 // Ponto e virgula ;
-%token TFIM 
+%token SIM_FIM 
 // Operadores relacionais == != > < >= <=
-%token TEQQ TDIF TGTH TLTH TGTE TLTE 
+%token SIM_IGUALIGUAL SIM_DIFERENTE SIM_MAIORQUE SIM_MENORQUE SIM_MAIOROUIGUAL SIM_MENOROUIGUAL 
 // Operadores logicos && ||
-%token TAND TOR 
+%token SIM_E SIM_OU 
 
-
+// ID
 %token TID
-%token CRETURN
-%token TVOID TINT TLITERAL TSTRING TFLOAT
-%token CIF CELSE
-%token CWHILE
-%token CPRINT CREAD
+// Tipos void, int, literal, string e float
+%token TIPO_VOID TIPO_INT TIPO_STRING TIPO_FLOAT
+
+// Comandos
+// Return 
+%token COM_RETORNO
+// If e Else
+%token COM_SE COM_SENAO
+// While
+%token COM_ENQUANTO
+// Print e Read
+%token COM_IMPRIME COM_LER
 
 %%
 Programa: ListaFuncoes BlocoPrincipal
@@ -41,33 +48,33 @@ Programa: ListaFuncoes BlocoPrincipal
 ListaFuncoes: ListaFuncoes Funcao
 	| Funcao
 	;
-Funcao: TipoRetorno TID TAPAR DeclParametros TFPAR BlocoPrincipal
-	| TipoRetorno TID TAPAR TFPAR BlocoPrincipal
+Funcao: TipoRetorno TID SIM_ABREPARENTESES DeclParametros SIM_FECHAPARENTESES BlocoPrincipal
+	| TipoRetorno TID SIM_ABREPARENTESES SIM_FECHAPARENTESES BlocoPrincipal
 	;
 TipoRetorno: Tipo
-	| TVOID
+	| TIPO_VOID
 	;
-DeclParametros: DeclParametros TVIR Parametro
+DeclParametros: DeclParametros SIM_VIRGULA Parametro
 	| Parametro
 	;
 Parametro: Tipo TID
 	;
-BlocoPrincipal: TACHA Declaracoes ListaCmd TFCHA
-	| TACHA Declaracao TFCHA
+BlocoPrincipal: SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES
+	| SIM_ABRECHAVES Declaracao SIM_FECHACHAVES
 	;
 Declaracoes: Declaracoes Declaracao
 	| Declaracao
 	;
-Declaracao: Tipo ListaId TFIM
+Declaracao: Tipo ListaId SIM_FIM
 	;
-Tipo: TINT
-	| TSTRING
-	| TFLOAT
+Tipo: TIPO_INT
+	| TIPO_STRING
+	| TIPO_FLOAT
 	;
-ListaId: ListaId TVIR TID
+ListaId: ListaId SIM_VIRGULA TID
 	| TID
 	;
-Bloco: TACHA ListaCmd TFCHA
+Bloco: SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES
 	;
 ListaCmd: ListaCmd Comando
 	| Comando
@@ -80,58 +87,58 @@ Comando: CmdIf
 	| ChamadaProc
 	| Retorno
 	;
-Retorno: CRETURN Expra TFIM
-	| CRETURN TLITERAL TFIM
-	| CRETURN TFIM
+Retorno: COM_RETORNO Expra SIM_FIM
+	| COM_RETORNO TIPO_STRING SIM_FIM
+	| COM_RETORNO SIM_FIM
 	;
-CmdIf: CIF TAPAR Exprl TFPAR Bloco
-	| CIF TAPAR Exprl TFPAR Bloco CELSE Bloco
+CmdIf: COM_SE SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES Bloco
+	| COM_SE SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES Bloco COM_SENAO Bloco
 	;
-CmdWhile: CWHILE TAPAR Exprl TFPAR Bloco
+CmdWhile: COM_ENQUANTO SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES Bloco
 	;
-CmdAtrib: TID TEQU Expra TFIM
-	| TID TEQU TLITERAL TFIM
+CmdAtrib: TID SIM_IGUAL Expra SIM_FIM
+	| TID SIM_IGUAL TIPO_STRING SIM_FIM
 	;
-CmdWrite: CPRINT TAPAR Expra TFPAR TFIM
-	| CPRINT TAPAR TLITERAL TFPAR TFIM
+CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES SIM_FIM
+	| COM_IMPRIME SIM_ABREPARENTESES TIPO_STRING SIM_FECHAPARENTESES SIM_FIM
 	;
-CmdRead: CREAD TAPAR TID TFPAR TFIM
+CmdRead: COM_LER SIM_ABREPARENTESES TID SIM_FECHAPARENTESES SIM_FIM
 	;
-ChamadaProc: ChamaFuncao TFIM
+ChamadaProc: ChamaFuncao SIM_FIM
 	;
-ChamaFuncao: TID TAPAR ListaParametros TFPAR
-	| TID TAPAR TFPAR
+ChamaFuncao: TID SIM_ABREPARENTESES ListaParametros SIM_FECHAPARENTESES
+	| TID SIM_ABREPARENTESES SIM_FECHAPARENTESES
 	;
-ListaParametros: ListaParametros TVIR Expra
-	| ListaParametros TVIR TLITERAL
+ListaParametros: ListaParametros SIM_VIRGULA Expra
+	| ListaParametros SIM_VIRGULA TIPO_STRING
 	| Expra
-	| TLITERAL
+	| TIPO_STRING
 	;
 
-Linha :Expra TFIM {printf("Resultado:%lf\n", $1);exit(0);}
-	| Exprr TFIM {if ($1 != 0) printf("True"); else printf("False"); exit(0);}
-	| Exprl TFIM {if ($1 != 0) printf("True"); else printf("False"); exit(0);}
+Linha :Expra SIM_FIM {printf("Resultado:%lf\n", $1);exit(0);}
+	| Exprr SIM_FIM {if ($1 != 0) printf("True"); else printf("False"); exit(0);}
+	| Exprl SIM_FIM {if ($1 != 0) printf("True"); else printf("False"); exit(0);}
 	;
-Expra: Expra TADD Termo {$$ = $1 + $3;}
-	| Expra TSUB Termo {$$ = $1 - $3;}
+Expra: Expra SIM_ADICAO Termo {$$ = $1 + $3;}
+	| Expra SIM_SUBTRACAO Termo {$$ = $1 - $3;}
 	| Termo
 	;
-Termo: Termo TMUL Fator {$$ = $1 * $3;}
-	| Termo TDIV Fator {$$ = $1 / $3;}
-	| Fator
+Termo: Termo SIM_MULTIPLICACAO FaSIM_OU {$$ = $1 * $3;}
+	| Termo SIM_DIVISAO FaSIM_OU {$$ = $1 / $3;}
+	| FaSIM_OU
 	;
-Fator: TNUM 
-	| TAPAR Expra TFPAR {$$ = $2;}
+FaSIM_OU: TNUM
+	| SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES {$$ = $2;}
 	;
-Exprr: Expra TEQQ Expra {$$ = $1 == $3;}
-	| Expra TDIF Expra {$$ = $1 != $3;}
-	| Expra TGTH Expra {$$ = $1 > $3;}
-	| Expra TLTH Expra {$$ = $1 < $3;}
-	| Expra TGTE Expra {$$ = $1 >= $3;}
-	| Expra TLTE Expra {$$ = $1 <= $3;}
+Exprr: Expra SIM_IGUALIGUAL Expra {$$ = $1 == $3;}
+	| Expra SIM_DIFERENTE Expra {$$ = $1 != $3;}
+	| Expra SIM_MAIORQUE Expra {$$ = $1 > $3;}
+	| Expra SIM_MENORQUE Expra {$$ = $1 < $3;}
+	| Expra SIM_MAIOROUIGUAL Expra {$$ = $1 >= $3;}
+	| Expra SIM_MENOROUIGUAL Expra {$$ = $1 <= $3;}
 	| Expra
-Exprl: Exprr TAND Exprr {$$ = $1 && $3;}
-	| Exprr TOR Exprr {$$ = $1 || $3;}
+Exprl: Exprr SIM_E Exprr {$$ = $1 && $3;}
+	| Exprr SIM_OU Exprr {$$ = $1 || $3;}
 %%
 
 int yyerror (const char *str)

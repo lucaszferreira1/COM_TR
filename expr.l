@@ -8,44 +8,50 @@
 
 
 delim	[ \t]
+num [0-9]
+char [a-zA-Z]
+
+id [a-zA-Z][a-zA-Z0-9_]*
+int {num}+
+string \"([^"\n]|\"\")+\"
+float {int}+"."{num}*
+
 ws	{delim}+
-digito	[0-9]
-num	{digito}+(\.{digito}*(E[+-]?{digito}+)?)?
-char .
-string {char}
+
 
 %%
 {ws}	{}
 
-"return" {return CRETURN;}
-"void" {return TVOID;}
-"int" {return TINT;}
-"literal" {return TLITERAL;}
-"string" {return TSTRING;}
-"float" {return TFLOAT;}
-"if" {return CIF;}
-"else" {return CELSE;}
-"while" {return CWHILE;}
-"print" {return CPRINT;}
-"read" {return CREAD;}
+"void" {return TIPO_VOID;}
+{int} {yylval=atof(yytext); return TIPO_INT;}
+{string} {return TIPO_STRING;}
+{float} {yylval=atof(yytext); return TIPO_FLOAT;}
 
-"+"	{return TADD;}
-"-"	{return TSUB;}
-"*"	{return TMUL;}
-"/"	{return TDIV;}
-"("	{return TAPAR;}
-")"	{return TFPAR;}
-"=" {return TEQU;}
-"==" {return TEQQ;}
-"!=" {return TDIF;}
-">" {return TGTH;}
-"<" {return TLTH;}
-">=" {return TGTE;}
-"<=" {return TLTE;}
-"&&" {return TAND;}
-"and" {return TAND;}
-"||" {return TOR;}
-"or" {return TOR;}
-"," {return TVIR;}
-\n	{return TFIM;}
-{num}	{yylval=atof(yytext); return TNUM;} 
+"return" {return COM_RETORNO;}
+"if" {return COM_SE;}
+"else" {return COM_SENAO;}
+"while" {return COM_ENQUANTO;}
+"print" {return COM_IMPRIME;}
+"read" {return COM_LER;}
+
+"+"	{return SIM_ADICAO;}
+"-"	{return SIM_SUBTRACAO;}
+"*"	{return SIM_MULTIPLICACAO;}
+"/"	{return SIM_DIVISAO;}
+"("	{return SIM_ABREPARENTESES;}
+")"	{return SIM_FECHAPARENTESES;}
+"{" {return SIM_ABRECHAVES;}
+"}" {return SIM_FECHACHAVES;}
+"=" {return SIM_IGUAL;}
+"==" {return SIM_IGUALIGUAL;}
+"!=" {return SIM_DIFERENTE;}
+">" {return SIM_MAIORQUE;}
+"<" {return SIM_MENORQUE;}
+">=" {return SIM_MAIOROUIGUAL;}
+"<=" {return SIM_MENOROUIGUAL;}
+"&&" {return SIM_E;}
+"and" {return SIM_E;}
+"||" {return SIM_OU;}
+"or" {return SIM_OU;}
+"," {return SIM_VIRGULA;}
+\n	{return SIM_FIM;}

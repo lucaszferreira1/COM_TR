@@ -4,10 +4,14 @@
 
 extern FILE *yyin;
 
-int main()
-{
+int main(){
+	FILE *file = fopen("input.txt", "r");
+	if (file == NULL){
+		perror("Error opening file!");
+		return 1;
+	}
 	yyin = stdin;
-	printf("Digite uma expressão:");
+	printf("Digite uma expressï¿½o:");
 	yyparse();
 	return 0;
 }
