@@ -1,3 +1,3 @@
 # COM_TR
 Trabalho de Compiladores;
-Utiliza Yacc e Lex;
+Utiliza Yacc, Lex, Bison e C;
