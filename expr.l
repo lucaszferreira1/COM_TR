@@ -4,6 +4,7 @@
 #define YYSTYPE double
 #include "expr.tab.h"
 #include <stdlib.h>
+#include <string.h>
 %}
 
 
@@ -11,7 +12,7 @@ delim	[ \t]
 num [0-9]
 char [a-zA-Z]
 
-id [a-zA-Z][a-zA-Z0-9_]*
+id [a-zA-Z_][a-zA-Z0-9_]*
 int {num}+
 string \"([^"\n]|\"\")+\"
 float {int}+"."{num}*
@@ -23,9 +24,10 @@ ws	{delim}+
 {ws}	{}
 
 "void" {return TIPO_VOID;}
-{int} {yylval=atof(yytext); return TIPO_INT;}
-{string} {return TIPO_STRING;}
-{float} {yylval=atof(yytext); return TIPO_FLOAT;}
+{id} {yylval.string = strdup(yytext); return TID;}
+{int} {yylval.int = atoi(yytext); return TIPO_INT;}
+{string} {yylval.string = strdup(yytext + 1); return TIPO_STRING;}
+{float} {yylval.float = atof(yytext); return TIPO_FLOAT;}
 
 "return" {return COM_RETORNO;}
 "if" {return COM_SE;}
@@ -49,9 +51,13 @@ ws	{delim}+
 "<" {return SIM_MENORQUE;}
 ">=" {return SIM_MAIOROUIGUAL;}
 "<=" {return SIM_MENOROUIGUAL;}
+"!" {return SIM_NEGACAO;}
 "&&" {return SIM_E;}
 "and" {return SIM_E;}
 "||" {return SIM_OU;}
 "or" {return SIM_OU;}
 "," {return SIM_VIRGULA;}
 \n	{return SIM_FIM;}
+<<EOF>> {return TFIM;}
+
+%%

@@ -2,14 +2,60 @@
 #define YYSTYPE double
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#define MAX_ENTRADAS 10000
+#define TAM_MAX_NOME 100
 
 int yyerror(const char *);
 int yylex();
+
+typedef enum{
+	TID,
+	INT,
+	FLOAT,
+	STRING
+} TipoToken;
+
+typedef struct Entrada{
+	char name[TAM_MAX_NOME];
+	TipoToken tipo;
+} Entrada;
+
+typedef struct TabelaEntradas{
+	Entrada entradas[MAX_ENTRADAS];
+	int count;
+} TabelaEntradas;
+
+TabelaEntradas *tabela_entradas;
+
+void symtable_insert(TabelaEntradas *tabela, const char *nome, TipoToken tipo){
+	if (tabela.count < MAX_ENTRADAS){
+		Entrada *entrada = &tabela->entradas[tabela->count++];
+		strncpy(entrada->nome, nome, TAM_MAX_NOME - 1);
+		entrada->tipo = tipo;
+	}
+}
+
+Entrada* symtable_lookup(TabelaEntradas *tabela, const char *nome){
+	for (int i=0;i<tabela->count;i++){
+		if (strcmp(tabela->entrada[i].nome, nome) == 0){
+			return &tabela->entrada[i];
+		}
+	}
+	return NULL;
+}
+
 %}
 
-%define parse.error verbose
+%union {
+	int int;
+	float float;
+	char *string;
+	char *id;
+}
 
-%token TNUM
+%define parse.error verbose
 
 // Abre e fecha () e {}
 %token SIM_ABREPARENTESES SIM_FECHAPARENTESES SIM_ABRECHAVES SIM_FECHACHAVES 
@@ -20,16 +66,20 @@ int yylex();
 // Igual =
 %token SIM_IGUAL 
 // Ponto e virgula ;
-%token SIM_FIM 
+%token SIM_FIM
 // Operadores relacionais == != > < >= <=
 %token SIM_IGUALIGUAL SIM_DIFERENTE SIM_MAIORQUE SIM_MENORQUE SIM_MAIOROUIGUAL SIM_MENOROUIGUAL 
-// Operadores logicos && ||
-%token SIM_E SIM_OU 
+// Operadores logicos && || !
+%token SIM_E SIM_OU SIM_NEGACAO
 
 // ID
-%token TID
+%token <id>TID
 // Tipos void, int, literal, string e float
 %token TIPO_VOID TIPO_INT TIPO_STRING TIPO_FLOAT
+%token <int>CONS_INT <string>CONS_LITERAL <float>CONS_FLOAT
+
+// Fim do arquivo
+%token TFIM
 
 // Comandos
 // Return 
@@ -43,7 +93,8 @@ int yylex();
 
 %%
 Programa: ListaFuncoes BlocoPrincipal
-	| BlocoPrincipal
+	| BlocoPrincipal TFIM
+	| TFIM
 	;
 ListaFuncoes: ListaFuncoes Funcao
 	| Funcao
@@ -65,7 +116,8 @@ BlocoPrincipal: SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES
 Declaracoes: Declaracoes Declaracao
 	| Declaracao
 	;
-Declaracao: Tipo ListaId SIM_FIM
+Declaracao: Tipo ListaId SIM_FIM 
+	{symtable_insert(tabela, $2)}
 	;
 Tipo: TIPO_INT
 	| TIPO_STRING
@@ -99,8 +151,10 @@ CmdWhile: COM_ENQUANTO SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES Bloco
 CmdAtrib: TID SIM_IGUAL Expra SIM_FIM
 	| TID SIM_IGUAL TIPO_STRING SIM_FIM
 	;
-CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES SIM_FIM
+CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES SIM_FIM 
+	{printf("%s", $2);}
 	| COM_IMPRIME SIM_ABREPARENTESES TIPO_STRING SIM_FECHAPARENTESES SIM_FIM
+	{printf("%s", $2);}
 	;
 CmdRead: COM_LER SIM_ABREPARENTESES TID SIM_FECHAPARENTESES SIM_FIM
 	;
@@ -114,20 +168,15 @@ ListaParametros: ListaParametros SIM_VIRGULA Expra
 	| Expra
 	| TIPO_STRING
 	;
-
-Linha :Expra SIM_FIM {printf("Resultado:%lf\n", $1);exit(0);}
-	| Exprr SIM_FIM {if ($1 != 0) printf("True"); else printf("False"); exit(0);}
-	| Exprl SIM_FIM {if ($1 != 0) printf("True"); else printf("False"); exit(0);}
-	;
 Expra: Expra SIM_ADICAO Termo {$$ = $1 + $3;}
 	| Expra SIM_SUBTRACAO Termo {$$ = $1 - $3;}
 	| Termo
 	;
-Termo: Termo SIM_MULTIPLICACAO FaSIM_OU {$$ = $1 * $3;}
-	| Termo SIM_DIVISAO FaSIM_OU {$$ = $1 / $3;}
-	| FaSIM_OU
+Termo: Termo SIM_MULTIPLICACAO Fator {$$ = $1 * $3;}
+	| Termo SIM_DIVISAO Fator {$$ = $1 / $3;}
+	| Fator
 	;
-FaSIM_OU: TNUM
+Fator: TID
 	| SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES {$$ = $2;}
 	;
 Exprr: Expra SIM_IGUALIGUAL Expra {$$ = $1 == $3;}
@@ -137,8 +186,10 @@ Exprr: Expra SIM_IGUALIGUAL Expra {$$ = $1 == $3;}
 	| Expra SIM_MAIOROUIGUAL Expra {$$ = $1 >= $3;}
 	| Expra SIM_MENOROUIGUAL Expra {$$ = $1 <= $3;}
 	| Expra
-Exprl: Exprr SIM_E Exprr {$$ = $1 && $3;}
-	| Exprr SIM_OU Exprr {$$ = $1 || $3;}
+Exprl: SIM_NEGACAO Exprl {$$ = !$2;}
+	| Exprl SIM_E Exprl {$$ = $1 && $3;}
+	| Exprl SIM_OU Exprl {$$ = $1 || $3;}
+	| Exprr
 %%
 
 int yyerror (const char *str)

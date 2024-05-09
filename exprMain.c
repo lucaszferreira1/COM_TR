@@ -10,9 +10,11 @@ int main(){
 		perror("Error opening file!");
 		return 1;
 	}
+
 	yyin = stdin;
-	printf("Digite uma express�o:");
 	yyparse();
+
+	fclose(file);
 	return 0;
 }
 
