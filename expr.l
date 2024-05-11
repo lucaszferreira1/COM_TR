@@ -7,7 +7,6 @@
 #include <string.h>
 %}
 
-
 delim	[ \t]
 num [0-9]
 char [a-zA-Z]
@@ -23,11 +22,16 @@ ws	{delim}+
 %%
 {ws}	{}
 
+"main" {return FUN_MAIN;}
+
 "void" {return TIPO_VOID;}
-{id} {yylval.string = strdup(yytext); return TID;}
-{int} {yylval.int = atoi(yytext); return TIPO_INT;}
-{string} {yylval.string = strdup(yytext + 1); return TIPO_STRING;}
-{float} {yylval.float = atof(yytext); return TIPO_FLOAT;}
+"int" {return TIPO_INT;}
+"string" {return TIPO_STRING;}
+"float" {return TIPO_FLOAT;}
+
+{int} {return CONS_INT;}
+{string} {return CONS_LITERAL;}
+{float} {return CONS_FLOAT;}
 
 "return" {return COM_RETORNO;}
 "if" {return COM_SE;}
@@ -57,7 +61,7 @@ ws	{delim}+
 "||" {return SIM_OU;}
 "or" {return SIM_OU;}
 "," {return SIM_VIRGULA;}
-\n	{return SIM_FIM;}
-<<EOF>> {return TFIM;}
+";"	{return SIM_FIM;}
 
+{id} {return TID;}
 %%

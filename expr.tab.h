@@ -54,7 +54,7 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    TNUM = 258,                    /* TNUM  */
+    FUN_MAIN = 258,                /* FUN_MAIN  */
     SIM_ABREPARENTESES = 259,      /* SIM_ABREPARENTESES  */
     SIM_FECHAPARENTESES = 260,     /* SIM_FECHAPARENTESES  */
     SIM_ABRECHAVES = 261,          /* SIM_ABRECHAVES  */
@@ -74,24 +74,40 @@ extern int yydebug;
     SIM_MENOROUIGUAL = 275,        /* SIM_MENOROUIGUAL  */
     SIM_E = 276,                   /* SIM_E  */
     SIM_OU = 277,                  /* SIM_OU  */
-    TID = 278,                     /* TID  */
-    TIPO_VOID = 279,               /* TIPO_VOID  */
-    TIPO_INT = 280,                /* TIPO_INT  */
-    TIPO_STRING = 281,             /* TIPO_STRING  */
-    TIPO_FLOAT = 282,              /* TIPO_FLOAT  */
-    COM_RETORNO = 283,             /* COM_RETORNO  */
-    COM_SE = 284,                  /* COM_SE  */
-    COM_SENAO = 285,               /* COM_SENAO  */
-    COM_ENQUANTO = 286,            /* COM_ENQUANTO  */
-    COM_IMPRIME = 287,             /* COM_IMPRIME  */
-    COM_LER = 288                  /* COM_LER  */
+    SIM_NEGACAO = 278,             /* SIM_NEGACAO  */
+    TID = 279,                     /* TID  */
+    TIPO_VOID = 280,               /* TIPO_VOID  */
+    TIPO_INT = 281,                /* TIPO_INT  */
+    TIPO_STRING = 282,             /* TIPO_STRING  */
+    TIPO_FLOAT = 283,              /* TIPO_FLOAT  */
+    CONS_INT = 284,                /* CONS_INT  */
+    CONS_LITERAL = 285,            /* CONS_LITERAL  */
+    CONS_FLOAT = 286,              /* CONS_FLOAT  */
+    COM_RETORNO = 287,             /* COM_RETORNO  */
+    COM_SE = 288,                  /* COM_SE  */
+    COM_SENAO = 289,               /* COM_SENAO  */
+    COM_ENQUANTO = 290,            /* COM_ENQUANTO  */
+    COM_IMPRIME = 291,             /* COM_IMPRIME  */
+    COM_LER = 292                  /* COM_LER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+union YYSTYPE
+{
+#line 53 "expr.y"
+
+	float real;
+	int integer;
+	char *string;
+	char *id;
+
+#line 108 "expr.tab.h"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

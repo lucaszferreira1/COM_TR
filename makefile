@@ -1,7 +1,7 @@
 all: main
 
 expr.tab.c expr.tab.h: expr.y
-	bison -d expr.y
+	bison -d expr.y 
 
 lex.yy.c: expr.l
 	flex expr.l

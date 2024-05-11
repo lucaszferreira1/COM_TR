@@ -11,7 +11,7 @@ int main(){
 		return 1;
 	}
 
-	yyin = stdin;
+	yyin = file;
 	yyparse();
 
 	fclose(file);

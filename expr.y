@@ -10,6 +10,7 @@
 int yyerror(const char *);
 int yylex();
 
+/*
 typedef enum{
 	TID,
 	INT,
@@ -45,17 +46,21 @@ Entrada* symtable_lookup(TabelaEntradas *tabela, const char *nome){
 	}
 	return NULL;
 }
+*/
 
 %}
 
 %union {
-	int int;
-	float float;
+	float real;
+	int integer;
 	char *string;
 	char *id;
 }
 
 %define parse.error verbose
+
+// Funcao principal
+%token FUN_MAIN
 
 // Abre e fecha () e {}
 %token SIM_ABREPARENTESES SIM_FECHAPARENTESES SIM_ABRECHAVES SIM_FECHACHAVES 
@@ -76,10 +81,7 @@ Entrada* symtable_lookup(TabelaEntradas *tabela, const char *nome){
 %token <id>TID
 // Tipos void, int, literal, string e float
 %token TIPO_VOID TIPO_INT TIPO_STRING TIPO_FLOAT
-%token <int>CONS_INT <string>CONS_LITERAL <float>CONS_FLOAT
-
-// Fim do arquivo
-%token TFIM
+%token <integer>CONS_INT <string>CONS_LITERAL <real>CONS_FLOAT
 
 // Comandos
 // Return 
@@ -93,8 +95,8 @@ Entrada* symtable_lookup(TabelaEntradas *tabela, const char *nome){
 
 %%
 Programa: ListaFuncoes BlocoPrincipal
-	| BlocoPrincipal TFIM
-	| TFIM
+	| BlocoPrincipal YYEOF
+	| YYEOF
 	;
 ListaFuncoes: ListaFuncoes Funcao
 	| Funcao
@@ -110,14 +112,14 @@ DeclParametros: DeclParametros SIM_VIRGULA Parametro
 	;
 Parametro: Tipo TID
 	;
-BlocoPrincipal: SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES
-	| SIM_ABRECHAVES Declaracao SIM_FECHACHAVES
+BlocoPrincipal: FUN_MAIN SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES
+	| FUN_MAIN SIM_ABRECHAVES Declaracoes SIM_FECHACHAVES
+	| FUN_MAIN SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES
 	;
 Declaracoes: Declaracoes Declaracao
 	| Declaracao
 	;
-Declaracao: Tipo ListaId SIM_FIM 
-	{symtable_insert(tabela, $2)}
+Declaracao: Tipo ListaId SIM_FIM
 	;
 Tipo: TIPO_INT
 	| TIPO_STRING
@@ -127,6 +129,7 @@ ListaId: ListaId SIM_VIRGULA TID
 	| TID
 	;
 Bloco: SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES
+	| SIM_ABRECHAVES SIM_FECHACHAVES
 	;
 ListaCmd: ListaCmd Comando
 	| Comando
@@ -143,18 +146,16 @@ Retorno: COM_RETORNO Expra SIM_FIM
 	| COM_RETORNO TIPO_STRING SIM_FIM
 	| COM_RETORNO SIM_FIM
 	;
-CmdIf: COM_SE SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES Bloco
-	| COM_SE SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES Bloco COM_SENAO Bloco
+CmdIf: COM_SE SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco
+	| COM_SE SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco COM_SENAO Bloco
 	;
-CmdWhile: COM_ENQUANTO SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES Bloco
+CmdWhile: COM_ENQUANTO SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco
 	;
 CmdAtrib: TID SIM_IGUAL Expra SIM_FIM
-	| TID SIM_IGUAL TIPO_STRING SIM_FIM
+	| TID SIM_IGUAL CONS_LITERAL SIM_FIM
 	;
-CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES SIM_FIM 
-	{printf("%s", $2);}
-	| COM_IMPRIME SIM_ABREPARENTESES TIPO_STRING SIM_FECHAPARENTESES SIM_FIM
-	{printf("%s", $2);}
+CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES SIM_FIM
+	| COM_IMPRIME SIM_ABREPARENTESES CONS_LITERAL SIM_FECHAPARENTESES SIM_FIM
 	;
 CmdRead: COM_LER SIM_ABREPARENTESES TID SIM_FECHAPARENTESES SIM_FIM
 	;
@@ -168,28 +169,42 @@ ListaParametros: ListaParametros SIM_VIRGULA Expra
 	| Expra
 	| TIPO_STRING
 	;
-Expra: Expra SIM_ADICAO Termo {$$ = $1 + $3;}
-	| Expra SIM_SUBTRACAO Termo {$$ = $1 - $3;}
-	| Termo
+
+
+Expr: Exprr
+	| Exprl
 	;
-Termo: Termo SIM_MULTIPLICACAO Fator {$$ = $1 * $3;}
-	| Termo SIM_DIVISAO Fator {$$ = $1 / $3;}
-	| Fator
+TermoAritmetico: TID
+	| CONS_FLOAT
+	| CONS_INT
+	| ChamaFuncao
 	;
-Fator: TID
-	| SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES {$$ = $2;}
+Termo: TID
+	| CONS_FLOAT
+	| CONS_INT
+	| SIM_ABREPARENTESES TID SIM_FECHAPARENTESES
+	| SIM_ABREPARENTESES CONS_FLOAT SIM_FECHAPARENTESES
+	| SIM_ABREPARENTESES CONS_INT SIM_FECHAPARENTESES
+	| SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES
+	| SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES
+	| SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES
 	;
-Exprr: Expra SIM_IGUALIGUAL Expra {$$ = $1 == $3;}
-	| Expra SIM_DIFERENTE Expra {$$ = $1 != $3;}
-	| Expra SIM_MAIORQUE Expra {$$ = $1 > $3;}
-	| Expra SIM_MENORQUE Expra {$$ = $1 < $3;}
-	| Expra SIM_MAIOROUIGUAL Expra {$$ = $1 >= $3;}
-	| Expra SIM_MENOROUIGUAL Expra {$$ = $1 <= $3;}
-	| Expra
-Exprl: SIM_NEGACAO Exprl {$$ = !$2;}
-	| Exprl SIM_E Exprl {$$ = $1 && $3;}
-	| Exprl SIM_OU Exprl {$$ = $1 || $3;}
-	| Exprr
+Exprr: Termo SIM_MAIORQUE Termo
+	| Termo SIM_MENORQUE Termo
+	| Termo SIM_MAIOROUIGUAL Termo
+	| Termo SIM_MENOROUIGUAL Termo
+	| Termo SIM_IGUALIGUAL Termo
+	| Termo SIM_DIFERENTE Termo
+	;
+Expra: TermoAritmetico SIM_ADICAO TermoAritmetico
+	| TermoAritmetico SIM_SUBTRACAO TermoAritmetico
+	| TermoAritmetico SIM_MULTIPLICACAO TermoAritmetico
+	| TermoAritmetico SIM_DIVISAO TermoAritmetico
+	;
+Exprl: Termo SIM_E Termo
+	| Termo SIM_OU Termo
+	| SIM_NEGACAO Termo
+	;
 %%
 
 int yyerror (const char *str)
