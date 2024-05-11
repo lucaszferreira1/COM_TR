@@ -1,6 +1,7 @@
-main{
-    int a, b;
-    if(a || (a / b)){
+void test(){
 
-    }
+}
+
+main{
+    print(2 || 3 || 4);
 }

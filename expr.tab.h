@@ -75,20 +75,20 @@ extern int yydebug;
     SIM_E = 276,                   /* SIM_E  */
     SIM_OU = 277,                  /* SIM_OU  */
     SIM_NEGACAO = 278,             /* SIM_NEGACAO  */
-    TID = 279,                     /* TID  */
-    TIPO_VOID = 280,               /* TIPO_VOID  */
-    TIPO_INT = 281,                /* TIPO_INT  */
-    TIPO_STRING = 282,             /* TIPO_STRING  */
-    TIPO_FLOAT = 283,              /* TIPO_FLOAT  */
-    CONS_INT = 284,                /* CONS_INT  */
-    CONS_LITERAL = 285,            /* CONS_LITERAL  */
-    CONS_FLOAT = 286,              /* CONS_FLOAT  */
-    COM_RETORNO = 287,             /* COM_RETORNO  */
-    COM_SE = 288,                  /* COM_SE  */
-    COM_SENAO = 289,               /* COM_SENAO  */
-    COM_ENQUANTO = 290,            /* COM_ENQUANTO  */
-    COM_IMPRIME = 291,             /* COM_IMPRIME  */
-    COM_LER = 292                  /* COM_LER  */
+    COM_RETORNO = 279,             /* COM_RETORNO  */
+    COM_SE = 280,                  /* COM_SE  */
+    COM_SENAO = 281,               /* COM_SENAO  */
+    COM_ENQUANTO = 282,            /* COM_ENQUANTO  */
+    COM_IMPRIME = 283,             /* COM_IMPRIME  */
+    COM_LER = 284,                 /* COM_LER  */
+    TIPO_VOID = 285,               /* TIPO_VOID  */
+    TIPO_INT = 286,                /* TIPO_INT  */
+    TIPO_STRING = 287,             /* TIPO_STRING  */
+    TIPO_FLOAT = 288,              /* TIPO_FLOAT  */
+    TID = 289,                     /* TID  */
+    CONS_INT = 290,                /* CONS_INT  */
+    CONS_LITERAL = 291,            /* CONS_LITERAL  */
+    CONS_FLOAT = 292               /* CONS_FLOAT  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif

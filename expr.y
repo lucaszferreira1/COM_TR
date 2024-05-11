@@ -59,7 +59,6 @@ Entrada* symtable_lookup(TabelaEntradas *tabela, const char *nome){
 
 %define parse.error verbose
 
-// Funcao principal
 %token FUN_MAIN
 
 // Abre e fecha () e {}
@@ -77,12 +76,6 @@ Entrada* symtable_lookup(TabelaEntradas *tabela, const char *nome){
 // Operadores logicos && || !
 %token SIM_E SIM_OU SIM_NEGACAO
 
-// ID
-%token <id>TID
-// Tipos void, int, literal, string e float
-%token TIPO_VOID TIPO_INT TIPO_STRING TIPO_FLOAT
-%token <integer>CONS_INT <string>CONS_LITERAL <real>CONS_FLOAT
-
 // Comandos
 // Return 
 %token COM_RETORNO
@@ -93,9 +86,21 @@ Entrada* symtable_lookup(TabelaEntradas *tabela, const char *nome){
 // Print e Read
 %token COM_IMPRIME COM_LER
 
+// Tipos void, int, literal, string e float
+%token TIPO_VOID TIPO_INT TIPO_STRING TIPO_FLOAT
+%token TID CONS_INT CONS_LITERAL CONS_FLOAT
+%type <id> TID
+%type <integer> CONS_INT 
+%type <string> CONS_LITERAL 
+%type <real> CONS_FLOAT
+
+%left SIM_MAIOROUIGUAL SIM_MENOROUIGUAL SIM_IGUALIGUAL SIM_DIFERENTE SIM_MAIORQUE SIM_MENORQUE
+%left SIM_ADICAO SIM_SUBTRACAO
+%left SIM_MULTIPLICACAO SIM_DIVISAO
+
 %%
-Programa: ListaFuncoes BlocoPrincipal
-	| BlocoPrincipal YYEOF
+Programa: ListaFuncoes FUN_MAIN BlocoPrincipal YYEOF
+	| FUN_MAIN BlocoPrincipal YYEOF
 	| YYEOF
 	;
 ListaFuncoes: ListaFuncoes Funcao
@@ -112,9 +117,10 @@ DeclParametros: DeclParametros SIM_VIRGULA Parametro
 	;
 Parametro: Tipo TID
 	;
-BlocoPrincipal: FUN_MAIN SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES
-	| FUN_MAIN SIM_ABRECHAVES Declaracoes SIM_FECHACHAVES
-	| FUN_MAIN SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES
+BlocoPrincipal: SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES
+	| SIM_ABRECHAVES Declaracoes SIM_FECHACHAVES
+	| SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES
+	| SIM_ABRECHAVES SIM_FECHACHAVES
 	;
 Declaracoes: Declaracoes Declaracao
 	| Declaracao
@@ -154,7 +160,7 @@ CmdWhile: COM_ENQUANTO SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco
 CmdAtrib: TID SIM_IGUAL Expra SIM_FIM
 	| TID SIM_IGUAL CONS_LITERAL SIM_FIM
 	;
-CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES SIM_FIM
+CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES SIM_FIM
 	| COM_IMPRIME SIM_ABREPARENTESES CONS_LITERAL SIM_FECHAPARENTESES SIM_FIM
 	;
 CmdRead: COM_LER SIM_ABREPARENTESES TID SIM_FECHAPARENTESES SIM_FIM
@@ -171,39 +177,29 @@ ListaParametros: ListaParametros SIM_VIRGULA Expra
 	;
 
 
-Expr: Exprr
-	| Exprl
+Expr: Exprl
+	| Expra
 	;
-TermoAritmetico: TID
-	| CONS_FLOAT
-	| CONS_INT
-	| ChamaFuncao
+Termo: CONS_INT
+	/* | CONS_FLOAT
+	| TID
+	| ChamaFuncao */
 	;
-Termo: TID
-	| CONS_FLOAT
-	| CONS_INT
-	| SIM_ABREPARENTESES TID SIM_FECHAPARENTESES
-	| SIM_ABREPARENTESES CONS_FLOAT SIM_FECHAPARENTESES
-	| SIM_ABREPARENTESES CONS_INT SIM_FECHAPARENTESES
-	| SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES
-	| SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES
-	| SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES
+Expra: Expra SIM_MAIORQUE Expra
+	| Expra SIM_MENORQUE Expra
+	| Expra SIM_MAIOROUIGUAL Expra
+	| Expra SIM_MENOROUIGUAL Expra
+	| Expra SIM_IGUALIGUAL Expra
+	| Expra SIM_DIFERENTE Expra
+	| Expra SIM_ADICAO Expra
+	| Expra SIM_SUBTRACAO Expra
+	| Expra SIM_MULTIPLICACAO Expra
+	| Expra SIM_DIVISAO Expra
+	| Termo
 	;
-Exprr: Termo SIM_MAIORQUE Termo
-	| Termo SIM_MENORQUE Termo
-	| Termo SIM_MAIOROUIGUAL Termo
-	| Termo SIM_MENOROUIGUAL Termo
-	| Termo SIM_IGUALIGUAL Termo
-	| Termo SIM_DIFERENTE Termo
-	;
-Expra: TermoAritmetico SIM_ADICAO TermoAritmetico
-	| TermoAritmetico SIM_SUBTRACAO TermoAritmetico
-	| TermoAritmetico SIM_MULTIPLICACAO TermoAritmetico
-	| TermoAritmetico SIM_DIVISAO TermoAritmetico
-	;
-Exprl: Termo SIM_E Termo
-	| Termo SIM_OU Termo
-	| SIM_NEGACAO Termo
+Exprl: Exprl SIM_E Expra
+	| Exprl SIM_OU Expra
+	| SIM_NEGACAO SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES
 	;
 %%
 

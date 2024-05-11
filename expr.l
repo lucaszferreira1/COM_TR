@@ -7,9 +7,8 @@
 #include <string.h>
 %}
 
-delim	[ \t]
+delim [ \t]
 num [0-9]
-char [a-zA-Z]
 
 id [a-zA-Z_][a-zA-Z0-9_]*
 int {num}+
