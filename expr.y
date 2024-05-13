@@ -186,23 +186,24 @@ Termo: Expra SIM_MULTIPLICACAO Expra
 	;
 Fator: CONS_INT
 	| SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES
-/*  | CONS_FLOAT
+    | CONS_FLOAT
 	| TID
-	| ChamaFuncao */
+	| ChamaFuncao 
 	;
-Expra: Expra SIM_MAIORQUE Expra
-	| Expra SIM_MENORQUE Expra
-	| Expra SIM_MAIOROUIGUAL Expra
-	| Expra SIM_MENOROUIGUAL Expra
-	| Expra SIM_IGUALIGUAL Expra
-	| Expra SIM_DIFERENTE Expra
+Expra: Expra SIM_MAIORQUE Termo
+	| Expra SIM_MENORQUE Termo
+	| Expra SIM_MAIOROUIGUAL Termo
+	| Expra SIM_MENOROUIGUAL Termo
+	| Expra SIM_IGUALIGUAL Termo
+	| Expra SIM_DIFERENTE Termo
 	| Expra SIM_ADICAO Termo
 	| Expra SIM_SUBTRACAO Termo
 	| Termo
 	;
 Exprl: Exprl SIM_E Expra
 	| Exprl SIM_OU Expra
-	| SIM_NEGACAO SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES
+	| SIM_NEGACAO Expra
+	| Expra
 	;
 %%
 

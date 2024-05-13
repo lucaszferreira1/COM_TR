@@ -3,5 +3,10 @@ void test(){
 }
 
 main{
-    print((2+2)/(2+2));
+    string a;
+    int b, c;
+
+    test();
+    a = "Teste";
+    print(a);
 }
