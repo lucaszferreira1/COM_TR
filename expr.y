@@ -180,8 +180,13 @@ ListaParametros: ListaParametros SIM_VIRGULA Expra
 Expr: Exprl
 	| Expra
 	;
-Termo: CONS_INT
-	/* | CONS_FLOAT
+Termo: Expra SIM_MULTIPLICACAO Expra
+	| Expra SIM_DIVISAO Expra
+	| Fator
+	;
+Fator: CONS_INT
+	| SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES
+/*  | CONS_FLOAT
 	| TID
 	| ChamaFuncao */
 	;
@@ -191,10 +196,8 @@ Expra: Expra SIM_MAIORQUE Expra
 	| Expra SIM_MENOROUIGUAL Expra
 	| Expra SIM_IGUALIGUAL Expra
 	| Expra SIM_DIFERENTE Expra
-	| Expra SIM_ADICAO Expra
-	| Expra SIM_SUBTRACAO Expra
-	| Expra SIM_MULTIPLICACAO Expra
-	| Expra SIM_DIVISAO Expra
+	| Expra SIM_ADICAO Termo
+	| Expra SIM_SUBTRACAO Termo
 	| Termo
 	;
 Exprl: Exprl SIM_E Expra
