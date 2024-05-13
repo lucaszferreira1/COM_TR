@@ -61,5 +61,5 @@ ws	{delim}+
 "," {return SIM_VIRGULA;}
 ";"	{return SIM_FIM;}
 
-{id} {return TID;}
+{id} {yylval.string = strdup(yytext); return TID;}
 %%
