@@ -1,7 +1,6 @@
 %option noyywrap
 
 %{
-#define YYSTYPE double
 #include "expr.tab.h"
 #include <stdlib.h>
 #include <string.h>
@@ -13,7 +12,7 @@ num [0-9]
 id [a-zA-Z_][a-zA-Z0-9_]*
 int {num}+
 string \"([^"\n]|\"\")+\"
-float {int}+"."{num}*
+float {num}+"."{num}*
 
 ws	{delim}+
 
@@ -28,9 +27,9 @@ ws	{delim}+
 "string" {return TIPO_STRING;}
 "float" {return TIPO_FLOAT;}
 
-{int} {return CONS_INT;}
-{string} {return CONS_LITERAL;}
-{float} {return CONS_FLOAT;}
+{int} {yylval.integer = atoi(yytext); return CONS_INT;}
+{string} {yylval.string = strdup(yytext); return CONS_LITERAL;}
+{float} {yylval.real = atof(yytext); return CONS_FLOAT;}
 
 "return" {return COM_RETORNO;}
 "if" {return COM_SE;}

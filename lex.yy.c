@@ -503,12 +503,11 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "expr.l"
 #line 4 "expr.l"
-#define YYSTYPE double
 #include "expr.tab.h"
 #include <stdlib.h>
 #include <string.h>
+#line 510 "lex.yy.c"
 #line 511 "lex.yy.c"
-#line 512 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -725,9 +724,9 @@ YY_DECL
 		}
 
 	{
-#line 21 "expr.l"
+#line 20 "expr.l"
 
-#line 731 "lex.yy.c"
+#line 730 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -786,200 +785,200 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 22 "expr.l"
+#line 21 "expr.l"
 {}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 24 "expr.l"
+#line 23 "expr.l"
 {return FUN_MAIN;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 26 "expr.l"
+#line 25 "expr.l"
 {return TIPO_VOID;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 27 "expr.l"
+#line 26 "expr.l"
 {return TIPO_INT;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 28 "expr.l"
+#line 27 "expr.l"
 {return TIPO_STRING;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 29 "expr.l"
+#line 28 "expr.l"
 {return TIPO_FLOAT;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 31 "expr.l"
-{return CONS_INT;}
+#line 30 "expr.l"
+{yylval.integer = atoi(yytext); return CONS_INT;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 32 "expr.l"
-{return CONS_LITERAL;}
+#line 31 "expr.l"
+{yylval.string = strdup(yytext); return CONS_LITERAL;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 33 "expr.l"
-{return CONS_FLOAT;}
+#line 32 "expr.l"
+{yylval.real = atof(yytext); return CONS_FLOAT;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 35 "expr.l"
+#line 34 "expr.l"
 {return COM_RETORNO;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 36 "expr.l"
+#line 35 "expr.l"
 {return COM_SE;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 37 "expr.l"
+#line 36 "expr.l"
 {return COM_SENAO;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 38 "expr.l"
+#line 37 "expr.l"
 {return COM_ENQUANTO;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 39 "expr.l"
+#line 38 "expr.l"
 {return COM_IMPRIME;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 40 "expr.l"
+#line 39 "expr.l"
 {return COM_LER;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 42 "expr.l"
+#line 41 "expr.l"
 {return SIM_ADICAO;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 43 "expr.l"
+#line 42 "expr.l"
 {return SIM_SUBTRACAO;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 44 "expr.l"
+#line 43 "expr.l"
 {return SIM_MULTIPLICACAO;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 45 "expr.l"
+#line 44 "expr.l"
 {return SIM_DIVISAO;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 46 "expr.l"
+#line 45 "expr.l"
 {return SIM_ABREPARENTESES;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 47 "expr.l"
+#line 46 "expr.l"
 {return SIM_FECHAPARENTESES;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 48 "expr.l"
+#line 47 "expr.l"
 {return SIM_ABRECHAVES;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 49 "expr.l"
+#line 48 "expr.l"
 {return SIM_FECHACHAVES;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 50 "expr.l"
+#line 49 "expr.l"
 {return SIM_IGUAL;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 51 "expr.l"
+#line 50 "expr.l"
 {return SIM_IGUALIGUAL;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 52 "expr.l"
+#line 51 "expr.l"
 {return SIM_DIFERENTE;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 53 "expr.l"
+#line 52 "expr.l"
 {return SIM_MAIORQUE;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 54 "expr.l"
+#line 53 "expr.l"
 {return SIM_MENORQUE;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 55 "expr.l"
+#line 54 "expr.l"
 {return SIM_MAIOROUIGUAL;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 56 "expr.l"
+#line 55 "expr.l"
 {return SIM_MENOROUIGUAL;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 57 "expr.l"
+#line 56 "expr.l"
 {return SIM_NEGACAO;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 58 "expr.l"
+#line 57 "expr.l"
 {return SIM_E;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 59 "expr.l"
+#line 58 "expr.l"
 {return SIM_E;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 60 "expr.l"
+#line 59 "expr.l"
 {return SIM_OU;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 61 "expr.l"
+#line 60 "expr.l"
 {return SIM_OU;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 62 "expr.l"
+#line 61 "expr.l"
 {return SIM_VIRGULA;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 63 "expr.l"
+#line 62 "expr.l"
 {return SIM_FIM;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 65 "expr.l"
+#line 64 "expr.l"
 {return TID;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 66 "expr.l"
+#line 65 "expr.l"
 ECHO;
 	YY_BREAK
-#line 983 "lex.yy.c"
+#line 982 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1984,5 +1983,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 66 "expr.l"
+#line 65 "expr.l"
 

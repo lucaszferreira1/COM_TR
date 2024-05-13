@@ -1,5 +1,4 @@
 %{
-#define YYSTYPE double
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -98,6 +97,11 @@ Entrada* symtable_lookup(TabelaEntradas *tabela, const char *nome){
 %left SIM_ADICAO SIM_SUBTRACAO
 %left SIM_MULTIPLICACAO SIM_DIVISAO
 
+%type <real> Exprr
+%type <real> Expra
+%type <real> Fator
+%type <real> Termo
+
 %%
 Programa: ListaFuncoes FUN_MAIN BlocoPrincipal YYEOF
 	| FUN_MAIN BlocoPrincipal YYEOF
@@ -149,7 +153,7 @@ Comando: CmdIf
 	| Retorno
 	;
 Retorno: COM_RETORNO Expra SIM_FIM
-	| COM_RETORNO TIPO_STRING SIM_FIM
+	| COM_RETORNO CONS_LITERAL SIM_FIM
 	| COM_RETORNO SIM_FIM
 	;
 CmdIf: COM_SE SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco
@@ -160,7 +164,9 @@ CmdWhile: COM_ENQUANTO SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco
 CmdAtrib: TID SIM_IGUAL Expra SIM_FIM
 	| TID SIM_IGUAL CONS_LITERAL SIM_FIM
 	;
-CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES SIM_FIM
+CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES SIM_FIM
+	{printf("%f", $3);}
+	| COM_IMPRIME SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES SIM_FIM
 	| COM_IMPRIME SIM_ABREPARENTESES CONS_LITERAL SIM_FECHAPARENTESES SIM_FIM
 	;
 CmdRead: COM_LER SIM_ABREPARENTESES TID SIM_FECHAPARENTESES SIM_FIM
@@ -179,26 +185,45 @@ ListaParametros: ListaParametros SIM_VIRGULA Expra
 
 Expr: Exprl
 	| Expra
+	| Exprr
 	;
-Termo: Expra SIM_MULTIPLICACAO Expra
-	| Expra SIM_DIVISAO Expra
+Exprr: Exprr SIM_MAIORQUE Expra
+	{$$ = $1 > $3;}
+	| Exprr SIM_MENORQUE Expra
+	{$$ = $1 < $3;}
+	| Exprr SIM_MAIOROUIGUAL Expra
+	{$$ = $1 >= $3;}
+	| Exprr SIM_MENOROUIGUAL Expra
+	{$$ = $1 <= $3;}
+	| Exprr SIM_IGUALIGUAL Expra
+	{$$ = $1 == $3;}
+	| Exprr SIM_DIFERENTE Expra
+	{$$ = $1 != $3;}
+	| Expra
+	{$$ = $1;}
+	;
+Expra: Expra SIM_ADICAO Termo
+	{$$ = $1 + $3;}
+	| Expra SIM_SUBTRACAO Termo
+	{$$ = $1 - $3;}
+	| Termo
+	{$$ = $1;}
+	;
+Termo: Termo SIM_MULTIPLICACAO Fator
+	{$$ = $1 * $3;}
+	| Termo SIM_DIVISAO Fator
+	{$$ = $1 / $3;}
 	| Fator
+	{$$ = $1;}
 	;
 Fator: CONS_INT
-	| SIM_ABREPARENTESES Expra SIM_FECHAPARENTESES
+	{$$ = (float)$1;}
     | CONS_FLOAT
-	| TID
-	| ChamaFuncao 
-	;
-Expra: Expra SIM_MAIORQUE Termo
-	| Expra SIM_MENORQUE Termo
-	| Expra SIM_MAIOROUIGUAL Termo
-	| Expra SIM_MENOROUIGUAL Termo
-	| Expra SIM_IGUALIGUAL Termo
-	| Expra SIM_DIFERENTE Termo
-	| Expra SIM_ADICAO Termo
-	| Expra SIM_SUBTRACAO Termo
-	| Termo
+	{$$ = $1;}
+	/* | TID
+	| ChamaFuncao  */
+	| SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES
+	{$$ = $2;}
 	;
 Exprl: Exprl SIM_E Expra
 	| Exprl SIM_OU Expra
