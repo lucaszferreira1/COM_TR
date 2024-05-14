@@ -58,8 +58,6 @@ Entrada* symtable_lookup(TabelaEntradas *tabela, const char *nome){
 
 %define parse.error verbose
 
-%token FUN_MAIN
-
 // Abre e fecha () e {}
 %token SIM_ABREPARENTESES SIM_FECHAPARENTESES SIM_ABRECHAVES SIM_FECHACHAVES 
 // Virgula ,
@@ -97,14 +95,9 @@ Entrada* symtable_lookup(TabelaEntradas *tabela, const char *nome){
 %left SIM_ADICAO SIM_SUBTRACAO
 %left SIM_MULTIPLICACAO SIM_DIVISAO
 
-%type <real> Exprr
-%type <real> Expra
-%type <real> Fator
-%type <real> Termo
-
 %%
-Programa: ListaFuncoes FUN_MAIN BlocoPrincipal YYEOF
-	| FUN_MAIN BlocoPrincipal YYEOF
+Programa: ListaFuncoes BlocoPrincipal YYEOF
+	| BlocoPrincipal YYEOF
 	| YYEOF
 	;
 ListaFuncoes: ListaFuncoes Funcao
@@ -165,7 +158,6 @@ CmdAtrib: TID SIM_IGUAL Expra SIM_FIM
 	| TID SIM_IGUAL CONS_LITERAL SIM_FIM
 	;
 CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES SIM_FIM
-	{printf("%f", $3);}
 	| COM_IMPRIME SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES SIM_FIM
 	| COM_IMPRIME SIM_ABREPARENTESES CONS_LITERAL SIM_FECHAPARENTESES SIM_FIM
 	;
@@ -188,42 +180,26 @@ Expr: Exprl
 	| Exprr
 	;
 Exprr: Exprr SIM_MAIORQUE Expra
-	{$$ = $1 > $3;}
 	| Exprr SIM_MENORQUE Expra
-	{$$ = $1 < $3;}
 	| Exprr SIM_MAIOROUIGUAL Expra
-	{$$ = $1 >= $3;}
 	| Exprr SIM_MENOROUIGUAL Expra
-	{$$ = $1 <= $3;}
 	| Exprr SIM_IGUALIGUAL Expra
-	{$$ = $1 == $3;}
 	| Exprr SIM_DIFERENTE Expra
-	{$$ = $1 != $3;}
 	| Expra
-	{$$ = $1;}
 	;
 Expra: Expra SIM_ADICAO Termo
-	{$$ = $1 + $3;}
 	| Expra SIM_SUBTRACAO Termo
-	{$$ = $1 - $3;}
 	| Termo
-	{$$ = $1;}
 	;
 Termo: Termo SIM_MULTIPLICACAO Fator
-	{$$ = $1 * $3;}
 	| Termo SIM_DIVISAO Fator
-	{$$ = $1 / $3;}
 	| Fator
-	{$$ = $1;}
 	;
 Fator: CONS_INT
-	{$$ = (float)$1;}
-    | CONS_FLOAT
-	{$$ = $1;}
-	/* | TID
-	| ChamaFuncao  */
+	| CONS_FLOAT
+	| TID
+	| ChamaFuncao 
 	| SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES
-	{$$ = $2;}
 	;
 Exprl: Exprl SIM_E Expra
 	| Exprl SIM_OU Expra

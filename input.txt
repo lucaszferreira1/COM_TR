@@ -9,13 +9,9 @@ int fat(int n){
     return f;
 }
 
-main{
-    string a;
-    int b, c;
+{
+    int a, b;
 
-    test();
-    read(b);
-
-    a = "Teste";
-    print(9 * 9 - 4 + 2);
+    a = f(5);
+    b = f(4) + 1;
 }

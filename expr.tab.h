@@ -54,41 +54,40 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    FUN_MAIN = 258,                /* FUN_MAIN  */
-    SIM_ABREPARENTESES = 259,      /* SIM_ABREPARENTESES  */
-    SIM_FECHAPARENTESES = 260,     /* SIM_FECHAPARENTESES  */
-    SIM_ABRECHAVES = 261,          /* SIM_ABRECHAVES  */
-    SIM_FECHACHAVES = 262,         /* SIM_FECHACHAVES  */
-    SIM_VIRGULA = 263,             /* SIM_VIRGULA  */
-    SIM_ADICAO = 264,              /* SIM_ADICAO  */
-    SIM_MULTIPLICACAO = 265,       /* SIM_MULTIPLICACAO  */
-    SIM_SUBTRACAO = 266,           /* SIM_SUBTRACAO  */
-    SIM_DIVISAO = 267,             /* SIM_DIVISAO  */
-    SIM_IGUAL = 268,               /* SIM_IGUAL  */
-    SIM_FIM = 269,                 /* SIM_FIM  */
-    SIM_IGUALIGUAL = 270,          /* SIM_IGUALIGUAL  */
-    SIM_DIFERENTE = 271,           /* SIM_DIFERENTE  */
-    SIM_MAIORQUE = 272,            /* SIM_MAIORQUE  */
-    SIM_MENORQUE = 273,            /* SIM_MENORQUE  */
-    SIM_MAIOROUIGUAL = 274,        /* SIM_MAIOROUIGUAL  */
-    SIM_MENOROUIGUAL = 275,        /* SIM_MENOROUIGUAL  */
-    SIM_E = 276,                   /* SIM_E  */
-    SIM_OU = 277,                  /* SIM_OU  */
-    SIM_NEGACAO = 278,             /* SIM_NEGACAO  */
-    COM_RETORNO = 279,             /* COM_RETORNO  */
-    COM_SE = 280,                  /* COM_SE  */
-    COM_SENAO = 281,               /* COM_SENAO  */
-    COM_ENQUANTO = 282,            /* COM_ENQUANTO  */
-    COM_IMPRIME = 283,             /* COM_IMPRIME  */
-    COM_LER = 284,                 /* COM_LER  */
-    TIPO_VOID = 285,               /* TIPO_VOID  */
-    TIPO_INT = 286,                /* TIPO_INT  */
-    TIPO_STRING = 287,             /* TIPO_STRING  */
-    TIPO_FLOAT = 288,              /* TIPO_FLOAT  */
-    TID = 289,                     /* TID  */
-    CONS_INT = 290,                /* CONS_INT  */
-    CONS_LITERAL = 291,            /* CONS_LITERAL  */
-    CONS_FLOAT = 292               /* CONS_FLOAT  */
+    SIM_ABREPARENTESES = 258,      /* SIM_ABREPARENTESES  */
+    SIM_FECHAPARENTESES = 259,     /* SIM_FECHAPARENTESES  */
+    SIM_ABRECHAVES = 260,          /* SIM_ABRECHAVES  */
+    SIM_FECHACHAVES = 261,         /* SIM_FECHACHAVES  */
+    SIM_VIRGULA = 262,             /* SIM_VIRGULA  */
+    SIM_ADICAO = 263,              /* SIM_ADICAO  */
+    SIM_MULTIPLICACAO = 264,       /* SIM_MULTIPLICACAO  */
+    SIM_SUBTRACAO = 265,           /* SIM_SUBTRACAO  */
+    SIM_DIVISAO = 266,             /* SIM_DIVISAO  */
+    SIM_IGUAL = 267,               /* SIM_IGUAL  */
+    SIM_FIM = 268,                 /* SIM_FIM  */
+    SIM_IGUALIGUAL = 269,          /* SIM_IGUALIGUAL  */
+    SIM_DIFERENTE = 270,           /* SIM_DIFERENTE  */
+    SIM_MAIORQUE = 271,            /* SIM_MAIORQUE  */
+    SIM_MENORQUE = 272,            /* SIM_MENORQUE  */
+    SIM_MAIOROUIGUAL = 273,        /* SIM_MAIOROUIGUAL  */
+    SIM_MENOROUIGUAL = 274,        /* SIM_MENOROUIGUAL  */
+    SIM_E = 275,                   /* SIM_E  */
+    SIM_OU = 276,                  /* SIM_OU  */
+    SIM_NEGACAO = 277,             /* SIM_NEGACAO  */
+    COM_RETORNO = 278,             /* COM_RETORNO  */
+    COM_SE = 279,                  /* COM_SE  */
+    COM_SENAO = 280,               /* COM_SENAO  */
+    COM_ENQUANTO = 281,            /* COM_ENQUANTO  */
+    COM_IMPRIME = 282,             /* COM_IMPRIME  */
+    COM_LER = 283,                 /* COM_LER  */
+    TIPO_VOID = 284,               /* TIPO_VOID  */
+    TIPO_INT = 285,                /* TIPO_INT  */
+    TIPO_STRING = 286,             /* TIPO_STRING  */
+    TIPO_FLOAT = 287,              /* TIPO_FLOAT  */
+    TID = 288,                     /* TID  */
+    CONS_INT = 289,                /* CONS_INT  */
+    CONS_LITERAL = 290,            /* CONS_LITERAL  */
+    CONS_FLOAT = 291               /* CONS_FLOAT  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -104,7 +103,7 @@ union YYSTYPE
 	char *string;
 	char *id;
 
-#line 108 "expr.tab.h"
+#line 107 "expr.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -6,7 +6,7 @@
 #include <string.h>
 %}
 
-delim [ \t]
+delim [ \t\n]
 num [0-9]
 
 id [a-zA-Z_][a-zA-Z0-9_]*
@@ -19,8 +19,6 @@ ws	{delim}+
 
 %%
 {ws}	{}
-
-"main" {return FUN_MAIN;}
 
 "void" {return TIPO_VOID;}
 "int" {return TIPO_INT;}
@@ -62,4 +60,5 @@ ws	{delim}+
 ";"	{return SIM_FIM;}
 
 {id} {yylval.string = strdup(yytext); return TID;}
+
 %%
