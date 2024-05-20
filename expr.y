@@ -9,43 +9,47 @@
 int yyerror(const char *);
 int yylex();
 
-/*
 typedef enum{
-	TID,
-	INT,
-	FLOAT,
-	STRING
-} TipoToken;
+	N, // Numero
+	E  // Expressao
+}Tipo;
 
-typedef struct Entrada{
-	char name[TAM_MAX_NOME];
-	TipoToken tipo;
-} Entrada;
+typedef struct No{
+	Tipo t; // Tipo da entrada 'E' Expressao 'N' Numero
+	double v; // Somente para 'N'
+	char op[TAM_MAX_NOME]; // Somente para 'E'
+	struct No *esq;
+	struct No *dir;
+} No;
 
-typedef struct TabelaEntradas{
-	Entrada entradas[MAX_ENTRADAS];
-	int count;
-} TabelaEntradas;
-
-TabelaEntradas *tabela_entradas;
-
-void symtable_insert(TabelaEntradas *tabela, const char *nome, TipoToken tipo){
-	if (tabela.count < MAX_ENTRADAS){
-		Entrada *entrada = &tabela->entradas[tabela->count++];
-		strncpy(entrada->nome, nome, TAM_MAX_NOME - 1);
-		entrada->tipo = tipo;
-	}
+No* cria_no_num(double v){
+	No *no = (No*)malloc(sizeof(No));
+	no->t = N;
+	no->v = v;
+	no->esq = NULL;
+	no->dir = NULL;
+	return no;
 }
 
-Entrada* symtable_lookup(TabelaEntradas *tabela, const char *nome){
-	for (int i=0;i<tabela->count;i++){
-		if (strcmp(tabela->entrada[i].nome, nome) == 0){
-			return &tabela->entrada[i];
-		}
-	}
-	return NULL;
+No* cria_no_expr(char op[TAM_MAX_NOME], No *n1, No *n2){
+	No *no = (No*)malloc(sizeof(No));
+	no->t = N;
+	strcpy(no->op, op);
+	no->esq = n1;
+	no->dir = n2;
+	return no;
 }
-*/
+
+void print_arv(No* raiz){
+	if (raiz == NULL) return;
+	if (raiz->t == N) {
+        printf("%lf", raiz->v);
+    } else {
+        printf("(%s ", raiz->op);
+        print_arv(raiz->esq);
+        print_arv(raiz->dir);
+    }
+}
 
 %}
 
