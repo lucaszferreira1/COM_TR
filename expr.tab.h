@@ -97,14 +97,15 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 52 "expr.y"
+#line 26 "expr.y"
 
 	float real;
 	int integer;
 	char *string;
 	char *id;
+	tipoNo *nPtr;
 
-#line 107 "expr.tab.h"
+#line 108 "expr.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
