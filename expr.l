@@ -2,6 +2,7 @@
 
 %{
 #include "expr.tab.h"
+#include "tipoNo.h"
 #include <stdlib.h>
 #include <string.h>
 %}
