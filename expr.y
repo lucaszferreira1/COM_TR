@@ -2,54 +2,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#include "tipoNo.h"
 
-#define MAX_ENTRADAS 10000
-#define TAM_MAX_NOME 100
+#define TAM_TABELA_SIMBOLOS 50
 
 int yyerror(const char *);
 int yylex();
 
-typedef enum{
-	N, // Numero
-	E  // Expressao
-}Tipo;
+tipoNo *criaInteger(int);
+tipoNo *criaReal(float val);
+tipoNo *criaString(char *str);
+tipoNo *criaId(char *name);
+tipoNo *criaOpr(int opr, int nOps, ...);
+void excluirNo(tipoNo *no);
+int ex(tipoNo *no);
 
-typedef struct No{
-	Tipo t; // Tipo da entrada 'E' Expressao 'N' Numero
-	double v; // Somente para 'N'
-	char op[TAM_MAX_NOME]; // Somente para 'E'
-	struct No *esq;
-	struct No *dir;
-} No;
-
-No* cria_no_num(double v){
-	No *no = (No*)malloc(sizeof(No));
-	no->t = N;
-	no->v = v;
-	no->esq = NULL;
-	no->dir = NULL;
-	return no;
-}
-
-No* cria_no_expr(char op[TAM_MAX_NOME], No *n1, No *n2){
-	No *no = (No*)malloc(sizeof(No));
-	no->t = N;
-	strcpy(no->op, op);
-	no->esq = n1;
-	no->dir = n2;
-	return no;
-}
-
-void print_arv(No* raiz){
-	if (raiz == NULL) return;
-	if (raiz->t == N) {
-        printf("%lf", raiz->v);
-    } else {
-        printf("(%s ", raiz->op);
-        print_arv(raiz->esq);
-        print_arv(raiz->dir);
-    }
-}
+int sym[TAM_TABELA_SIMBOLOS];
+int lastPos = 0;
 
 %}
 
@@ -58,7 +28,8 @@ void print_arv(No* raiz){
 	int integer;
 	char *string;
 	char *id;
-}
+	tipoNo *nPtr;
+};
 
 %define parse.error verbose
 
@@ -178,7 +149,6 @@ ListaParametros: ListaParametros SIM_VIRGULA Expra
 	| TIPO_STRING
 	;
 
-
 Expr: Exprl
 	| Expra
 	| Exprr
@@ -211,10 +181,63 @@ Exprl: Exprl SIM_E Expra
 	| Expra
 	;
 %%
-
 int yyerror (const char *str)
 {
 	fprintf(stderr, "%s\n", str);
 	
 } 		 
 
+tipoNo *criaInteger(int val){
+	tipoNo *no;
+	no->type = typeInt;
+	no->inteiro.val = val;
+	return no;
+}
+
+tipoNo *criaReal(float val){
+	tipoNo *no;
+	no->type = typeFloat;
+	no->real.val = val;
+	return no;
+}
+
+tipoNo *criaString(char *str){
+	tipoNo *no;
+	no->type = typeString;
+	strcpy(no->string.str, str);
+	return no;
+}
+
+tipoNo *criaId(char *name){
+	tipoNo *no;
+	no->type = typeId;
+	strcpy(no->id.name, name);
+	no->id.i = lastPos;
+	lastPos++;
+	return no;
+}
+
+tipoNo *criaOpr(int opr, int nOps, ...){
+	va_list ap;
+	tipoNo *no;
+	no->type = typeOpr;
+	no->opr.opr = opr;
+	no->opr.nOps = nOps;
+	va_start(ap, nOps);
+	for (int i=0;i<nOps;i++){
+		no->opr.op[i] = va_arg(ap, tipoNo*);
+	}
+	va_end(ap);
+	return no;
+}
+
+void excluirNo(tipoNo *no){
+	if (!no)
+		return;
+	if (no->type == typeOpr){
+		for (int i=0;i < no->opr.nOps; i++){
+			excluirNo(no->opr.op[i]);
+		}
+	}
+	free(no);
+}
