@@ -37,6 +37,7 @@
 
 #ifndef YY_YY_EXPR_TAB_H_INCLUDED
 # define YY_YY_EXPR_TAB_H_INCLUDED
+#include "tipoNo.h"
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
