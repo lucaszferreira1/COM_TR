@@ -1,6 +1,6 @@
 1. Rever a criação de variáveis pois a base usa apenas int e precisamos funcionar com mais tipos.
 Sugestão: Fazer o TIPO_... retornar um int e.g {$$ = TIPO_...} e na declaração da variável teremos {$$ = criaOpr(DECLARACAO, 2, $1, $2) onde $1 é o tipo e $2 o nome.
-Problema: ListaId. Talvez seja preciso criar uma função nova para a declaração de múltiplas variáveis.
+Problema: ListaId. Talvez seja preciso criar uma função nova para a declaração de múltiplas variáveis, podemos seguir o exemplo da criaOpr, porém como não sabemos o número de variáveis a serem declaradas não tenho certeza de como prosseguir.
 
 2. Encontrar uma solução para o overwrite do #include "tipoNo.h" no arquivo expr.tab.h
 Sugestão: Adicionar shell script que adiciona o include.
