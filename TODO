@@ -1,0 +1,12 @@
+1. Rever a criação de variáveis pois a base usa apenas int e precisamos funcionar com mais tipos.
+Sugestão: Fazer o TIPO_... retornar um int e.g {$$ = TIPO_...} e na declaração da variável teremos {$$ = criaOpr(DECLARACAO, 2, $1, $2) onde $1 é o tipo e $2 o nome.
+Problema: ListaId. Talvez seja preciso criar uma função nova para a declaração de múltiplas variáveis.
+
+2. Encontrar uma solução para o overwrite do #include "tipoNo.h" no arquivo expr.tab.h
+Sugestão: Adicionar shell script que adiciona o include.
+
+3. Criar uma função para imprimir uma árvore
+Desc: Para realizar testes mais avançados iremos precisar de uma forma mais fácil e precisa de testar por isso é preciso imprimir as árvores geradas. 
+
+4. Entender a forma pedida pelo professor
+Desc: O professor dá a entender que ele quer uma estrutura no formato de uma lista de árvores, é preciso conversar com ele para entender melhor o problema.
