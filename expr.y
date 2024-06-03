@@ -6,6 +6,7 @@
 #include "tipoNo.h"
 
 #define TAM_TABELA_SIMBOLOS 50
+#define NUM_ARVORES 128
 
 int yyerror(const char *);
 int yylex();
@@ -13,13 +14,14 @@ int yylex();
 tipoNo *criaInteger(int);
 tipoNo *criaReal(float val);
 tipoNo *criaString(char *str);
-tipoNo *criaId(char *name);
+tipoNo *criaId(char *name, int tipo);
 tipoNo *criaOpr(int opr, int nOps, ...);
 void excluirNo(tipoNo *no);
-int ex(tipoNo *no);
 
 int sym[TAM_TABELA_SIMBOLOS];
 int lastPos = 0;
+tipoNo *arvores[NUM_ARVORES];
+int lastArv = 0;
 
 %}
 
@@ -70,49 +72,49 @@ int lastPos = 0;
 %left SIM_ADICAO SIM_SUBTRACAO
 %left SIM_MULTIPLICACAO SIM_DIVISAO
 
-%type <nPtr> Expr Expra Exprl Exprr Termo Fator ListaFuncoes Funcao TipoRetorno Tipo DeclParametros Parametro Declaracoes Declaracao ListaId Bloco ListaCmd Comando CmdIf CmdWhile CmdAtrib CmdWrite CmdRead ChamadaProc Retorno ListaParametros
-%type <id> ChamaFuncao
+%type <nPtr> Expr Expra Exprl Exprr Termo Fator ListaFuncoes Funcao DeclParametros Parametro Declaracoes Declaracao ListaId Bloco ListaCmd Comando CmdIf CmdWhile CmdAtrib CmdWrite CmdRead ChamadaProc Retorno ListaParametros BlocoPrincipal ChamaFuncao
+%type <integer> Tipo TipoRetorno
 
 %%
-Programa: ListaFuncoes BlocoPrincipal YYEOF
-	| BlocoPrincipal YYEOF
+Programa: ListaFuncoes BlocoPrincipal YYEOF {arvores[lastArv] = $2;}
+	| BlocoPrincipal YYEOF {arvores[lastArv] = $1;}
 	| YYEOF {exit(0);}
 	;
-ListaFuncoes: ListaFuncoes Funcao {$$ = $2;}
-	| Funcao {$$ = $1;}
+ListaFuncoes: ListaFuncoes Funcao {arvores[lastArv] = $2; lastArv++;}
+	| Funcao {arvores[lastArv] = $1; lastArv++;}
 	;
-Funcao: TipoRetorno TID SIM_ABREPARENTESES DeclParametros SIM_FECHAPARENTESES BlocoPrincipal
-	| TipoRetorno TID SIM_ABREPARENTESES SIM_FECHAPARENTESES BlocoPrincipal
+Funcao: TipoRetorno TID SIM_ABREPARENTESES DeclParametros SIM_FECHAPARENTESES BlocoPrincipal {$$ = criaOpr($1, 3, criaId($2, $1), $4, $6);}
+	| TipoRetorno TID SIM_ABREPARENTESES SIM_FECHAPARENTESES BlocoPrincipal {$$ = criaOpr($1, 3, criaId($2, $1), NULL, $5);}
 	;
 TipoRetorno: Tipo {$$ = $1;}
 	| TIPO_VOID {$$ = TIPO_VOID;}
 	;
-DeclParametros: DeclParametros SIM_VIRGULA Parametro {$$ = $3;}
+DeclParametros: Parametro SIM_VIRGULA DeclParametros {$$ = criaOpr(TID, 2, $1, $3);}
 	| Parametro {$$ = $1;}
 	;
-Parametro: Tipo TID {$$ = criaOpr(TID, 2, $1, criaId($2));}
+Parametro: Tipo TID {$$ = criaId($2, $1);}
 	;
-BlocoPrincipal: SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES
-	| SIM_ABRECHAVES Declaracoes SIM_FECHACHAVES
-	| SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES
-	| SIM_ABRECHAVES SIM_FECHACHAVES
+BlocoPrincipal: SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES {$$ = criaOpr(SIM_ABRECHAVES, 3, $2, $3, criaOpr(SIM_FECHACHAVES, 0));}
+	| SIM_ABRECHAVES Declaracoes SIM_FECHACHAVES {$$ = criaOpr(SIM_ABRECHAVES, 2, $2, criaOpr(SIM_FECHACHAVES, 0));}
+	| SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES {$$ = criaOpr(SIM_ABRECHAVES, 2, $2, criaOpr(SIM_FECHACHAVES, 0));}
+	| SIM_ABRECHAVES SIM_FECHACHAVES {$$ = NULL;}
 	;
-Declaracoes: Declaracoes Declaracao {$$ = $2;}
+Declaracoes: Declaracao Declaracoes {$$ = criaOpr(1, 2, $1, $2);}
 	| Declaracao {$$ = $1;}
 	;
-Declaracao: Tipo ListaId SIM_FIM
+Declaracao: Tipo ListaId SIM_FIM {$$ = criaOpr($1, 1, $2);}
 	;
 Tipo: TIPO_INT {$$ = TIPO_INT;}
 	| TIPO_STRING {$$ = TIPO_STRING;}
 	| TIPO_FLOAT {$$ = TIPO_FLOAT;}
 	;
-ListaId: ListaId SIM_VIRGULA TID {$$ = criaId($3);}
-	| TID {$$ = criaId($1);}
+ListaId: TID SIM_VIRGULA ListaId {$$ = criaOpr(TID, 2, criaId($1, 0), $3);}
+	| TID {$$ = criaId($1, 0);}
 	;
 Bloco: SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES {$$ = $2;}
-	| SIM_ABRECHAVES SIM_FECHACHAVES
+	| SIM_ABRECHAVES SIM_FECHACHAVES {$$ = NULL;}
 	;
-ListaCmd: ListaCmd Comando {$$ = $2;}
+ListaCmd: Comando ListaCmd {$$ = criaOpr(1, 2, $1, $2);}
 	| Comando {$$ = $1;}
 	;
 Comando: CmdIf {$$ = $1;}
@@ -132,24 +134,24 @@ CmdIf: COM_SE SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco {$$ = criaOpr(CO
 	;
 CmdWhile: COM_ENQUANTO SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco {$$ = criaOpr(COM_ENQUANTO, 2, $3, $5);}
 	;
-CmdAtrib: TID SIM_IGUAL Expra SIM_FIM {$$ = criaOpr(SIM_IGUAL, 2, criaId($1), $3);}
-	| TID SIM_IGUAL CONS_LITERAL SIM_FIM {$$ = criaOpr(SIM_IGUAL, 2, criaId($1), criaString($3));}
+CmdAtrib: TID SIM_IGUAL Expra SIM_FIM {$$ = criaOpr(SIM_IGUAL, 2, criaId($1, 0), $3);}
+	| TID SIM_IGUAL CONS_LITERAL SIM_FIM {$$ = criaOpr(SIM_IGUAL, 2, criaId($1, 0), criaString($3));}
 	;
 CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES SIM_FIM {criaOpr(COM_IMPRIME, 1, $3);}
 	| COM_IMPRIME SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES SIM_FIM {criaOpr(COM_IMPRIME, 1, $3);}
 	| COM_IMPRIME SIM_ABREPARENTESES CONS_LITERAL SIM_FECHAPARENTESES SIM_FIM {criaOpr(COM_IMPRIME, 1, criaString($3));}
 	;
-CmdRead: COM_LER SIM_ABREPARENTESES TID SIM_FECHAPARENTESES SIM_FIM {criaOpr(COM_LER, 1, criaId($3));}
+CmdRead: COM_LER SIM_ABREPARENTESES TID SIM_FECHAPARENTESES SIM_FIM {criaOpr(COM_LER, 1, criaId($3, 0));}
 	;
 ChamadaProc: ChamaFuncao SIM_FIM {$$ = $1;}
 	;
-ChamaFuncao: TID SIM_ABREPARENTESES ListaParametros SIM_FECHAPARENTESES
-	| TID SIM_ABREPARENTESES SIM_FECHAPARENTESES
+ChamaFuncao: TID SIM_ABREPARENTESES ListaParametros SIM_FECHAPARENTESES {$$ = criaOpr(1, 2, criaId($1, 0), $3);}
+	| TID SIM_ABREPARENTESES SIM_FECHAPARENTESES {$$ = criaOpr(1, 1, criaId($1, 0));}
 	;
-ListaParametros: ListaParametros SIM_VIRGULA Expra {$$ = $3;}
-	| ListaParametros SIM_VIRGULA TID {$$ = criaId($3);}
+ListaParametros: Expra SIM_VIRGULA ListaParametros {$$ = criaOpr(1, 2, $1, $3);}
+	| TID SIM_VIRGULA ListaParametros {$$ = criaOpr(1, 2, criaId($1, 0), $3);}
 	| Expra {$$ = $1;}
-	| TID {$$ = criaId($1);}
+	| TID {$$ = criaId($1, 0);}
 	;
 
 Expr: Exprl {$$ = $1;}
@@ -174,8 +176,8 @@ Termo: Termo SIM_MULTIPLICACAO Fator {$$ = criaOpr(SIM_MULTIPLICACAO, 2, $1, $3)
 	;
 Fator: CONS_INT {$$ = criaInteger($1);}
 	| CONS_FLOAT {$$ = criaReal($1);}
-	| TID {$$ = criaId($1);}
-	| ChamaFuncao {$$ = criaId($1);}
+	| TID {$$ = criaId($1, 0);}
+	| ChamaFuncao {$$ = $1;}
 	| SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES {$$ = $2;}
 	;
 Exprl: Exprl SIM_E Expra {$$ = criaOpr(SIM_E, 2, $1, $3);}
@@ -225,7 +227,7 @@ tipoNo *criaString(char *str){
 	return no;
 }
 
-tipoNo *criaId(char *name){
+tipoNo *criaId(char *name, int tipo){
 	tipoNo *no;
 	size_t tam_no = SIZEOF_TIPONO + sizeof(typeId);
 	if ((no = malloc(tam_no)) == NULL)
@@ -233,8 +235,7 @@ tipoNo *criaId(char *name){
 	
 	no->type = typeId;
 	strcpy(no->id.name, name);
-	no->id.i = lastPos;
-	lastPos++;
+	no->id.tipo = tipo;
 	return no;
 }
 
