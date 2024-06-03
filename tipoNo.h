@@ -17,7 +17,7 @@ typedef struct{
 
 typedef struct{
     char *name; // Nome da Variavel
-    int i; // Indice do vetor de simbolos
+    int tipo; // Tipo da Variavel
 } idTipoNo;
 
 typedef struct{
