@@ -1,15 +1,7 @@
-1. Rever a criação de variáveis pois a base usa apenas int e precisamos funcionar com mais tipos.
-Sugestão: Fazer o TIPO_... retornar um int e.g {$$ = TIPO_...} e na declaração da variável teremos {$$ = criaOpr($1, 1, $2) onde $1 é o tipo, $2 o nome e 1 o número de variáveis a serem declaradas.
-A base dá de exemplo o código a seguir:
-decl: type varlist
-    ;
-type: INT 
-    | FLOAT
-    ;
-varlist: VAR { setType($1, $0); }
-    | varlist ',' VAR { setType($3, $0); }
-    ;
-Isto sugere que tenhamos que adicionar eTipo dentro da definição do idTipoNo.
+1. Resolver como os nós da declaração e parãmetros serão definidos.
+Desc: A parte de comandos já está em teoria pronta, agora é preciso resolver como será a estrutura de definição de parâmetros e declaração de múltiplas variáveis.
+Provavelmente terá de ser criada uma nova estrutura para facilitar nossa vida.
+Notas: (Lucas) Resolvi focar em conseguir gerar uma lista do programa inteiro primeiro e depois se preocupar com as tabelas de símbolos. 
 
 
 2. Encontrar uma solução para o overwrite do #include "tipoNo.h" no arquivo expr.tab.h
@@ -19,12 +11,3 @@ Sugestão: Adicionar shell script que adiciona o include.
 3. Criar uma função para imprimir uma árvore
 Desc: Para realizar testes mais avançados iremos precisar de uma forma mais fácil e precisa de testar por isso é preciso imprimir as árvores geradas. 
 
-
-4. Entender a forma pedida pelo professor
-Desc: O professor dá a entender que ele quer uma estrutura no formato de uma lista de árvores, é preciso conversar com ele para entender melhor o problema.
-
-4.1. Definir como tratar de funções.
-Desc: O professor falou sobre a ideia de quando se chama uma função é chamado um código daquela função, o que dá a entender que chama a árvore daquela função.
-Partindo da ideia de que precisamos fazer uma lista de árvores, a separação entre cada item da lista seria o início e fim de cada função.
-
-4.1.1 Entender como tratar de tipo void
