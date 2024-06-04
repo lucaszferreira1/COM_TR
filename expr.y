@@ -6,6 +6,8 @@
 #include "tipoNo.h"
 
 #define NUM_FUNCOES 128
+#define TAM_MAX_STRING 1024
+#define TAM_MAX_NOMEVAR 1024
 
 int yyerror(const char *);
 int yylex();
@@ -16,13 +18,13 @@ tipoNo *criaString(char *str);
 tipoNo *criaId(char *name, int tipo);
 tipoNo *criaOpr(int opr, int nOps, ...);
 void excluirNo(tipoNo *no);
-Funcao* allocFuncoes();
-Funcao* criaFuncao(int tipo, char *nome, Item *prms, Item *cmds);
-Bloco* criaBloco(Item *decl, Item *cmds);
+Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc);
+ListaDecl *criaListaDecl(Declaracao *decl);
+Declaracao* criaDeclaracao(int tipo, Item *vars);
+Bloco* criaBloco(ListaDecl *decl, Item *cmds);
 Item* criaItem(tipoNo *arv);
-
-Funcao **programa;
-int lastFun = 0;
+void AddListaDecl(ListaDecl *o, ListaDecl *ad);
+void AddItem(Item *o, Item *ad);
 
 %}
 
@@ -35,6 +37,8 @@ int lastFun = 0;
 	Item *item;
 	Bloco *bloco;
 	Funcao *funcao;
+	Declaracao *declaracao;
+	ListaDecl *listadecl;
 };
 
 %define parse.error verbose
@@ -76,46 +80,49 @@ int lastFun = 0;
 %left SIM_ADICAO SIM_SUBTRACAO
 %left SIM_MULTIPLICACAO SIM_DIVISAO
 
-%type <nPtr> Expr Expra Exprl Exprr Termo Fator DeclParametros Parametro Declaracoes Declaracao ListaId Comando CmdIf CmdWhile CmdAtrib CmdWrite CmdRead ChamadaProc Retorno ListaParametros BlocoPrincipal ChamaFuncao
+%type <nPtr> Expr Expra Exprl Exprr Termo Fator Parametro Comando CmdIf CmdWhile CmdAtrib CmdWrite CmdRead ChamadaProc Retorno ListaParametros ChamaFuncao
 %type <integer> Tipo TipoRetorno
-%type <item> ListaCmd Bloco
+%type <item> ListaCmd Bloco ListaId DeclParametros
+%type <listadecl> Declaracoes
+%type <declaracao> Declaracao
+%type <bloco> BlocoPrincipal
 %type <funcao> Funcao ListaFuncoes
 
 %%
-Programa: ListaFuncoes BlocoPrincipal YYEOF {programa = allocFuncoes();programa[lastFun] = criaFuncao(285, NULL, NULL, criaItem($2));lastFun++;}
-	| BlocoPrincipal YYEOF {programa = allocFuncoes();programa[lastFun] = criaFuncao(285, NULL, NULL, criaItem($1));lastFun++;}
+Programa: ListaFuncoes BlocoPrincipal YYEOF {criaFuncao(TIPO_INT, NULL, NULL, $2);}
+	| BlocoPrincipal YYEOF {criaFuncao(285, NULL, NULL, $1);}
 	| YYEOF {exit(0);}
 	;
-ListaFuncoes: ListaFuncoes Funcao {programa[lastFun] = $2; lastFun++;}
-	| Funcao {programa[lastFun] = $1; lastFun++;}
+ListaFuncoes: ListaFuncoes Funcao {}
+	| Funcao {}
 	;
-Funcao: TipoRetorno TID SIM_ABREPARENTESES DeclParametros SIM_FECHAPARENTESES BlocoPrincipal {$$ = criaFuncao($1, $2, criaItem($4), $6);}
+Funcao: TipoRetorno TID SIM_ABREPARENTESES DeclParametros SIM_FECHAPARENTESES BlocoPrincipal {$$ = criaFuncao($1, $2, $4, $6);}
 	| TipoRetorno TID SIM_ABREPARENTESES SIM_FECHAPARENTESES BlocoPrincipal {$$ = criaFuncao($1, $2, NULL, $5);}
 	;
 TipoRetorno: Tipo {$$ = $1;}
 	| TIPO_VOID {$$ = TIPO_VOID;}
 	;
-DeclParametros: DeclParametros SIM_VIRGULA Parametro {$$ = criaOpr(TID, 2, $1, $3);}
-	| Parametro {$$ = $1;}
+DeclParametros: DeclParametros SIM_VIRGULA Parametro {AddItem($1, criaItem($3));$$ = $1;}
+	| Parametro {$$ = criaItem($1);}
 	;
 Parametro: Tipo TID {$$ = criaId($2, $1);}
 	;
 BlocoPrincipal: SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES {$$ = criaBloco($2, $3);}
 	| SIM_ABRECHAVES Declaracoes SIM_FECHACHAVES {$$ = criaBloco($2, NULL);}
-	| SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES {$$ = criaBloco(NULL, $3);}
+	| SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES {$$ = criaBloco(NULL, $2);}
 	| SIM_ABRECHAVES SIM_FECHACHAVES {$$ = NULL;}
 	;
-Declaracoes: Declaracao Declaracoes {$$ = criaOpr(1, 2, $1, $2);}
-	| Declaracao {$$ = $1;}
+Declaracoes: Declaracoes Declaracao {AddListaDecl($1, criaListaDecl($2));$$ = $1;}
+	| Declaracao {$$ = criaListaDecl($1);}
 	;
-Declaracao: Tipo ListaId SIM_FIM {$$ = criaOpr($1, 1, $2);}
+Declaracao: Tipo ListaId SIM_FIM {$$ = criaDeclaracao($1, $2);}
 	;
 Tipo: TIPO_INT {$$ = TIPO_INT;}
 	| TIPO_STRING {$$ = TIPO_STRING;}
 	| TIPO_FLOAT {$$ = TIPO_FLOAT;}
 	;
-ListaId: TID SIM_VIRGULA ListaId {$$ = criaOpr(TID, 2, criaId($1, 0), $3);}
-	| TID {$$ = criaId($1, 0);}
+ListaId: ListaId SIM_VIRGULA TID {AddItem($1, criaItem(criaId($3, 0)));$$ = $1;}
+	| TID {$$ = criaItem(criaId($1, 0));}
 	;
 Bloco: SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES {$$ = $2;}
 	| SIM_ABRECHAVES SIM_FECHACHAVES {$$ = NULL;}
@@ -229,6 +236,9 @@ tipoNo *criaString(char *str){
 		yyerror("Sem memória");
 
 	no->type = typeString;
+	no->string.str = (char*)malloc(TAM_MAX_STRING);
+	if (no->string.str == NULL)
+		yyerror("Sem memória");
 	strcpy(no->string.str, str);
 	return no;
 }
@@ -239,7 +249,10 @@ tipoNo *criaId(char *name, int tipo){
 	if ((no = malloc(tam_no)) == NULL)
 		yyerror("Sem memória");
 	
-	no->type = typeId;
+	no->type = typeId; 
+	no->id.name = (char*)malloc(TAM_MAX_NOMEVAR);
+	if (no->id.name == NULL)
+		yyerror("Sem memória");
 	strcpy(no->id.name, name);
 	no->id.tipo = tipo;
 	return no;
@@ -274,15 +287,6 @@ void excluirNo(tipoNo *no){
 	free(no);
 }
 
-Funcao** allocFuncoes(){
-	Funcao **funcoes = (Funcao*)malloc(sizeof(Funcao*) * NUM_FUNCOES);
-	if (funcoes == NULL){
-		printf("Error ao alocar memória para as funções");
-		exit(1);
-	}
-	return funcoes;
-}
-
 eTipo getTipoId(int v){
 	if (v == TIPO_INT)
 		return typeInt;
@@ -294,9 +298,60 @@ eTipo getTipoId(int v){
 		return typeVoid;
 }
 
+Item* criaItem(tipoNo *arv){
+	Item *i = malloc(sizeof(Item*));
+	if (i == NULL){
+		printf("Error ao alocar memória para o Item");
+		exit(1);
+	}
+	i->prox = NULL;
+	i->arv = arv;
+	return i;
+}
+
+Declaracao* criaDeclaracao(int tipo, Item *vars){
+	Declaracao *d = malloc(sizeof(Declaracao*));
+	if (d == NULL){
+		printf("Error ao alocar memória para as Declarações");
+		exit(1);
+	}
+	d->tipo = getTipoId(tipo);
+	d->vars = vars;
+	return d;
+}
+
+ListaDecl *criaListaDecl(Declaracao *decl){
+	ListaDecl *l = malloc(sizeof(ListaDecl*));
+	if (l == NULL){
+		printf("Error ao alocar memória para a Lista de Declarações");
+		exit(1);
+	}
+	l->prox = NULL;
+	l->decl = decl;
+	return l;
+}
+
+Bloco* criaBloco(ListaDecl *decl, Item *cmds){
+	Bloco* b = malloc(sizeof(Bloco*));
+	if (b == NULL){
+		printf("Error ao alocar memória para o Bloco");
+		exit(1);
+	}
+	b->decl = decl;
+	b->cmds = cmds;
+	return b;
+}
+
 Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
 	Funcao *f = malloc(sizeof(Funcao*));
+	if (f == NULL){
+		printf("Error ao alocar memória para a função");
+		exit(1);
+	}
 	f->tipo = getTipoId(tipo);
+	f->name = (char*)malloc(TAM_MAX_NOMEVAR);
+	if (f->name == NULL)
+		yyerror("Sem memória");
 	strcpy(f->name, nome);
 	f->syms = NULL;
 	f->prms = prms;
@@ -304,16 +359,16 @@ Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
 	return f;
 }
 
-Bloco* criaBloco(Item *decl, Item *cmds){
-	Bloco* b = malloc(sizeof(Bloco*));
-	b->decl = decl;
-	b->cmds = cmds;
-	return b;
+void AddItem(Item *o, Item *ad){
+	while(o->prox)
+		o = o->prox;
+	o->prox = malloc(sizeof(Item*));
+	o = ad;
 }
 
-Item* criaItem(tipoNo *arv){
-	Item *i = malloc(sizeof(Item*));
-	i->prox = NULL;
-	i->arv = arv;
-	return i;
+void AddListaDecl(ListaDecl *o, ListaDecl *ad){
+	while(o->prox)
+		o = o->prox;
+	o->prox = malloc(sizeof(ListaDecl*));
+	o = ad;
 }

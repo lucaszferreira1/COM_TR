@@ -72,53 +72,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#include "tipoNo.h"
 
-#define MAX_ENTRADAS 10000
-#define TAM_MAX_NOME 100
+#define NUM_FUNCOES 128
+#define TAM_MAX_STRING 1024
+#define TAM_MAX_NOMEVAR 1024
 
 int yyerror(const char *);
 int yylex();
 
-/*
-typedef enum{
-	TID,
-	INT,
-	FLOAT,
-	STRING
-} TipoToken;
-
-typedef struct Entrada{
-	char name[TAM_MAX_NOME];
-	TipoToken tipo;
-} Entrada;
-
-typedef struct TabelaEntradas{
-	Entrada entradas[MAX_ENTRADAS];
-	int count;
-} TabelaEntradas;
-
-TabelaEntradas *tabela_entradas;
-
-void symtable_insert(TabelaEntradas *tabela, const char *nome, TipoToken tipo){
-	if (tabela.count < MAX_ENTRADAS){
-		Entrada *entrada = &tabela->entradas[tabela->count++];
-		strncpy(entrada->nome, nome, TAM_MAX_NOME - 1);
-		entrada->tipo = tipo;
-	}
-}
-
-Entrada* symtable_lookup(TabelaEntradas *tabela, const char *nome){
-	for (int i=0;i<tabela->count;i++){
-		if (strcmp(tabela->entrada[i].nome, nome) == 0){
-			return &tabela->entrada[i];
-		}
-	}
-	return NULL;
-}
-*/
+tipoNo *criaInteger(int);
+tipoNo *criaReal(float val);
+tipoNo *criaString(char *str);
+tipoNo *criaId(char *name, int tipo);
+tipoNo *criaOpr(int opr, int nOps, ...);
+void excluirNo(tipoNo *no);
+Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc);
+ListaDecl *criaListaDecl(Declaracao *decl);
+Declaracao* criaDeclaracao(int tipo, Item *vars);
+Bloco* criaBloco(ListaDecl *decl, Item *cmds);
+Item* criaItem(tipoNo *arv);
+void AddListaDecl(ListaDecl *o, ListaDecl *ad);
+void AddItem(Item *o, Item *ad);
 
 
-#line 122 "expr.tab.c"
+#line 101 "expr.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -540,7 +519,7 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  33
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   229
+#define YYLAST   234
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  37
@@ -549,7 +528,7 @@ union yyalloc
 /* YYNRULES -- Number of rules.  */
 #define YYNRULES  80
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  149
+#define YYNSTATES  150
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   291
@@ -602,15 +581,15 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    99,    99,   100,   101,   103,   104,   106,   107,   109,
-     110,   112,   113,   115,   117,   118,   119,   120,   122,   123,
-     125,   127,   128,   129,   131,   132,   134,   135,   137,   138,
-     140,   141,   142,   143,   144,   145,   146,   148,   149,   150,
-     152,   153,   155,   157,   158,   160,   161,   162,   164,   166,
-     168,   169,   171,   172,   173,   174,   178,   179,   180,   182,
-     183,   184,   185,   186,   187,   188,   190,   191,   192,   194,
-     195,   196,   198,   199,   200,   201,   202,   204,   205,   206,
-     207
+       0,    92,    92,    93,    94,    96,    97,    99,   100,   102,
+     103,   105,   106,   108,   110,   111,   112,   113,   115,   116,
+     118,   120,   121,   122,   124,   125,   127,   128,   130,   131,
+     133,   134,   135,   136,   137,   138,   139,   141,   142,   143,
+     145,   146,   148,   150,   151,   153,   154,   155,   157,   159,
+     161,   162,   164,   165,   166,   167,   170,   171,   172,   174,
+     175,   176,   177,   178,   179,   180,   182,   183,   184,   186,
+     187,   188,   190,   191,   192,   193,   194,   196,   197,   198,
+     199
 };
 #endif
 
@@ -649,7 +628,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-105)
+#define YYPACT_NINF (-106)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -663,21 +642,21 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-      75,  -105,   107,  -105,  -105,  -105,  -105,     9,    90,  -105,
-     -18,    17,  -105,  -105,     3,    29,    57,    66,    82,    43,
-     118,  -105,    65,   130,  -105,  -105,  -105,  -105,  -105,  -105,
-    -105,  -105,    99,  -105,  -105,   115,   129,  -105,    28,  -105,
-     157,  -105,   139,  -105,  -105,    74,    42,  -105,    45,    45,
-      23,   137,    16,    37,  -105,  -105,   141,  -105,    61,  -105,
-    -105,  -105,  -105,    79,   181,   151,  -105,    28,    28,  -105,
-      28,    28,    28,   158,   196,     4,    56,   167,   174,   187,
-     199,     7,   175,  -105,  -105,     6,   151,   168,   208,  -105,
-     147,  -105,   184,    26,  -105,   159,  -105,    28,    28,    28,
-      28,    28,    28,    42,    42,  -105,  -105,   151,   185,    28,
-      28,   185,   195,   204,   209,   210,  -105,    63,  -105,  -105,
-    -105,  -105,   184,    96,  -105,   151,   151,   151,   151,   151,
-     151,   149,   169,   151,   151,  -105,  -105,  -105,  -105,  -105,
-    -105,   151,  -105,  -105,  -105,   160,   185,  -105,  -105
+      53,  -106,   105,  -106,  -106,  -106,  -106,    60,   171,  -106,
+      46,    87,  -106,  -106,    12,    13,    30,    96,   111,    25,
+     119,  -106,    74,   133,  -106,  -106,  -106,  -106,  -106,  -106,
+    -106,  -106,   114,  -106,  -106,   134,   145,  -106,    28,  -106,
+     151,  -106,   142,  -106,  -106,     4,   211,  -106,    33,    33,
+      16,   125,    23,    40,  -106,  -106,   147,  -106,    97,  -106,
+    -106,  -106,  -106,    64,   104,   188,  -106,    28,    28,  -106,
+      28,    28,    28,   159,   197,     3,   -11,   164,   165,   191,
+     157,    77,   175,  -106,   109,   179,    70,   149,    22,  -106,
+     154,  -106,   183,   102,  -106,   193,  -106,    28,    28,    28,
+      28,    28,    28,   211,   211,  -106,  -106,   188,   192,    28,
+      28,   192,   208,   214,   215,   216,    69,  -106,    69,  -106,
+    -106,  -106,  -106,   183,   187,  -106,   188,   188,   188,   188,
+     188,   188,   158,   199,   188,   188,  -106,  -106,  -106,  -106,
+    -106,  -106,  -106,  -106,  -106,  -106,   166,   192,  -106,  -106
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -693,29 +672,29 @@ static const yytype_int8 yydefact[] =
        0,     0,     0,     0,    15,    18,     0,    25,     0,    16,
       28,    49,     2,     0,     0,    65,    38,     0,     0,    37,
        0,     0,     0,     0,    58,    65,    56,     0,     0,     0,
-      65,     0,     0,    51,    55,     0,    54,     0,     0,    14,
+      65,     0,     0,    51,    74,     0,    54,     0,     0,    14,
        0,    20,     0,     0,    12,     0,    76,     0,     0,     0,
        0,     0,     0,    66,    67,    69,    70,    79,     0,     0,
-       0,     0,     0,     0,     0,     0,    50,     0,    44,    43,
-      24,     8,     0,     0,    13,    63,    64,    59,    60,    61,
-      62,     0,    40,    77,    78,    42,    47,    45,    46,    48,
-      53,    52,     7,    11,    27,     0,     0,    26,    41
+       0,     0,     0,     0,     0,     0,     0,    50,     0,    44,
+      43,    24,     8,     0,     0,    13,    63,    64,    59,    60,
+      61,    62,     0,    40,    77,    78,    42,    47,    45,    46,
+      48,    53,    52,     7,    11,    27,     0,     0,    26,    41
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-    -105,  -105,  -105,   216,  -105,  -105,   102,    -6,  -105,   206,
-       2,  -105,  -104,   -17,   -22,  -105,  -105,  -105,  -105,  -105,
-    -105,  -105,    -2,  -105,   178,   -15,    -9,    35,    47,   179
+    -106,  -106,  -106,   196,  -106,  -106,   106,    -6,  -106,   212,
+       2,  -106,  -105,   -17,   -22,  -106,  -106,  -106,  -106,  -106,
+    -106,  -106,    -2,   107,   182,   -30,    -9,    73,     0,   184
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_uint8 yydefgoto[] =
 {
        0,     7,     8,     9,    10,    93,    94,    11,    20,    21,
-      12,    58,   132,    23,    24,    25,    26,    27,    28,    29,
-      30,    31,    44,    85,    73,    74,    75,    46,    47,    76
+      12,    58,   133,    23,    24,    25,    26,    27,    28,    29,
+      30,    31,    44,    85,    73,    74,    86,    46,    47,    76
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -723,56 +702,58 @@ static const yytype_uint8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int16 yytable[] =
 {
-      32,    60,    35,    56,    22,    45,    38,   135,   -57,    33,
-     116,   114,    67,   117,    68,    36,    39,    37,    32,    38,
-      83,    32,    22,    64,   -80,   -80,    38,   109,   110,    65,
-     122,    38,    48,   123,    60,    79,    40,    41,    42,    43,
-      38,    80,   148,    86,    88,    72,    52,    84,    38,    40,
-      41,    70,    43,    71,    32,    53,    40,    41,    78,    43,
-      49,    40,    41,   107,    43,    95,    38,    72,    90,    50,
-      40,    41,    87,    43,    91,     1,   109,   110,    40,    41,
-       2,    43,    67,    92,    68,    51,   121,    69,   125,   126,
-     127,   128,   129,   130,   140,     2,    40,    41,    57,    43,
-     133,   134,   103,   104,     3,     4,     5,     6,   141,     4,
-       5,     6,    61,    13,   145,    62,   142,   105,   106,     3,
-       4,     5,     6,    60,    54,    95,     4,     5,     6,    32,
-      14,    15,    63,    16,    17,    18,    59,     4,     5,     6,
-      19,    14,    15,    32,    16,    17,    18,    89,     4,     5,
-       6,    19,    66,    14,    15,   144,    16,    17,    18,    67,
-      52,    68,   108,    19,    14,    15,   147,    16,    17,    18,
-      82,   111,    14,    15,    19,    16,    17,    18,   112,   115,
-     120,   118,    19,    14,    15,    96,    16,    17,    18,     2,
-     131,   113,   124,    19,   146,    97,    98,    99,   100,   101,
-     102,    97,    98,    99,   100,   101,   102,    67,   136,    68,
-      97,    98,    99,   100,   101,   102,    67,   137,    68,   -80,
-     -80,   119,   138,   139,    34,   143,    55,    77,     0,    81
+      32,    60,    35,    56,    22,    45,   136,   -57,    64,   109,
+     110,    67,    67,    68,    68,    38,    48,    69,    32,    38,
+      79,    32,    22,   -80,   -80,    39,    38,    83,    52,    65,
+      67,    38,    68,    49,    60,   120,    38,    53,    72,    75,
+      75,    80,   149,    38,    88,    40,    41,    42,    43,    40,
+      41,    78,    43,     1,    32,    72,    84,    41,     2,    43,
+      33,    40,    41,   107,    43,    95,    40,    41,    92,    43,
+     105,   106,    38,    40,    41,    87,    43,   118,    67,    36,
+      68,   114,     3,     4,     5,     6,   122,    37,   126,   127,
+     128,   129,   130,   131,     4,     5,     6,   109,   110,    50,
+     134,   135,    84,    41,    90,    43,   123,    57,    96,   124,
+      91,    13,    52,   -55,    51,   146,   116,   143,    97,    98,
+      99,   100,   101,   102,    60,    54,    95,    61,    14,    15,
+      32,    16,    17,    18,    62,     4,     5,     6,    19,    59,
+     103,   104,    14,    15,    32,    16,    17,    18,    63,     4,
+       5,     6,    19,    89,    52,    66,    14,    15,    82,    16,
+      17,    18,   119,   108,   145,    67,    19,    68,   111,   112,
+      14,    15,   148,    16,    17,    18,     2,   -80,   -80,   115,
+      19,    14,    15,   117,    16,    17,    18,   121,     2,    14,
+      15,    19,    16,    17,    18,   113,    67,   132,    68,    19,
+       3,     4,     5,     6,    34,    97,    98,    99,   100,   101,
+     102,    97,    98,    99,   100,   101,   102,     4,     5,     6,
+      70,   137,    71,   141,   147,   142,   125,   138,   139,   140,
+     144,    77,    55,     0,    81
 };
 
 static const yytype_int16 yycheck[] =
 {
-       2,    23,     8,    20,     2,    14,     3,   111,     4,     0,
-       4,     4,     8,     7,    10,    33,    13,     0,    20,     3,
-       4,    23,    20,    38,    20,    21,     3,    20,    21,    38,
-       4,     3,     3,     7,    56,    50,    33,    34,    35,    36,
-       3,    50,   146,    52,    53,    22,     3,    31,     3,    33,
-      34,     9,    36,    11,    56,    12,    33,    34,    35,    36,
-       3,    33,    34,    72,    36,    63,     3,    22,     7,     3,
-      33,    34,    35,    36,    13,     0,    20,    21,    33,    34,
-       5,    36,     8,     4,    10,     3,    92,    13,    97,    98,
-      99,   100,   101,   102,    31,     5,    33,    34,    33,    36,
-     109,   110,    67,    68,    29,    30,    31,    32,   117,    30,
-      31,    32,    13,     6,   131,     0,   122,    70,    71,    29,
-      30,    31,    32,   145,     6,   123,    30,    31,    32,   131,
-      23,    24,     3,    26,    27,    28,     6,    30,    31,    32,
-      33,    23,    24,   145,    26,    27,    28,     6,    30,    31,
-      32,    33,    13,    23,    24,     6,    26,    27,    28,     8,
-       3,    10,     4,    33,    23,    24,     6,    26,    27,    28,
-      33,     4,    23,    24,    33,    26,    27,    28,     4,     4,
-      33,    13,    33,    23,    24,     4,    26,    27,    28,     5,
-       5,     4,    33,    33,    25,    14,    15,    16,    17,    18,
-      19,    14,    15,    16,    17,    18,    19,     8,    13,    10,
-      14,    15,    16,    17,    18,    19,     8,    13,    10,    20,
-      21,    13,    13,    13,     8,   123,    20,    49,    -1,    50
+       2,    23,     8,    20,     2,    14,   111,     4,    38,    20,
+      21,     8,     8,    10,    10,     3,     3,    13,    20,     3,
+      50,    23,    20,    20,    21,    13,     3,     4,     3,    38,
+       8,     3,    10,     3,    56,    13,     3,    12,    22,    48,
+      49,    50,   147,     3,    53,    33,    34,    35,    36,    33,
+      34,    35,    36,     0,    56,    22,    33,    34,     5,    36,
+       0,    33,    34,    72,    36,    63,    33,    34,     4,    36,
+      70,    71,     3,    33,    34,    35,    36,     7,     8,    33,
+      10,     4,    29,    30,    31,    32,    92,     0,    97,    98,
+      99,   100,   101,   102,    30,    31,    32,    20,    21,     3,
+     109,   110,    33,    34,     7,    36,     4,    33,     4,     7,
+      13,     6,     3,     4,     3,   132,     7,   123,    14,    15,
+      16,    17,    18,    19,   146,     6,   124,    13,    23,    24,
+     132,    26,    27,    28,     0,    30,    31,    32,    33,     6,
+      67,    68,    23,    24,   146,    26,    27,    28,     3,    30,
+      31,    32,    33,     6,     3,    13,    23,    24,    33,    26,
+      27,    28,    13,     4,     6,     8,    33,    10,     4,     4,
+      23,    24,     6,    26,    27,    28,     5,    20,    21,     4,
+      33,    23,    24,     4,    26,    27,    28,    33,     5,    23,
+      24,    33,    26,    27,    28,     4,     8,     5,    10,    33,
+      29,    30,    31,    32,     8,    14,    15,    16,    17,    18,
+      19,    14,    15,    16,    17,    18,    19,    30,    31,    32,
+       9,    13,    11,   116,    25,   118,    33,    13,    13,    13,
+     124,    49,    20,    -1,    50
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -787,13 +768,13 @@ static const yytype_int8 yystos[] =
        3,     3,     3,    12,     6,    46,    50,    33,    48,     6,
       51,    13,     0,     3,    62,    63,    13,     8,    10,    13,
        9,    11,    22,    61,    62,    63,    66,    61,    35,    62,
-      63,    66,    33,     4,    31,    60,    63,    35,    63,     6,
+      63,    66,    33,     4,    33,    60,    63,    35,    63,     6,
        7,    13,     4,    42,    43,    47,     4,    14,    15,    16,
       17,    18,    19,    64,    64,    65,    65,    63,     4,    20,
-      21,     4,     4,     4,     4,     4,     4,     7,    13,    13,
-      33,    44,     4,     7,    33,    63,    63,    63,    63,    63,
-      63,     5,    49,    63,    63,    49,    13,    13,    13,    13,
-      31,    63,    44,    43,     6,    50,    25,     6,    49
+      21,     4,     4,     4,     4,     4,     7,     4,     7,    13,
+      13,    33,    44,     4,     7,    33,    63,    63,    63,    63,
+      63,    63,     5,    49,    63,    63,    49,    13,    13,    13,
+      13,    60,    60,    44,    43,     6,    50,    25,     6,    49
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
@@ -1554,8 +1535,482 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
+  case 2: /* Programa: ListaFuncoes BlocoPrincipal $end  */
+#line 92 "expr.y"
+                                            {criaFuncao(TIPO_INT, NULL, NULL, (yyvsp[-1].bloco));}
+#line 1542 "expr.tab.c"
+    break;
 
-#line 1559 "expr.tab.c"
+  case 3: /* Programa: BlocoPrincipal $end  */
+#line 93 "expr.y"
+                               {criaFuncao(285, NULL, NULL, (yyvsp[-1].bloco));}
+#line 1548 "expr.tab.c"
+    break;
+
+  case 4: /* Programa: $end  */
+#line 94 "expr.y"
+                {exit(0);}
+#line 1554 "expr.tab.c"
+    break;
+
+  case 5: /* ListaFuncoes: ListaFuncoes Funcao  */
+#line 96 "expr.y"
+                                  {}
+#line 1560 "expr.tab.c"
+    break;
+
+  case 6: /* ListaFuncoes: Funcao  */
+#line 97 "expr.y"
+                 {}
+#line 1566 "expr.tab.c"
+    break;
+
+  case 7: /* Funcao: TipoRetorno TID SIM_ABREPARENTESES DeclParametros SIM_FECHAPARENTESES BlocoPrincipal  */
+#line 99 "expr.y"
+                                                                                             {(yyval.funcao) = criaFuncao((yyvsp[-5].integer), (yyvsp[-4].id), (yyvsp[-2].item), (yyvsp[0].bloco));}
+#line 1572 "expr.tab.c"
+    break;
+
+  case 8: /* Funcao: TipoRetorno TID SIM_ABREPARENTESES SIM_FECHAPARENTESES BlocoPrincipal  */
+#line 100 "expr.y"
+                                                                                {(yyval.funcao) = criaFuncao((yyvsp[-4].integer), (yyvsp[-3].id), NULL, (yyvsp[0].bloco));}
+#line 1578 "expr.tab.c"
+    break;
+
+  case 9: /* TipoRetorno: Tipo  */
+#line 102 "expr.y"
+                  {(yyval.integer) = (yyvsp[0].integer);}
+#line 1584 "expr.tab.c"
+    break;
+
+  case 10: /* TipoRetorno: TIPO_VOID  */
+#line 103 "expr.y"
+                    {(yyval.integer) = TIPO_VOID;}
+#line 1590 "expr.tab.c"
+    break;
+
+  case 11: /* DeclParametros: DeclParametros SIM_VIRGULA Parametro  */
+#line 105 "expr.y"
+                                                     {AddItem((yyvsp[-2].item), criaItem((yyvsp[0].nPtr)));(yyval.item) = (yyvsp[-2].item);}
+#line 1596 "expr.tab.c"
+    break;
+
+  case 12: /* DeclParametros: Parametro  */
+#line 106 "expr.y"
+                    {(yyval.item) = criaItem((yyvsp[0].nPtr));}
+#line 1602 "expr.tab.c"
+    break;
+
+  case 13: /* Parametro: Tipo TID  */
+#line 108 "expr.y"
+                    {(yyval.nPtr) = criaId((yyvsp[0].id), (yyvsp[-1].integer));}
+#line 1608 "expr.tab.c"
+    break;
+
+  case 14: /* BlocoPrincipal: SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES  */
+#line 110 "expr.y"
+                                                                    {(yyval.bloco) = criaBloco((yyvsp[-2].listadecl), (yyvsp[-1].item));}
+#line 1614 "expr.tab.c"
+    break;
+
+  case 15: /* BlocoPrincipal: SIM_ABRECHAVES Declaracoes SIM_FECHACHAVES  */
+#line 111 "expr.y"
+                                                     {(yyval.bloco) = criaBloco((yyvsp[-1].listadecl), NULL);}
+#line 1620 "expr.tab.c"
+    break;
+
+  case 16: /* BlocoPrincipal: SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES  */
+#line 112 "expr.y"
+                                                  {(yyval.bloco) = criaBloco(NULL, (yyvsp[-1].item));}
+#line 1626 "expr.tab.c"
+    break;
+
+  case 17: /* BlocoPrincipal: SIM_ABRECHAVES SIM_FECHACHAVES  */
+#line 113 "expr.y"
+                                         {(yyval.bloco) = NULL;}
+#line 1632 "expr.tab.c"
+    break;
+
+  case 18: /* Declaracoes: Declaracoes Declaracao  */
+#line 115 "expr.y"
+                                    {AddListaDecl((yyvsp[-1].listadecl), criaListaDecl((yyvsp[0].declaracao)));(yyval.listadecl) = (yyvsp[-1].listadecl);}
+#line 1638 "expr.tab.c"
+    break;
+
+  case 19: /* Declaracoes: Declaracao  */
+#line 116 "expr.y"
+                     {(yyval.listadecl) = criaListaDecl((yyvsp[0].declaracao));}
+#line 1644 "expr.tab.c"
+    break;
+
+  case 20: /* Declaracao: Tipo ListaId SIM_FIM  */
+#line 118 "expr.y"
+                                 {(yyval.declaracao) = criaDeclaracao((yyvsp[-2].integer), (yyvsp[-1].item));}
+#line 1650 "expr.tab.c"
+    break;
+
+  case 21: /* Tipo: TIPO_INT  */
+#line 120 "expr.y"
+               {(yyval.integer) = TIPO_INT;}
+#line 1656 "expr.tab.c"
+    break;
+
+  case 22: /* Tipo: TIPO_STRING  */
+#line 121 "expr.y"
+                      {(yyval.integer) = TIPO_STRING;}
+#line 1662 "expr.tab.c"
+    break;
+
+  case 23: /* Tipo: TIPO_FLOAT  */
+#line 122 "expr.y"
+                     {(yyval.integer) = TIPO_FLOAT;}
+#line 1668 "expr.tab.c"
+    break;
+
+  case 24: /* ListaId: ListaId SIM_VIRGULA TID  */
+#line 124 "expr.y"
+                                 {AddItem((yyvsp[-2].item), criaItem(criaId((yyvsp[0].id), 0)));(yyval.item) = (yyvsp[-2].item);}
+#line 1674 "expr.tab.c"
+    break;
+
+  case 25: /* ListaId: TID  */
+#line 125 "expr.y"
+              {(yyval.item) = criaItem(criaId((yyvsp[0].id), 0));}
+#line 1680 "expr.tab.c"
+    break;
+
+  case 26: /* Bloco: SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES  */
+#line 127 "expr.y"
+                                               {(yyval.item) = (yyvsp[-1].item);}
+#line 1686 "expr.tab.c"
+    break;
+
+  case 27: /* Bloco: SIM_ABRECHAVES SIM_FECHACHAVES  */
+#line 128 "expr.y"
+                                         {(yyval.item) = NULL;}
+#line 1692 "expr.tab.c"
+    break;
+
+  case 28: /* ListaCmd: ListaCmd Comando  */
+#line 130 "expr.y"
+                           {(yyvsp[-1].item)->prox = criaItem((yyvsp[0].nPtr)); (yyval.item) = (yyvsp[-1].item);}
+#line 1698 "expr.tab.c"
+    break;
+
+  case 29: /* ListaCmd: Comando  */
+#line 131 "expr.y"
+                  {(yyval.item) = criaItem((yyvsp[0].nPtr));}
+#line 1704 "expr.tab.c"
+    break;
+
+  case 30: /* Comando: CmdIf  */
+#line 133 "expr.y"
+               {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1710 "expr.tab.c"
+    break;
+
+  case 31: /* Comando: CmdWhile  */
+#line 134 "expr.y"
+                   {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1716 "expr.tab.c"
+    break;
+
+  case 32: /* Comando: CmdAtrib  */
+#line 135 "expr.y"
+                   {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1722 "expr.tab.c"
+    break;
+
+  case 33: /* Comando: CmdWrite  */
+#line 136 "expr.y"
+                   {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1728 "expr.tab.c"
+    break;
+
+  case 34: /* Comando: CmdRead  */
+#line 137 "expr.y"
+                  {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1734 "expr.tab.c"
+    break;
+
+  case 35: /* Comando: ChamadaProc  */
+#line 138 "expr.y"
+                      {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1740 "expr.tab.c"
+    break;
+
+  case 36: /* Comando: Retorno  */
+#line 139 "expr.y"
+                  {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1746 "expr.tab.c"
+    break;
+
+  case 37: /* Retorno: COM_RETORNO Expra SIM_FIM  */
+#line 141 "expr.y"
+                                   {(yyval.nPtr) = criaOpr(COM_RETORNO, 1, (yyvsp[-1].nPtr));}
+#line 1752 "expr.tab.c"
+    break;
+
+  case 38: /* Retorno: COM_RETORNO CONS_LITERAL SIM_FIM  */
+#line 142 "expr.y"
+                                           {(yyval.nPtr) = criaOpr(COM_RETORNO, 1, criaString((yyvsp[-1].string)));}
+#line 1758 "expr.tab.c"
+    break;
+
+  case 39: /* Retorno: COM_RETORNO SIM_FIM  */
+#line 143 "expr.y"
+                              {(yyval.nPtr) = criaOpr(COM_RETORNO, 0);}
+#line 1764 "expr.tab.c"
+    break;
+
+  case 40: /* CmdIf: COM_SE SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco  */
+#line 145 "expr.y"
+                                                                {(yyval.nPtr) = criaOpr(COM_SE, 2, (yyvsp[-2].nPtr), (yyvsp[0].item));}
+#line 1770 "expr.tab.c"
+    break;
+
+  case 41: /* CmdIf: COM_SE SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco COM_SENAO Bloco  */
+#line 146 "expr.y"
+                                                                                   {(yyval.nPtr) = criaOpr(COM_SE, 3, (yyvsp[-4].nPtr), (yyvsp[-2].item), (yyvsp[0].item));}
+#line 1776 "expr.tab.c"
+    break;
+
+  case 42: /* CmdWhile: COM_ENQUANTO SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco  */
+#line 148 "expr.y"
+                                                                         {(yyval.nPtr) = criaOpr(COM_ENQUANTO, 2, (yyvsp[-2].nPtr), (yyvsp[0].item));}
+#line 1782 "expr.tab.c"
+    break;
+
+  case 43: /* CmdAtrib: TID SIM_IGUAL Expra SIM_FIM  */
+#line 150 "expr.y"
+                                      {(yyval.nPtr) = criaOpr(SIM_IGUAL, 2, criaId((yyvsp[-3].id), 0), (yyvsp[-1].nPtr));}
+#line 1788 "expr.tab.c"
+    break;
+
+  case 44: /* CmdAtrib: TID SIM_IGUAL CONS_LITERAL SIM_FIM  */
+#line 151 "expr.y"
+                                             {(yyval.nPtr) = criaOpr(SIM_IGUAL, 2, criaId((yyvsp[-3].id), 0), criaString((yyvsp[-1].string)));}
+#line 1794 "expr.tab.c"
+    break;
+
+  case 45: /* CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES SIM_FIM  */
+#line 153 "expr.y"
+                                                                           {criaOpr(COM_IMPRIME, 1, (yyvsp[-2].nPtr));}
+#line 1800 "expr.tab.c"
+    break;
+
+  case 46: /* CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES SIM_FIM  */
+#line 154 "expr.y"
+                                                                           {criaOpr(COM_IMPRIME, 1, (yyvsp[-2].nPtr));}
+#line 1806 "expr.tab.c"
+    break;
+
+  case 47: /* CmdWrite: COM_IMPRIME SIM_ABREPARENTESES CONS_LITERAL SIM_FECHAPARENTESES SIM_FIM  */
+#line 155 "expr.y"
+                                                                                  {criaOpr(COM_IMPRIME, 1, criaString((yyvsp[-2].string)));}
+#line 1812 "expr.tab.c"
+    break;
+
+  case 48: /* CmdRead: COM_LER SIM_ABREPARENTESES TID SIM_FECHAPARENTESES SIM_FIM  */
+#line 157 "expr.y"
+                                                                    {criaOpr(COM_LER, 1, criaId((yyvsp[-2].id), 0));}
+#line 1818 "expr.tab.c"
+    break;
+
+  case 49: /* ChamadaProc: ChamaFuncao SIM_FIM  */
+#line 159 "expr.y"
+                                 {(yyval.nPtr) = (yyvsp[-1].nPtr);}
+#line 1824 "expr.tab.c"
+    break;
+
+  case 50: /* ChamaFuncao: TID SIM_ABREPARENTESES ListaParametros SIM_FECHAPARENTESES  */
+#line 161 "expr.y"
+                                                                        {(yyval.nPtr) = criaOpr(1, 2, criaId((yyvsp[-3].id), 0), (yyvsp[-1].nPtr));}
+#line 1830 "expr.tab.c"
+    break;
+
+  case 51: /* ChamaFuncao: TID SIM_ABREPARENTESES SIM_FECHAPARENTESES  */
+#line 162 "expr.y"
+                                                     {(yyval.nPtr) = criaOpr(1, 1, criaId((yyvsp[-2].id), 0));}
+#line 1836 "expr.tab.c"
+    break;
+
+  case 52: /* ListaParametros: Expra SIM_VIRGULA ListaParametros  */
+#line 164 "expr.y"
+                                                   {(yyval.nPtr) = criaOpr(1, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
+#line 1842 "expr.tab.c"
+    break;
+
+  case 53: /* ListaParametros: TID SIM_VIRGULA ListaParametros  */
+#line 165 "expr.y"
+                                          {(yyval.nPtr) = criaOpr(1, 2, criaId((yyvsp[-2].id), 0), (yyvsp[0].nPtr));}
+#line 1848 "expr.tab.c"
+    break;
+
+  case 54: /* ListaParametros: Expra  */
+#line 166 "expr.y"
+                {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1854 "expr.tab.c"
+    break;
+
+  case 55: /* ListaParametros: TID  */
+#line 167 "expr.y"
+              {(yyval.nPtr) = criaId((yyvsp[0].id), 0);}
+#line 1860 "expr.tab.c"
+    break;
+
+  case 56: /* Expr: Exprl  */
+#line 170 "expr.y"
+            {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1866 "expr.tab.c"
+    break;
+
+  case 57: /* Expr: Expra  */
+#line 171 "expr.y"
+                {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1872 "expr.tab.c"
+    break;
+
+  case 58: /* Expr: Exprr  */
+#line 172 "expr.y"
+                {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1878 "expr.tab.c"
+    break;
+
+  case 59: /* Exprr: Exprr SIM_MAIORQUE Expra  */
+#line 174 "expr.y"
+                                {(yyval.nPtr) = criaOpr(SIM_MAIORQUE, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
+#line 1884 "expr.tab.c"
+    break;
+
+  case 60: /* Exprr: Exprr SIM_MENORQUE Expra  */
+#line 175 "expr.y"
+                                   {(yyval.nPtr) = criaOpr(SIM_MENORQUE, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
+#line 1890 "expr.tab.c"
+    break;
+
+  case 61: /* Exprr: Exprr SIM_MAIOROUIGUAL Expra  */
+#line 176 "expr.y"
+                                       {(yyval.nPtr) = criaOpr(SIM_MAIOROUIGUAL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
+#line 1896 "expr.tab.c"
+    break;
+
+  case 62: /* Exprr: Exprr SIM_MENOROUIGUAL Expra  */
+#line 177 "expr.y"
+                                       {(yyval.nPtr) = criaOpr(SIM_MENOROUIGUAL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
+#line 1902 "expr.tab.c"
+    break;
+
+  case 63: /* Exprr: Exprr SIM_IGUALIGUAL Expra  */
+#line 178 "expr.y"
+                                     {(yyval.nPtr) = criaOpr(SIM_IGUALIGUAL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
+#line 1908 "expr.tab.c"
+    break;
+
+  case 64: /* Exprr: Exprr SIM_DIFERENTE Expra  */
+#line 179 "expr.y"
+                                    {(yyval.nPtr) = criaOpr(SIM_DIFERENTE, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
+#line 1914 "expr.tab.c"
+    break;
+
+  case 65: /* Exprr: Expra  */
+#line 180 "expr.y"
+                {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1920 "expr.tab.c"
+    break;
+
+  case 66: /* Expra: Expra SIM_ADICAO Termo  */
+#line 182 "expr.y"
+                              {(yyval.nPtr) = criaOpr(SIM_ADICAO, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
+#line 1926 "expr.tab.c"
+    break;
+
+  case 67: /* Expra: Expra SIM_SUBTRACAO Termo  */
+#line 183 "expr.y"
+                                    {(yyval.nPtr) = criaOpr(SIM_SUBTRACAO, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
+#line 1932 "expr.tab.c"
+    break;
+
+  case 68: /* Expra: Termo  */
+#line 184 "expr.y"
+                {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1938 "expr.tab.c"
+    break;
+
+  case 69: /* Termo: Termo SIM_MULTIPLICACAO Fator  */
+#line 186 "expr.y"
+                                     {(yyval.nPtr) = criaOpr(SIM_MULTIPLICACAO, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
+#line 1944 "expr.tab.c"
+    break;
+
+  case 70: /* Termo: Termo SIM_DIVISAO Fator  */
+#line 187 "expr.y"
+                                  {(yyval.nPtr) = criaOpr(SIM_DIVISAO, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
+#line 1950 "expr.tab.c"
+    break;
+
+  case 71: /* Termo: Fator  */
+#line 188 "expr.y"
+                {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1956 "expr.tab.c"
+    break;
+
+  case 72: /* Fator: CONS_INT  */
+#line 190 "expr.y"
+                {(yyval.nPtr) = criaInteger((yyvsp[0].integer));}
+#line 1962 "expr.tab.c"
+    break;
+
+  case 73: /* Fator: CONS_FLOAT  */
+#line 191 "expr.y"
+                     {(yyval.nPtr) = criaReal((yyvsp[0].real));}
+#line 1968 "expr.tab.c"
+    break;
+
+  case 74: /* Fator: TID  */
+#line 192 "expr.y"
+              {(yyval.nPtr) = criaId((yyvsp[0].id), 0);}
+#line 1974 "expr.tab.c"
+    break;
+
+  case 75: /* Fator: ChamaFuncao  */
+#line 193 "expr.y"
+                      {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 1980 "expr.tab.c"
+    break;
+
+  case 76: /* Fator: SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES  */
+#line 194 "expr.y"
+                                                       {(yyval.nPtr) = (yyvsp[-1].nPtr);}
+#line 1986 "expr.tab.c"
+    break;
+
+  case 77: /* Exprl: Exprl SIM_E Expra  */
+#line 196 "expr.y"
+                         {(yyval.nPtr) = criaOpr(SIM_E, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
+#line 1992 "expr.tab.c"
+    break;
+
+  case 78: /* Exprl: Exprl SIM_OU Expra  */
+#line 197 "expr.y"
+                             {(yyval.nPtr) = criaOpr(SIM_OU, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
+#line 1998 "expr.tab.c"
+    break;
+
+  case 79: /* Exprl: SIM_NEGACAO Expra  */
+#line 198 "expr.y"
+                            {(yyval.nPtr) = criaOpr(SIM_NEGACAO, 1, (yyvsp[0].nPtr));}
+#line 2004 "expr.tab.c"
+    break;
+
+  case 80: /* Exprl: Expra  */
+#line 199 "expr.y"
+                {(yyval.nPtr) = (yyvsp[0].nPtr);}
+#line 2010 "expr.tab.c"
+    break;
+
+
+#line 2014 "expr.tab.c"
 
       default: break;
     }
@@ -1779,8 +2234,9 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 209 "expr.y"
+#line 201 "expr.y"
 
+#define SIZEOF_TIPONO ((char *)&no->inteiro - (char *)no)
 
 int yyerror (const char *str)
 {
@@ -1788,3 +2244,168 @@ int yyerror (const char *str)
 	
 } 		 
 
+tipoNo *criaInteger(int val){
+	tipoNo *no;
+	size_t tam_no = SIZEOF_TIPONO + sizeof(typeInt);
+	if ((no = malloc(tam_no)) == NULL)
+		yyerror("Sem memória");
+
+	no->type = typeInt;
+	no->inteiro.val = val;
+	return no;
+}
+
+tipoNo *criaReal(float val){
+	tipoNo *no;
+	size_t tam_no = SIZEOF_TIPONO + sizeof(typeFloat);
+	if ((no = malloc(tam_no)) == NULL)
+		yyerror("Sem memória");
+
+	no->type = typeFloat;
+	no->real.val = val;
+	return no;
+}
+
+tipoNo *criaString(char *str){
+	tipoNo *no;
+	size_t tam_no = SIZEOF_TIPONO + sizeof(typeString);
+	if ((no = malloc(tam_no)) == NULL)
+		yyerror("Sem memória");
+
+	no->type = typeString;
+	no->string.str = (char*)malloc(TAM_MAX_STRING);
+	if (no->string.str == NULL)
+		yyerror("Sem memória");
+	strcpy(no->string.str, str);
+	return no;
+}
+
+tipoNo *criaId(char *name, int tipo){
+	tipoNo *no;
+	size_t tam_no = SIZEOF_TIPONO + sizeof(typeId);
+	if ((no = malloc(tam_no)) == NULL)
+		yyerror("Sem memória");
+	
+	no->type = typeId; 
+	no->id.name = (char*)malloc(TAM_MAX_NOMEVAR);
+	if (no->id.name == NULL)
+		yyerror("Sem memória");
+	strcpy(no->id.name, name);
+	no->id.tipo = tipo;
+	return no;
+}
+
+tipoNo *criaOpr(int opr, int nOps, ...){
+	va_list ap;
+	tipoNo *no;
+	size_t tam_no = SIZEOF_TIPONO + sizeof(typeOpr) + (nOps - 1) * sizeof(tipoNo*);
+	if ((no = malloc(tam_no)) == NULL)
+		yyerror("Sem memória");
+
+	no->type = typeOpr;
+	no->opr.opr = opr;
+	no->opr.nOps = nOps;
+	va_start(ap, nOps);
+	for (int i=0;i<nOps;i++){
+		no->opr.op[i] = va_arg(ap, tipoNo*);
+	}
+	va_end(ap);
+	return no;
+}
+
+void excluirNo(tipoNo *no){
+	if (!no)
+		return;
+	if (no->type == typeOpr){
+		for (int i=0;i < no->opr.nOps; i++){
+			excluirNo(no->opr.op[i]);
+		}
+	}
+	free(no);
+}
+
+eTipo getTipoId(int v){
+	if (v == TIPO_INT)
+		return typeInt;
+	else if (v == TIPO_FLOAT)
+		return typeFloat;
+	else if (v == TIPO_STRING)
+		return typeString;
+	else if (v == TIPO_VOID)
+		return typeVoid;
+}
+
+Item* criaItem(tipoNo *arv){
+	Item *i = malloc(sizeof(Item*));
+	if (i == NULL){
+		printf("Error ao alocar memória para o Item");
+		exit(1);
+	}
+	i->prox = NULL;
+	i->arv = arv;
+	return i;
+}
+
+Declaracao* criaDeclaracao(int tipo, Item *vars){
+	Declaracao *d = malloc(sizeof(Declaracao*));
+	if (d == NULL){
+		printf("Error ao alocar memória para as Declarações");
+		exit(1);
+	}
+	d->tipo = getTipoId(tipo);
+	d->vars = vars;
+	return d;
+}
+
+ListaDecl *criaListaDecl(Declaracao *decl){
+	ListaDecl *l = malloc(sizeof(ListaDecl*));
+	if (l == NULL){
+		printf("Error ao alocar memória para a Lista de Declarações");
+		exit(1);
+	}
+	l->prox = NULL;
+	l->decl = decl;
+	return l;
+}
+
+Bloco* criaBloco(ListaDecl *decl, Item *cmds){
+	Bloco* b = malloc(sizeof(Bloco*));
+	if (b == NULL){
+		printf("Error ao alocar memória para o Bloco");
+		exit(1);
+	}
+	b->decl = decl;
+	b->cmds = cmds;
+	return b;
+}
+
+Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
+	Funcao *f = malloc(sizeof(Funcao*));
+	if (f == NULL){
+		printf("Error ao alocar memória para a função");
+		exit(1);
+	}
+	f->tipo = getTipoId(tipo);
+	f->name = (char*)malloc(TAM_MAX_NOMEVAR);
+	if (f->name == NULL)
+		yyerror("Sem memória");
+	strcpy(f->name, nome);
+	f->syms = NULL;
+	f->prms = prms;
+	f->blc = blc;
+	return f;
+}
+
+void AddItem(Item *o, Item *ad){
+	while(o->prox)
+		o = o->prox;
+	o->prox = malloc(sizeof(Item*));
+	o = ad;
+}
+
+void AddListaDecl(ListaDecl *o, ListaDecl *ad){
+	while(o->prox)
+		o = o->prox;
+	o->prox = malloc(sizeof(ListaDecl*));
+	o = ad;
+}

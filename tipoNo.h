@@ -23,7 +23,7 @@ typedef struct{
 typedef struct{
     int opr; // Operacao
     int nOps; // Numero de operandos
-    struct tagTipoNo *op[1]; // Operandos
+    struct tagTipoNo *op[4]; // Operandos
 } oprTipoNo;
 
 typedef struct tagTipoNo{
@@ -43,8 +43,18 @@ typedef struct Item{
     tipoNo *arv;
 }Item;
 
+typedef struct Declaracao{
+    eTipo tipo;
+    Item *vars;
+}Declaracao;
+
+typedef struct ListaDecl{
+    struct ListaDecl *prox;
+    Declaracao *decl;
+}ListaDecl;
+
 typedef struct Bloco{
-    Item *decl;
+    ListaDecl *decl;
     Item *cmds;
 }Bloco;
 

@@ -37,7 +37,6 @@
 
 #ifndef YY_YY_EXPR_TAB_H_INCLUDED
 # define YY_YY_EXPR_TAB_H_INCLUDED
-#include "tipoNo.h"
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -95,17 +94,23 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+#include "tipoNo.h"
 union YYSTYPE
 {
-#line 26 "expr.y"
+#line 31 "expr.y"
 
 	float real;
 	int integer;
 	char *string;
 	char *id;
 	tipoNo *nPtr;
+	Item *item;
+	Bloco *bloco;
+	Funcao *funcao;
+	Declaracao *declaracao;
+	ListaDecl *listadecl;
 
-#line 108 "expr.tab.h"
+#line 113 "expr.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
