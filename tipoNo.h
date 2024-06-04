@@ -1,7 +1,7 @@
 #ifndef TIPONO_H
 #define TIPONO_H
 
-typedef enum {typeInt, typeFloat, typeString, typeId, typeOpr} eTipo;
+typedef enum {typeInt, typeFloat, typeString, typeVoid, typeId, typeOpr} eTipo;
 
 typedef struct{
     int val;
@@ -37,5 +37,23 @@ typedef struct tagTipoNo{
         oprTipoNo opr;
     };
 } tipoNo;
+
+typedef struct Item{
+    struct Item *prox;
+    tipoNo *arv;
+}Item;
+
+typedef struct Bloco{
+    Item *decl;
+    Item *cmds;
+}Bloco;
+
+typedef struct Funcao{
+    eTipo tipo; // Tipo
+    char *name; // Nome
+    Item *syms; // Simbolos
+    Item *prms; // Parametros
+    Bloco *blc;
+}Funcao;
 
 #endif
