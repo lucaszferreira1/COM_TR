@@ -5,8 +5,7 @@
 #include <stdarg.h>
 #include "tipoNo.h"
 
-#define TAM_TABELA_SIMBOLOS 50
-#define NUM_ARVORES 128
+#define NUM_FUNCOES 128
 
 int yyerror(const char *);
 int yylex();
@@ -17,11 +16,13 @@ tipoNo *criaString(char *str);
 tipoNo *criaId(char *name, int tipo);
 tipoNo *criaOpr(int opr, int nOps, ...);
 void excluirNo(tipoNo *no);
+Funcao* allocFuncoes();
+Funcao* criaFuncao(int tipo, char *nome, Item *prms, Item *cmds);
+Bloco* criaBloco(Item *decl, Item *cmds);
+Item* criaItem(tipoNo *arv);
 
-int sym[TAM_TABELA_SIMBOLOS];
-int lastPos = 0;
-tipoNo *arvores[NUM_ARVORES];
-int lastArv = 0;
+Funcao **programa;
+int lastFun = 0;
 
 %}
 
@@ -31,6 +32,9 @@ int lastArv = 0;
 	char *string;
 	char *id;
 	tipoNo *nPtr;
+	Item *item;
+	Bloco *bloco;
+	Funcao *funcao;
 };
 
 %define parse.error verbose
@@ -72,31 +76,33 @@ int lastArv = 0;
 %left SIM_ADICAO SIM_SUBTRACAO
 %left SIM_MULTIPLICACAO SIM_DIVISAO
 
-%type <nPtr> Expr Expra Exprl Exprr Termo Fator ListaFuncoes Funcao DeclParametros Parametro Declaracoes Declaracao ListaId Bloco ListaCmd Comando CmdIf CmdWhile CmdAtrib CmdWrite CmdRead ChamadaProc Retorno ListaParametros BlocoPrincipal ChamaFuncao
+%type <nPtr> Expr Expra Exprl Exprr Termo Fator DeclParametros Parametro Declaracoes Declaracao ListaId Comando CmdIf CmdWhile CmdAtrib CmdWrite CmdRead ChamadaProc Retorno ListaParametros BlocoPrincipal ChamaFuncao
 %type <integer> Tipo TipoRetorno
+%type <item> ListaCmd Bloco
+%type <funcao> Funcao ListaFuncoes
 
 %%
-Programa: ListaFuncoes BlocoPrincipal YYEOF {arvores[lastArv] = $2;}
-	| BlocoPrincipal YYEOF {arvores[lastArv] = $1;}
+Programa: ListaFuncoes BlocoPrincipal YYEOF {programa = allocFuncoes();programa[lastFun] = criaFuncao(285, NULL, NULL, criaItem($2));lastFun++;}
+	| BlocoPrincipal YYEOF {programa = allocFuncoes();programa[lastFun] = criaFuncao(285, NULL, NULL, criaItem($1));lastFun++;}
 	| YYEOF {exit(0);}
 	;
-ListaFuncoes: ListaFuncoes Funcao {arvores[lastArv] = $2; lastArv++;}
-	| Funcao {arvores[lastArv] = $1; lastArv++;}
+ListaFuncoes: ListaFuncoes Funcao {programa[lastFun] = $2; lastFun++;}
+	| Funcao {programa[lastFun] = $1; lastFun++;}
 	;
-Funcao: TipoRetorno TID SIM_ABREPARENTESES DeclParametros SIM_FECHAPARENTESES BlocoPrincipal {$$ = criaOpr($1, 3, criaId($2, $1), $4, $6);}
-	| TipoRetorno TID SIM_ABREPARENTESES SIM_FECHAPARENTESES BlocoPrincipal {$$ = criaOpr($1, 3, criaId($2, $1), NULL, $5);}
+Funcao: TipoRetorno TID SIM_ABREPARENTESES DeclParametros SIM_FECHAPARENTESES BlocoPrincipal {$$ = criaFuncao($1, $2, criaItem($4), $6);}
+	| TipoRetorno TID SIM_ABREPARENTESES SIM_FECHAPARENTESES BlocoPrincipal {$$ = criaFuncao($1, $2, NULL, $5);}
 	;
 TipoRetorno: Tipo {$$ = $1;}
 	| TIPO_VOID {$$ = TIPO_VOID;}
 	;
-DeclParametros: Parametro SIM_VIRGULA DeclParametros {$$ = criaOpr(TID, 2, $1, $3);}
+DeclParametros: DeclParametros SIM_VIRGULA Parametro {$$ = criaOpr(TID, 2, $1, $3);}
 	| Parametro {$$ = $1;}
 	;
 Parametro: Tipo TID {$$ = criaId($2, $1);}
 	;
-BlocoPrincipal: SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES {$$ = criaOpr(SIM_ABRECHAVES, 3, $2, $3, criaOpr(SIM_FECHACHAVES, 0));}
-	| SIM_ABRECHAVES Declaracoes SIM_FECHACHAVES {$$ = criaOpr(SIM_ABRECHAVES, 2, $2, criaOpr(SIM_FECHACHAVES, 0));}
-	| SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES {$$ = criaOpr(SIM_ABRECHAVES, 2, $2, criaOpr(SIM_FECHACHAVES, 0));}
+BlocoPrincipal: SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES {$$ = criaBloco($2, $3);}
+	| SIM_ABRECHAVES Declaracoes SIM_FECHACHAVES {$$ = criaBloco($2, NULL);}
+	| SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES {$$ = criaBloco(NULL, $3);}
 	| SIM_ABRECHAVES SIM_FECHACHAVES {$$ = NULL;}
 	;
 Declaracoes: Declaracao Declaracoes {$$ = criaOpr(1, 2, $1, $2);}
@@ -114,8 +120,8 @@ ListaId: TID SIM_VIRGULA ListaId {$$ = criaOpr(TID, 2, criaId($1, 0), $3);}
 Bloco: SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES {$$ = $2;}
 	| SIM_ABRECHAVES SIM_FECHACHAVES {$$ = NULL;}
 	;
-ListaCmd: Comando ListaCmd {$$ = criaOpr(1, 2, $1, $2);}
-	| Comando {$$ = $1;}
+ListaCmd: ListaCmd Comando {$1->prox = criaItem($2); $$ = $1;}
+	| Comando {$$ = criaItem($1);}
 	;
 Comando: CmdIf {$$ = $1;}
 	| CmdWhile {$$ = $1;}
@@ -266,4 +272,48 @@ void excluirNo(tipoNo *no){
 		}
 	}
 	free(no);
+}
+
+Funcao** allocFuncoes(){
+	Funcao **funcoes = (Funcao*)malloc(sizeof(Funcao*) * NUM_FUNCOES);
+	if (funcoes == NULL){
+		printf("Error ao alocar memória para as funções");
+		exit(1);
+	}
+	return funcoes;
+}
+
+eTipo getTipoId(int v){
+	if (v == TIPO_INT)
+		return typeInt;
+	else if (v == TIPO_FLOAT)
+		return typeFloat;
+	else if (v == TIPO_STRING)
+		return typeString;
+	else if (v == TIPO_VOID)
+		return typeVoid;
+}
+
+Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
+	Funcao *f = malloc(sizeof(Funcao*));
+	f->tipo = getTipoId(tipo);
+	strcpy(f->name, nome);
+	f->syms = NULL;
+	f->prms = prms;
+	f->blc = blc;
+	return f;
+}
+
+Bloco* criaBloco(Item *decl, Item *cmds){
+	Bloco* b = malloc(sizeof(Bloco*));
+	b->decl = decl;
+	b->cmds = cmds;
+	return b;
+}
+
+Item* criaItem(tipoNo *arv){
+	Item *i = malloc(sizeof(Item*));
+	i->prox = NULL;
+	i->arv = arv;
+	return i;
 }
