@@ -4,9 +4,11 @@ int teste(int a){
 
 {
     int a, b, c;
-    a = 2 + 2;
+    a = 2;
     if (a == a){
-        print("Teste");
+        a = 2;
+        print(a);
+    }else{
+        b = 29 - 23948 / 23 * 24;
     }
-    print(a);
 }

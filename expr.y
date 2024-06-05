@@ -16,17 +16,19 @@ tipoNo *criaInteger(int);
 tipoNo *criaReal(float val);
 tipoNo *criaString(char *str);
 tipoNo *criaId(char *name, int tipo);
-tipoNo *criaOpr(int opr, int nOps, ...);
+tipoNo *criaOpr(int opr, Repeticao *rep, int nOps, ...);
 void excluirNo(tipoNo *no);
 Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc);
 ListaDecl *criaListaDecl(Declaracao *decl);
 Declaracao* criaDeclaracao(int tipo, Item *vars);
 Bloco* criaBloco(ListaDecl *decl, Item *cmds);
 Item* criaItem(tipoNo *arv);
+Repeticao* criaRepeticao(Item *cmds, Item *senao);
 void AddListaDecl(ListaDecl *o, ListaDecl *ad);
 void AddItem(Item *o, Item *ad);
 void AddFuncao(Funcao *f1, Funcao *f2);
 void printFuncao(Funcao *f);
+void printComandos(Item *cmds);
 
 %}
 
@@ -140,31 +142,31 @@ Comando: CmdIf {$$ = $1;}
 	| ChamadaProc {$$ = $1;}
 	| Retorno {$$ = $1;}
 	;
-Retorno: COM_RETORNO Expra SIM_FIM {$$ = criaOpr(COM_RETORNO, 1, $2);}
-	| COM_RETORNO CONS_LITERAL SIM_FIM {$$ = criaOpr(COM_RETORNO, 1, criaString($2));}
-	| COM_RETORNO SIM_FIM {$$ = criaOpr(COM_RETORNO, 0);}
+Retorno: COM_RETORNO Expra SIM_FIM {$$ = criaOpr(COM_RETORNO, NULL, 1, $2);}
+	| COM_RETORNO CONS_LITERAL SIM_FIM {$$ = criaOpr(COM_RETORNO, NULL, 1, criaString($2));}
+	| COM_RETORNO SIM_FIM {$$ = criaOpr(COM_RETORNO, NULL, 0);}
 	;
-CmdIf: COM_SE SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco {$$ = criaOpr(COM_SE, 2, $3, $5);}
-	| COM_SE SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco COM_SENAO Bloco {$$ = criaOpr(COM_SE, 3, $3, $5, $7);}
+CmdIf: COM_SE SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco {$$ = criaOpr(COM_SE, criaRepeticao($5, NULL), 1, $3);}
+	| COM_SE SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco COM_SENAO Bloco {$$ = criaOpr(COM_SENAO, criaRepeticao($5, $7), 1, $3);}
 	;
-CmdWhile: COM_ENQUANTO SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco {$$ = criaOpr(COM_ENQUANTO, 2, $3, $5);}
+CmdWhile: COM_ENQUANTO SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco {$$ = criaOpr(COM_ENQUANTO, criaRepeticao($5, NULL), 1, $3);}
 	;
-CmdAtrib: TID SIM_IGUAL Expra SIM_FIM {$$ = criaOpr(SIM_IGUAL, 2, criaId($1, 0), $3);}
-	| TID SIM_IGUAL CONS_LITERAL SIM_FIM {$$ = criaOpr(SIM_IGUAL, 2, criaId($1, 0), criaString($3));}
+CmdAtrib: TID SIM_IGUAL Expra SIM_FIM {$$ = criaOpr(SIM_IGUAL, NULL, 2, criaId($1, 0), $3);}
+	| TID SIM_IGUAL CONS_LITERAL SIM_FIM {$$ = criaOpr(SIM_IGUAL, NULL, 2, criaId($1, 0), criaString($3));}
 	;
-CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES SIM_FIM {$$ = criaOpr(COM_IMPRIME, 1, $3);}
-	| COM_IMPRIME SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES SIM_FIM {$$ = criaOpr(COM_IMPRIME, 1, $3);}
-	| COM_IMPRIME SIM_ABREPARENTESES CONS_LITERAL SIM_FECHAPARENTESES SIM_FIM {$$ = criaOpr(COM_IMPRIME, 1, criaString($3));}
+CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES SIM_FIM {$$ = criaOpr(COM_IMPRIME, NULL, 1, $3);}
+	| COM_IMPRIME SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES SIM_FIM {$$ = criaOpr(COM_IMPRIME, NULL, 1, $3);}
+	| COM_IMPRIME SIM_ABREPARENTESES CONS_LITERAL SIM_FECHAPARENTESES SIM_FIM {$$ = criaOpr(COM_IMPRIME, NULL, 1, criaString($3));}
 	;
-CmdRead: COM_LER SIM_ABREPARENTESES TID SIM_FECHAPARENTESES SIM_FIM {$$ = criaOpr(COM_LER, 1, criaId($3, 0));}
+CmdRead: COM_LER SIM_ABREPARENTESES TID SIM_FECHAPARENTESES SIM_FIM {$$ = criaOpr(COM_LER, NULL, 1, criaId($3, 0));}
 	;
 ChamadaProc: ChamaFuncao SIM_FIM {$$ = $1;}
 	;
-ChamaFuncao: TID SIM_ABREPARENTESES ListaParametros SIM_FECHAPARENTESES {$$ = criaOpr(1, 2, criaId($1, 0), $3);}
-	| TID SIM_ABREPARENTESES SIM_FECHAPARENTESES {$$ = criaOpr(1, 1, criaId($1, 0));}
+ChamaFuncao: TID SIM_ABREPARENTESES ListaParametros SIM_FECHAPARENTESES {$$ = criaOpr(1, NULL, 2, criaId($1, 0), $3);}
+	| TID SIM_ABREPARENTESES SIM_FECHAPARENTESES {$$ = criaOpr(1, NULL, 1, criaId($1, 0));}
 	;
-ListaParametros: Expra SIM_VIRGULA ListaParametros {$$ = criaOpr(1, 2, $1, $3);}
-	| TID SIM_VIRGULA ListaParametros {$$ = criaOpr(1, 2, criaId($1, 0), $3);}
+ListaParametros: Expra SIM_VIRGULA ListaParametros {$$ = criaOpr(1, NULL, 2, $1, $3);}
+	| TID SIM_VIRGULA ListaParametros {$$ = criaOpr(1, NULL, 2, criaId($1, 0), $3);}
 	| Expra {$$ = $1;}
 	| TID {$$ = criaId($1, 0);}
 	;
@@ -173,20 +175,20 @@ Expr: Exprl {$$ = $1;}
 	| Expra {$$ = $1;}
 	| Exprr {$$ = $1;}
 	;
-Exprr: Exprr SIM_MAIORQUE Expra {$$ = criaOpr(SIM_MAIORQUE, 2, $1, $3);}
-	| Exprr SIM_MENORQUE Expra {$$ = criaOpr(SIM_MENORQUE, 2, $1, $3);}
-	| Exprr SIM_MAIOROUIGUAL Expra {$$ = criaOpr(SIM_MAIOROUIGUAL, 2, $1, $3);}
-	| Exprr SIM_MENOROUIGUAL Expra {$$ = criaOpr(SIM_MENOROUIGUAL, 2, $1, $3);}
-	| Exprr SIM_IGUALIGUAL Expra {$$ = criaOpr(SIM_IGUALIGUAL, 2, $1, $3);}
-	| Exprr SIM_DIFERENTE Expra {$$ = criaOpr(SIM_DIFERENTE, 2, $1, $3);}
+Exprr: Exprr SIM_MAIORQUE Expra {$$ = criaOpr(SIM_MAIORQUE, NULL, 2, $1, $3);}
+	| Exprr SIM_MENORQUE Expra {$$ = criaOpr(SIM_MENORQUE, NULL, 2, $1, $3);}
+	| Exprr SIM_MAIOROUIGUAL Expra {$$ = criaOpr(SIM_MAIOROUIGUAL, NULL, 2, $1, $3);}
+	| Exprr SIM_MENOROUIGUAL Expra {$$ = criaOpr(SIM_MENOROUIGUAL, NULL, 2, $1, $3);}
+	| Exprr SIM_IGUALIGUAL Expra {$$ = criaOpr(SIM_IGUALIGUAL, NULL, 2, $1, $3);}
+	| Exprr SIM_DIFERENTE Expra {$$ = criaOpr(SIM_DIFERENTE, NULL, 2, $1, $3);}
 	| Expra {$$ = $1;}
 	;
-Expra: Expra SIM_ADICAO Termo {$$ = criaOpr(SIM_ADICAO, 2, $1, $3);}
-	| Expra SIM_SUBTRACAO Termo {$$ = criaOpr(SIM_SUBTRACAO, 2, $1, $3);}
+Expra: Expra SIM_ADICAO Termo {$$ = criaOpr(SIM_ADICAO, NULL, 2, $1, $3);}
+	| Expra SIM_SUBTRACAO Termo {$$ = criaOpr(SIM_SUBTRACAO, NULL, 2, $1, $3);}
 	| Termo {$$ = $1;}
 	;
-Termo: Termo SIM_MULTIPLICACAO Fator {$$ = criaOpr(SIM_MULTIPLICACAO, 2, $1, $3);}
-	| Termo SIM_DIVISAO Fator {$$ = criaOpr(SIM_DIVISAO, 2, $1, $3);}
+Termo: Termo SIM_MULTIPLICACAO Fator {$$ = criaOpr(SIM_MULTIPLICACAO, NULL, 2, $1, $3);}
+	| Termo SIM_DIVISAO Fator {$$ = criaOpr(SIM_DIVISAO, NULL, 2, $1, $3);}
 	| Fator {$$ = $1;}
 	;
 Fator: CONS_INT {$$ = criaInteger($1);}
@@ -195,9 +197,9 @@ Fator: CONS_INT {$$ = criaInteger($1);}
 	| ChamaFuncao {$$ = $1;}
 	| SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES {$$ = $2;}
 	;
-Exprl: Exprl SIM_E Expra {$$ = criaOpr(SIM_E, 2, $1, $3);}
-	| Exprl SIM_OU Expra {$$ = criaOpr(SIM_OU, 2, $1, $3);}
-	| SIM_NEGACAO Expra {$$ = criaOpr(SIM_NEGACAO, 1, $2);}
+Exprl: Exprl SIM_E Expra {$$ = criaOpr(SIM_E, NULL, 2, $1, $3);}
+	| Exprl SIM_OU Expra {$$ = criaOpr(SIM_OU, NULL, 2, $1, $3);}
+	| SIM_NEGACAO Expra {$$ = criaOpr(SIM_NEGACAO, NULL, 1, $2);}
 	| Expra {$$ = $1;}
 	;
 %%
@@ -276,7 +278,7 @@ tipoNo *criaId(char *name, int tipo){
 	return no;
 }
 
-tipoNo *criaOpr(int opr, int nOps, ...){
+tipoNo *criaOpr(int opr, Repeticao *rep, int nOps, ...){
 	va_list ap;
 	tipoNo *no;
 	size_t tam_no = SIZEOF_TIPONO + sizeof(typeOpr) + (nOps - 1) * sizeof(tipoNo*);
@@ -284,8 +286,11 @@ tipoNo *criaOpr(int opr, int nOps, ...){
 		yyerror("Sem memória");
 	if ((no->opr.op = malloc(nOps * sizeof(tipoNo*))) == NULL)
 		yyerror("Sem memória");
+	if ((no->opr.rep = malloc(sizeof(Repeticao))) == NULL)
+		yyerror("Sem memória");
 
 	no->type = typeOpr;
+	no->opr.rep = rep;
 	no->opr.opr = opr;
 	no->opr.nOps = nOps;
 	va_start(ap, nOps);
@@ -316,6 +321,17 @@ Item* criaItem(tipoNo *arv){
 	i->prox = NULL;
 	i->arv = arv;
 	return i;
+}
+
+Repeticao* criaRepeticao(Item *cmds, Item *senao){
+	Repeticao *r = malloc(sizeof(Repeticao));
+	if (r == NULL){
+		printf("Error ao alocar memória para a Repetição");
+		exit(1);
+	}
+	r->cmds = cmds;
+	r->senao = senao;
+	return r;
 }
 
 Declaracao* criaDeclaracao(int tipo, Item *vars){
@@ -430,17 +446,148 @@ void printDeclaracoes(ListaDecl *decl){
 		printDeclaracoes(decl->prox);
 }
 
+void printNo(tipoNo *cmd){
+	switch(cmd->type){
+		case typeInt:
+			printf("%d", cmd->inteiro.val);
+			break;
+		case typeFloat:
+			printf("%f", cmd->real.val);
+			break;
+		case typeString:
+			printf("%s", cmd->string.str);
+			break;
+		case typeId:
+			printf("%s", cmd->id.name);
+			break;
+		case typeOpr:
+			switch(cmd->opr.opr){
+				case SIM_ADICAO:
+					printNo(cmd->opr.op[0]);
+					printf("+");
+					printNo(cmd->opr.op[1]);
+					break;
+				case SIM_MULTIPLICACAO:
+					printNo(cmd->opr.op[0]);
+					printf("*");
+					printNo(cmd->opr.op[1]);
+					break;
+				case SIM_SUBTRACAO:
+					printNo(cmd->opr.op[0]);
+					printf("-");
+					printNo(cmd->opr.op[1]);
+					break;
+				case SIM_DIVISAO:
+					printNo(cmd->opr.op[0]);
+					printf("/");
+					printNo(cmd->opr.op[1]);
+					break;
+				case SIM_IGUAL:
+					printNo(cmd->opr.op[0]);
+					printf("=");
+					printNo(cmd->opr.op[1]);
+					break;
+				case SIM_IGUALIGUAL:
+					printNo(cmd->opr.op[0]);
+					printf("==");
+					printNo(cmd->opr.op[1]);
+					break;
+				case SIM_DIFERENTE:
+					printNo(cmd->opr.op[0]);
+					printf("!=");
+					printNo(cmd->opr.op[1]);
+					break;
+				case SIM_MAIORQUE:
+					printNo(cmd->opr.op[0]);
+					printf(">");
+					printNo(cmd->opr.op[1]);
+					break;
+				case SIM_MENORQUE:
+					printNo(cmd->opr.op[0]);
+					printf("<");
+					printNo(cmd->opr.op[1]);
+					break;
+				case SIM_MAIOROUIGUAL:
+					printNo(cmd->opr.op[0]);
+					printf(">=");
+					printNo(cmd->opr.op[1]);
+					break;
+				case SIM_MENOROUIGUAL:
+					printNo(cmd->opr.op[0]);
+					printf("<=");
+					printNo(cmd->opr.op[1]);
+					break;
+				case SIM_E:
+					printNo(cmd->opr.op[0]);
+					printf("&&");
+					printNo(cmd->opr.op[1]);
+					break;
+				case SIM_OU:
+					printNo(cmd->opr.op[0]);
+					printf("||");
+					printNo(cmd->opr.op[1]);
+					break;
+				case SIM_NEGACAO:
+					printf("!");
+					printNo(cmd->opr.op[0]);
+					break;
+				case COM_RETORNO:
+					printf("return ");
+					printNo(cmd->opr.op[0]);
+					break;
+				case COM_SE:
+					printf("if(");
+					printNo(cmd->opr.op[0]);
+					printf("){\n");
+					printComandos(cmd->opr.rep->cmds);
+					printf("}");
+					break;
+				case COM_SENAO:
+					printf("if(");
+					printNo(cmd->opr.op[0]);
+					printf("){\n");
+					printComandos(cmd->opr.rep->cmds);
+					printf("}");
+					printf("else{\n");
+					printComandos(cmd->opr.rep->senao);
+					printf("}");
+					break;
+				case COM_ENQUANTO:
+					printf("while(");
+					printNo(cmd->opr.op[0]);
+					printf("){\n");
+					printComandos(cmd->opr.rep->cmds);
+					printf("}");
+					break;
+				case COM_IMPRIME:
+					printf("print(");
+					printNo(cmd->opr.op[0]);
+					printf(")");
+					break;
+				case COM_LER:
+					printf("read(");
+					printNo(cmd->opr.op[0]);
+					printf(")");
+					break;
+			}
+			break;
+	}
+}
+
 void printComandos(Item *cmds){
-	printf("%d %d;\n", cmds->arv->opr.opr, cmds->arv->opr.nOps);
+	printNo(cmds->arv);
+	printf(";\n");
 	if (cmds->prox != NULL)
 		printComandos(cmds->prox);
 }
 
 void printBloco(Bloco *blc){
+	printf("{\n");
 	if (blc->decl)
 		printDeclaracoes(blc->decl);
 	if (blc->cmds)
 		printComandos(blc->cmds);
+	printf("}\n");
 }
 
 void printFuncao(Funcao *f){
@@ -452,10 +599,9 @@ void printFuncao(Funcao *f){
 		printParametros(f->prms);
 	printf(")");
 
-	printf("{\n");
 	if (f->blc != NULL)
 		printBloco(f->blc);
-	printf("}");
+	
 
 	printf("\n");
 	if (f->prox != NULL)
