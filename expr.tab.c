@@ -1543,7 +1543,7 @@ yyreduce:
 
   case 3: /* Programa: BlocoPrincipal $end  */
 #line 93 "expr.y"
-                               {criaFuncao(285, NULL, NULL, (yyvsp[-1].bloco));}
+                               {criaFuncao(285, "main", NULL, (yyvsp[-1].bloco));}
 #line 1548 "expr.tab.c"
     break;
 
@@ -2273,10 +2273,7 @@ tipoNo *criaString(char *str){
 		yyerror("Sem memória");
 
 	no->type = typeString;
-	no->string.str = (char*)malloc(TAM_MAX_STRING);
-	if (no->string.str == NULL)
-		yyerror("Sem memória");
-	strcpy(no->string.str, str);
+	no->string.str = strdup(str);
 	return no;
 }
 
@@ -2287,10 +2284,7 @@ tipoNo *criaId(char *name, int tipo){
 		yyerror("Sem memória");
 	
 	no->type = typeId; 
-	no->id.name = (char*)malloc(TAM_MAX_NOMEVAR);
-	if (no->id.name == NULL)
-		yyerror("Sem memória");
-	strcpy(no->id.name, name);
+	no->id.name = strdup(name);
 	no->id.tipo = tipo;
 	return no;
 }
@@ -2300,6 +2294,8 @@ tipoNo *criaOpr(int opr, int nOps, ...){
 	tipoNo *no;
 	size_t tam_no = SIZEOF_TIPONO + sizeof(typeOpr) + (nOps - 1) * sizeof(tipoNo*);
 	if ((no = malloc(tam_no)) == NULL)
+		yyerror("Sem memória");
+	if ((no->opr.op = malloc(nOps * sizeof(tipoNo*))) == NULL)
 		yyerror("Sem memória");
 
 	no->type = typeOpr;
@@ -2386,10 +2382,7 @@ Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
 		exit(1);
 	}
 	f->tipo = getTipoId(tipo);
-	f->name = (char*)malloc(TAM_MAX_NOMEVAR);
-	if (f->name == NULL)
-		yyerror("Sem memória");
-	strcpy(f->name, nome);
+	f->name = strdup(nome);
 	f->syms = NULL;
 	f->prms = prms;
 	f->blc = blc;
