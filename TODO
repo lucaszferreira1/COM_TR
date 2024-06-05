@@ -1,16 +1,9 @@
-1. Resolver como os nós da declaração e parãmetros serão definidos.
-Desc: A parte de comandos já está em teoria pronta, agora é preciso resolver como será a estrutura de definição de parâmetros e declaração de múltiplas variáveis.
-Provavelmente terá de ser criada uma nova estrutura para facilitar nossa vida.
-Notas: (Lucas) Resolvi focar em conseguir gerar uma lista do programa inteiro primeiro e depois se preocupar com as tabelas de símbolos. 
+1. Fazer o sistema de tabelas de simbolos nas funções
+
+1.1. Consertar a chamada de funções
 
 
-2. Encontrar uma solução para o overwrite do #include "tipoNo.h" no arquivo expr.tab.h
-Sugestão: Adicionar shell script que adiciona o include.
+2. Traduzir a linguagem retornada para assembly
 
 
-3. Criar uma função para imprimir uma árvore
-Desc: Para realizar testes mais avançados iremos precisar de uma forma mais fácil e precisa de testar por isso é preciso imprimir as árvores geradas. 
-
-
-4. Resolver o problema do IF e WHILE com Bloco
-Desc: Não estudei o problema ainda.
+3. (Opcional) Refatorar o .y para que as funções no final do arquivo fiquem em um arquivo separado para melhor organização
