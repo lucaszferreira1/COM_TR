@@ -97,7 +97,7 @@ extern int yydebug;
 #include "tipoNo.h"
 union YYSTYPE
 {
-#line 31 "expr.y"
+#line 33 "expr.y"
 
 	float real;
 	int integer;

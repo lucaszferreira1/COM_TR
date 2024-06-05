@@ -17,7 +17,7 @@ typedef struct{
 
 typedef struct{
     char *name; // Nome da Variavel
-    int tipo; // Tipo da Variavel
+    eTipo tipo; // Tipo da Variavel
 } idTipoNo;
 
 typedef struct{
@@ -44,26 +44,27 @@ typedef struct Item{
 }Item;
 
 typedef struct Declaracao{
-    eTipo tipo;
-    Item *vars;
+    eTipo tipo; // Tipo
+    Item *vars; // Variaveis
 }Declaracao;
 
 typedef struct ListaDecl{
-    struct ListaDecl *prox;
-    Declaracao *decl;
+    struct ListaDecl *prox; // Proxima declaracao na lista
+    Declaracao *decl; // Declaracao
 }ListaDecl;
 
 typedef struct Bloco{
-    ListaDecl *decl;
-    Item *cmds;
+    ListaDecl *decl; // Declaracoes
+    Item *cmds; // Comandos
 }Bloco;
 
 typedef struct Funcao{
+    struct Funcao *prox; // Proxima funcao na lista
     eTipo tipo; // Tipo
     char *name; // Nome
     Item *syms; // Simbolos
     Item *prms; // Parametros
-    Bloco *blc;
+    Bloco *blc; // Bloco
 }Funcao;
 
 #endif
