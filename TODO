@@ -3,7 +3,10 @@
 1.1. Consertar a chamada de funções
 
 
-2. Traduzir a linguagem retornada para assembly
+2. Análise Semântica (Ver Atividade no Moodle)
 
 
-3. (Opcional) Refatorar o .y para que as funções no final do arquivo fiquem em um arquivo separado para melhor organização
+3. Traduzir a linguagem retornada para assembly
+
+
+4. (Opcional) Refatorar o .y para que as funções no final do arquivo fiquem em um arquivo separado para melhor organização
