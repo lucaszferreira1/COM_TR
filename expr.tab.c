@@ -2320,7 +2320,7 @@ tipoNo *criaId(char *name, int tipo){
 	if ((no = malloc(tam_no)) == NULL)
 		yyerror("Sem memória");
 	
-	no->type = typeId; 
+	no->type = typeId;
 	no->id.name = strdup(name);
 	no->id.tipo = getTipoId(tipo);
 	if (tipo != 1){
@@ -2534,12 +2534,16 @@ void printNo(tipoNo *cmd){
 				case 1: // Chama Função
 					printNo(cmd->opr.op[0]);
 					printf("(");
-					/* if (cmd->opr.op[1])
-						printNo(cmd->opr[1]); */
+					if (cmd->opr.op[1])
+						printNo(cmd->opr.op[1]);
 					printf(")");
 					break;
 				case 2: // Parâmetros da Função
-
+					printNo(cmd->opr.op[0]);
+					if (cmd->opr.op[1]){
+						printf(", ");
+						printNo(cmd->opr.op[1]);
+					}
 					break;
 				case SIM_ADICAO:
 					printNo(cmd->opr.op[0]);
@@ -2670,8 +2674,6 @@ void printBloco(Bloco *blc){
 }
 
 void printFuncao(Funcao *f){
-	printVariaveis(f->syms);
-	printf("\n");
 	printf("%s ", getIdTipo(f->tipo));
 	printf("%s", f->name);
 	
