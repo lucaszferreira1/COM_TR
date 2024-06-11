@@ -95,9 +95,10 @@ extern int yydebug;
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 #include "tipoNo.h"
+#include "tipoNo.h"
 union YYSTYPE
 {
-#line 35 "expr.y"
+#line 37 "expr.y"
 
 	float real;
 	int integer;

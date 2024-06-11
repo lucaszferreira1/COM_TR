@@ -1,14 +1,9 @@
-int teste(int a){
-    print("Teste");
+int teste(int h){
+    int i;
 }
 
 {
     int a, b, c;
-    a = 2;
-    if (a == a){
-        a = 2;
-        print(a);
-    }else{
-        b = 29 - 23948 / 23 * 24;
-    }
+    a = teste();
+    b = ti();
 }

@@ -18,6 +18,7 @@ typedef struct{
 typedef struct{
     char *name; // Nome da Variavel
     eTipo tipo; // Tipo da Variavel
+    int i;
 } idTipoNo;
 
 typedef struct{
@@ -66,6 +67,7 @@ typedef struct Bloco{
 
 typedef struct Funcao{
     struct Funcao *prox; // Proxima funcao na lista
+    int i;
     eTipo tipo; // Tipo
     char *name; // Nome
     Item *syms; // Simbolos

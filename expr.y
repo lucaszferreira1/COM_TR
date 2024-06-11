@@ -30,6 +30,8 @@ void AddFuncao(Funcao *f1, Funcao *f2);
 void printFuncao(Funcao *f);
 void printComandos(Item *cmds);
 
+Item *tbl_sim;
+
 %}
 
 %union {
@@ -94,7 +96,7 @@ void printComandos(Item *cmds);
 
 %%
 Programa: ListaFuncoes BlocoPrincipal YYEOF {AddFuncao($1, criaFuncao(TIPO_INT, "main", NULL, $2));printFuncao($1);}
-	| BlocoPrincipal YYEOF {criaFuncao(285, "main", NULL, $1);}
+	| BlocoPrincipal YYEOF {printFuncao(criaFuncao(285, "main", NULL, $1));}
 	| YYEOF {exit(0);}
 	;
 ListaFuncoes: ListaFuncoes Funcao {AddFuncao($1, $2);$$ = $1;}
@@ -165,8 +167,8 @@ ChamadaProc: ChamaFuncao SIM_FIM {$$ = $1;}
 ChamaFuncao: TID SIM_ABREPARENTESES ListaParametros SIM_FECHAPARENTESES {$$ = criaOpr(1, NULL, 2, criaId($1, 0), $3);}
 	| TID SIM_ABREPARENTESES SIM_FECHAPARENTESES {$$ = criaOpr(1, NULL, 1, criaId($1, 0));}
 	;
-ListaParametros: Expra SIM_VIRGULA ListaParametros {$$ = criaOpr(1, NULL, 2, $1, $3);}
-	| TID SIM_VIRGULA ListaParametros {$$ = criaOpr(1, NULL, 2, criaId($1, 0), $3);}
+ListaParametros: Expra SIM_VIRGULA ListaParametros {$$ = criaOpr(2, NULL, 2, $1, $3);}
+	| TID SIM_VIRGULA ListaParametros {$$ = criaOpr(2, NULL, 2, criaId($1, 0), $3);}
 	| Expra {$$ = $1;}
 	| TID {$$ = criaId($1, 0);}
 	;
@@ -233,6 +235,15 @@ char *getIdTipo(eTipo v){
 		return "void";
 }
 
+int inFila(Item *f, char *name){
+	while(f){
+		if (!strcmp(f->arv->id.name, name))
+			return 1;
+		f = f->prox;
+	}
+	return 0;
+}
+
 tipoNo *criaInteger(int val){
 	tipoNo *no;
 	size_t tam_no = SIZEOF_TIPONO + sizeof(typeInt);
@@ -275,6 +286,12 @@ tipoNo *criaId(char *name, int tipo){
 	no->type = typeId; 
 	no->id.name = strdup(name);
 	no->id.tipo = getTipoId(tipo);
+	if (tbl_sim == NULL){
+		tbl_sim = criaItem(no);
+	}else{
+		if (!inFila(tbl_sim, no->id.name))
+			AddItem(tbl_sim, criaItem(no));
+	}
 	return no;
 }
 
@@ -318,6 +335,9 @@ Item* criaItem(tipoNo *arv){
 		printf("Error ao alocar memória para o Item");
 		exit(1);
 	}
+	if (arv->type == typeId)
+		arv->id.i = 0;
+	
 	i->prox = NULL;
 	i->arv = arv;
 	return i;
@@ -342,6 +362,11 @@ Declaracao* criaDeclaracao(int tipo, Item *vars){
 	}
 	d->tipo = getTipoId(tipo);
 	d->vars = vars;
+	Item *var = d->vars;
+	while (var != NULL){
+		var->arv->type = getTipoId(tipo);
+		var = var->prox;
+	}
 	return d;
 }
 
@@ -373,9 +398,11 @@ Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
 		printf("Error ao alocar memória para a função");
 		exit(1);
 	}
+	f->i = 0;
 	f->tipo = getTipoId(tipo);
 	f->name = strdup(nome);
-	f->syms = NULL;
+	f->syms = tbl_sim;
+	tbl_sim = NULL;
 	f->prms = prms;
 	f->blc = blc;
 	return f;
@@ -389,6 +416,8 @@ void AddItem(Item *o, Item *ad){
 		printf("Erro ao alocar memória para o próximo item");
 		exit(1);
 	}
+	if (o->arv->type == typeId && ad->arv->type == typeId)
+		ad->arv->id.i = o->arv->id.i + 1;
 	o->prox = ad;
 }
 
@@ -411,6 +440,7 @@ void AddFuncao(Funcao *f1, Funcao *f2){
 		printf("Erro ao alocar memória para a próxima função");
 		exit(1);
 	}
+	f2->i = f1->i + 1;
 	f1->prox = f2;
 	f2->prox = NULL;
 }
@@ -462,6 +492,16 @@ void printNo(tipoNo *cmd){
 			break;
 		case typeOpr:
 			switch(cmd->opr.opr){
+				case 1: // Chama Função
+					printNo(cmd->opr.op[0]);
+					printf("(");
+					/* if (cmd->opr.op[1])
+						printNo(cmd->opr[1]); */
+					printf(")");
+					break;
+				case 2: // Parâmetros da Função
+
+					break;
 				case SIM_ADICAO:
 					printNo(cmd->opr.op[0]);
 					printf("+");
@@ -591,6 +631,8 @@ void printBloco(Bloco *blc){
 }
 
 void printFuncao(Funcao *f){
+	printVariaveis(f->syms);
+	printf("\n");
 	printf("%s ", getIdTipo(f->tipo));
 	printf("%s", f->name);
 	
