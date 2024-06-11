@@ -1,12 +1,13 @@
-1. Fazer o sistema de tabelas de simbolos nas funções
+1. Estudar a forma como será realizada a busca nas tabelas de símbolos, pois temos os índices das funções, e as tabelas de símbolos dentro das funções, o que pode vir a ser esquisito.
+Sugest: Talvez seja possível só pesquisar pelo id primeiro na tabela de símbolos da função e depois procurar nas funções, pesquisando pelo nome.
 
-1.1. Consertar a chamada de funções
-
-
-2. Análise Semântica (Ver Atividade no Moodle)
+2. Consertar a impressão das chamadas de função (Parâmetros)
 
 
-3. Traduzir a linguagem retornada para assembly
+3. Análise Semântica (Ver Atividade no Moodle)
 
 
-4. (Opcional) Refatorar o .y para que as funções no final do arquivo fiquem em um arquivo separado para melhor organização
+4. Traduzir a linguagem retornada para assembly
+
+
+5. (Opcional) Refatorar o .y para que as funções no final do arquivo fiquem em um arquivo separado para melhor organização

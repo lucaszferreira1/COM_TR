@@ -164,8 +164,8 @@ CmdRead: COM_LER SIM_ABREPARENTESES TID SIM_FECHAPARENTESES SIM_FIM {$$ = criaOp
 	;
 ChamadaProc: ChamaFuncao SIM_FIM {$$ = $1;}
 	;
-ChamaFuncao: TID SIM_ABREPARENTESES ListaParametros SIM_FECHAPARENTESES {$$ = criaOpr(1, NULL, 2, criaId($1, 0), $3);}
-	| TID SIM_ABREPARENTESES SIM_FECHAPARENTESES {$$ = criaOpr(1, NULL, 1, criaId($1, 0));}
+ChamaFuncao: TID SIM_ABREPARENTESES ListaParametros SIM_FECHAPARENTESES {$$ = criaOpr(1, NULL, 2, criaId($1, 1), $3);}
+	| TID SIM_ABREPARENTESES SIM_FECHAPARENTESES {$$ = criaOpr(1, NULL, 1, criaId($1, 1));}
 	;
 ListaParametros: Expra SIM_VIRGULA ListaParametros {$$ = criaOpr(2, NULL, 2, $1, $3);}
 	| TID SIM_VIRGULA ListaParametros {$$ = criaOpr(2, NULL, 2, criaId($1, 0), $3);}
@@ -286,11 +286,13 @@ tipoNo *criaId(char *name, int tipo){
 	no->type = typeId; 
 	no->id.name = strdup(name);
 	no->id.tipo = getTipoId(tipo);
-	if (tbl_sim == NULL){
-		tbl_sim = criaItem(no);
-	}else{
-		if (!inFila(tbl_sim, no->id.name))
-			AddItem(tbl_sim, criaItem(no));
+	if (tipo != 1){
+		if (tbl_sim == NULL){
+			tbl_sim = criaItem(no);
+		}else{
+			if (!inFila(tbl_sim, no->id.name))
+				AddItem(tbl_sim, criaItem(no));
+		}
 	}
 	return no;
 }

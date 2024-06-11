@@ -1831,13 +1831,13 @@ yyreduce:
 
   case 50: /* ChamaFuncao: TID SIM_ABREPARENTESES ListaParametros SIM_FECHAPARENTESES  */
 #line 167 "expr.y"
-                                                                        {(yyval.nPtr) = criaOpr(1, NULL, 2, criaId((yyvsp[-3].id), 0), (yyvsp[-1].nPtr));}
+                                                                        {(yyval.nPtr) = criaOpr(1, NULL, 2, criaId((yyvsp[-3].id), 1), (yyvsp[-1].nPtr));}
 #line 1836 "expr.tab.c"
     break;
 
   case 51: /* ChamaFuncao: TID SIM_ABREPARENTESES SIM_FECHAPARENTESES  */
 #line 168 "expr.y"
-                                                     {(yyval.nPtr) = criaOpr(1, NULL, 1, criaId((yyvsp[-2].id), 0));}
+                                                     {(yyval.nPtr) = criaOpr(1, NULL, 1, criaId((yyvsp[-2].id), 1));}
 #line 1842 "expr.tab.c"
     break;
 
@@ -2323,11 +2323,13 @@ tipoNo *criaId(char *name, int tipo){
 	no->type = typeId; 
 	no->id.name = strdup(name);
 	no->id.tipo = getTipoId(tipo);
-	if (tbl_sim == NULL){
-		tbl_sim = criaItem(no);
-	}else{
-		if (!inFila(tbl_sim, no->id.name))
-			AddItem(tbl_sim, criaItem(no));
+	if (tipo != 1){
+		if (tbl_sim == NULL){
+			tbl_sim = criaItem(no);
+		}else{
+			if (!inFila(tbl_sim, no->id.name))
+				AddItem(tbl_sim, criaItem(no));
+		}
 	}
 	return no;
 }
