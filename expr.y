@@ -30,6 +30,7 @@ void AddFuncao(Funcao *f1, Funcao *f2);
 void printFuncao(Funcao *f);
 void printComandos(Item *cmds);
 
+Item *tbl_fun;
 Item *tbl_sim;
 
 %}
@@ -127,8 +128,8 @@ Tipo: TIPO_INT {$$ = TIPO_INT;}
 	| TIPO_STRING {$$ = TIPO_STRING;}
 	| TIPO_FLOAT {$$ = TIPO_FLOAT;}
 	;
-ListaId: ListaId SIM_VIRGULA TID {AddItem($1, criaItem(criaId($3, 0)));$$ = $1;}
-	| TID {$$ = criaItem(criaId($1, 0));}
+ListaId: ListaId SIM_VIRGULA TID {AddItem($1, criaItem(criaId($3, 2)));$$ = $1;}
+	| TID {$$ = criaItem(criaId($1, 2));}
 	;
 Bloco: SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES {$$ = $2;}
 	| SIM_ABRECHAVES SIM_FECHACHAVES {$$ = NULL;}
@@ -211,7 +212,29 @@ int yyerror (const char *str)
 {
 	fprintf(stderr, "%s\n", str);
 	
-} 		 
+}
+
+int lookupIndexId(char* n){
+	Item *i = tbl_sim;
+	while(i != NULL){
+		if (!strcmp(i->arv->id.name, n))
+			return i->arv->id.i;
+		i = i->prox;
+	}
+	printf("Variável %s não foi encontrada.\n", n);
+	exit(1);
+}
+
+int lookupIndexFunc(char* n){
+	Item *i = tbl_fun;
+	while(i != NULL){
+		if (!strcmp(i->arv->id.name, n))
+			return i->arv->id.i;
+		i = i->prox;
+	}
+	printf("Função %s não foi encontrada.\n", n);
+	exit(1);
+}
 
 eTipo getTipoId(int v){
 	if (v == TIPO_INT)
@@ -286,14 +309,23 @@ tipoNo *criaId(char *name, int tipo){
 	no->type = typeId;
 	no->id.name = strdup(name);
 	no->id.tipo = getTipoId(tipo);
-	if (tipo != 1){
+	if (tipo == 0){
+		no->id.i = lookupIndexId(name);
+	}else if (tipo == 1){
+		no->id.i = lookupIndexFunc(name);
+	} else if (tipo == 2){
 		if (tbl_sim == NULL){
 			tbl_sim = criaItem(no);
 		}else{
-			if (!inFila(tbl_sim, no->id.name))
+			if (!inFila(tbl_sim, no->id.name)){
 				AddItem(tbl_sim, criaItem(no));
+			} else {
+				printf("Variável %s já foi declarada anteriormente", name);
+				exit(1);
+			}
 		}
 	}
+	
 	return no;
 }
 
@@ -399,6 +431,16 @@ Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
 	if (f == NULL){
 		printf("Error ao alocar memória para a função");
 		exit(1);
+	}
+	if (tbl_fun == NULL){
+		tbl_fun = criaItem(criaId(nome, tipo));
+	} else{
+		if (!inFila(tbl_fun, nome)){
+			AddItem(tbl_fun, criaItem(criaId(nome, tipo)));
+		} else{
+			printf("Função %s já foi declarada anteriormente", nome);
+			exit(1);
+		}
 	}
 	f->i = 0;
 	f->tipo = getTipoId(tipo);

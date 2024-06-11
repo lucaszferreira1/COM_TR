@@ -3,7 +3,6 @@ int teste(int h){
 }
 
 {
-    int a, b, c;
-    a = teste(1+1, d);
-    b = ti();
+    int a, b, c, i;
+    teste(1);
 }
