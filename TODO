@@ -1,21 +1,15 @@
-1. Estudar a forma como será realizada a busca nas tabelas de símbolos, pois temos os índices das funções, e as tabelas de símbolos dentro das funções, o que pode vir a ser esquisito.
-Sugest: Talvez seja possível só pesquisar pelo id primeiro na tabela de símbolos da função e depois procurar nas funções, pesquisando pelo nome.
-
-2. Consertar a impressão das chamadas de função (Parâmetros)
+1. Pensar em uma solução para o problema da recursividade
 
 
-3. Análise Semântica (Ver Atividade no Moodle)
+2. Análise Semântica (Ver Atividade no Moodle)
 
 
-4. Traduzir a linguagem retornada para assembly
+3. Traduzir a linguagem retornada para assembly
 
 
-5. (Opcional) Refatorar o .y para que as funções no final do arquivo fiquem em um arquivo separado para melhor organização
+4. (Opcional) Refatorar o .y para que as funções no final do arquivo fiquem em um arquivo separado para melhor organização
 
 
-•Em expressões binárias aritméticas ou relacionais quando um dos operandos for
-do tipo int e o outro for do tipo double o operando do tipo int deve ser convertido
-a double.
 
 •Quando uma variável declarada como double receber o valor de uma expressão
 de tipo int, o resultado da expressão deve ser convertido para o tipo double. Isso
@@ -28,11 +22,6 @@ deve ser emitida uma mensagem de advertência. Isso é válido para comandos de
 atribuição, passagem de parâmetros em chamadas de funções e para o retorno de
 funções.
 
-•Expressões com tipos incompatíveis devem emitir mensagens de erro.
-
 •Chamadas de funções com número de parâmetros errados ou com parâmetros
 formais e reais com tipos conflitantes devem ocasionar a emissão de mensagens
 de erro.
-
-•Atribuição de variáveis ou retorno de funções com tipos conflitantes devem
-ocasionar a emissão de mensagens de erro.

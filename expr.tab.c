@@ -2296,6 +2296,8 @@ char *getIdTipo(eTipo v){
 		return "void";
 	else if (v == typeId)
 		return "id";
+	else if (v == typeOpr)
+		return "opr";
 }
 
 int inFila(Item *f, char *name){
@@ -2352,7 +2354,7 @@ tipoNo *criaId(char *name, int tipo){
 		no = lookupId(name);
 	}else if (tipo == 1){
 		no = lookupFunc(name);
-	} else if (tipo == 2){
+	} else {
 		no->id.tipo = getTipoId(tp_sim);
 		if (tbl_sim == NULL){
 			tbl_sim = criaItem(no);
@@ -2364,7 +2366,9 @@ tipoNo *criaId(char *name, int tipo){
 				exit(1);
 			}
 		}
-	}
+	} 
+	printf("%d %s %s\n", no->id.i, getIdTipo(no->id.tipo), no->id.name);
+	
 	return no;
 }
 
@@ -2388,32 +2392,36 @@ tipoNo *criaOpr(int opr, Repeticao *rep, int nOps, ...){
 		no->opr.op[i] = va_arg(ap, tipoNo*);
 	}
 	va_end(ap);
-
-	if (opr != SIM_E && opr != SIM_OU && opr != SIM_NEGACAO){
-		if (no->opr.op[0]->id.tipo == typeString){
-			printf("Strings só podem ser usadas em expressões relacionais\n");
-			exit(1);
-		}
-		if (no->opr.op[1] != NULL){
-			if (no->opr.op[1]->id.tipo == typeString){
-				printf("Strings só podem ser usadas em expressões relacionais\n");
-				exit(1);
-			}
-		}
-	}
-
+	
 	if (opr == SIM_IGUAL){
-		if (no->opr.op[0]->id.tipo == typeInt && no->opr.op[1]->id.tipo == typeFloat){
-			printf("Aviso:Tipo float sendo atribuído a tipo int\n");
-		} else if (no->opr.op[0]->id.tipo == typeFloat && no->opr.op[1]->id.tipo == typeInt){
-			printf("Aviso:Tipo int sendo atribuído a tipo float\n");
+		if (no->opr.op[1]->type == typeOpr){ // Operação
+			if (no->opr.op[1]->opr.opr == 1){ // Chama Função
+				if (no->opr.op[0]->id.tipo != no->opr.op[1]->opr.op[0]->id.tipo){
+					printf("Retorno %s da função %s não pode ser atribuído à variável %s a qual tem tipo %s\n", getIdTipo(no->opr.op[1]->opr.op[0]->id.tipo), no->opr.op[1]->opr.op[0]->id.name, no->opr.op[0]->id.name, getIdTipo(no->opr.op[0]->id.tipo)); 
+					exit(1);
+				}
+			}
+		} else if (no->opr.op[0]->id.tipo == typeString || no->opr.op[1]->id.tipo == typeString){
+			printf("Não é possível atribuir %s á %s", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
+			exit(1);
+		} else if (no->opr.op[0]->id.tipo != no->opr.op[1]->id.tipo){
+			printf("Aviso:Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
 		}
 	} else if (opr == SIM_E || opr == SIM_OU){
 		if ((no->opr.op[0]->id.tipo == typeString && no->opr.op[1]->id.tipo != typeString) || (no->opr.op[0]->id.tipo != typeString && no->opr.op[1]->id.tipo == typeString)){
 			printf("Os dois operandos de operações relacionais devem ser strings\n");
 			exit(1);
 		}
-	} else if (opr == SIM_ADICAO || opr == SIM_SUBTRACAO || opr == SIM_MULTIPLICACAO || opr == SIM_DIVISAO){
+	} else if (opr == SIM_ADICAO || opr == SIM_SUBTRACAO || opr == SIM_MULTIPLICACAO || opr == SIM_DIVISAO || opr == SIM_IGUALIGUAL || opr == SIM_DIFERENTE || opr == SIM_MAIORQUE || opr == SIM_MENORQUE || opr == SIM_MAIOROUIGUAL || opr == SIM_MENOROUIGUAL){
+		if (no->opr.op[0]->id.tipo == typeString){
+			printf("Strings só podem ser usadas em expressões relacionais\n");
+			exit(1);
+		} else if (no->opr.op[1] != NULL){
+			if (no->opr.op[1]->id.tipo == typeString){
+				printf("Strings só podem ser usadas em expressões relacionais\n");
+				exit(1);
+			}
+		}
 		if (no->opr.op[0]->type == typeInt && no->opr.op[1]->type == typeFloat){
 			no->opr.op[0]->type = typeFloat;
 			no->opr.op[0]->real.val = (float)no->opr.op[0]->inteiro.val;
@@ -2519,8 +2527,8 @@ Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
 	f->tipo = getTipoId(tipo);
 	f->name = strdup(nome);
 	f->syms = tbl_sim;
-	f->i = 0;
 	tbl_sim = NULL;
+	f->i = 0;
 	f->prms = prms;
 	f->blc = blc;
 	return f;
