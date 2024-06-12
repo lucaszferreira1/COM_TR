@@ -1,8 +1,7 @@
-int teste(int h){
-    int i;
-}
-
 {
-    int a, b, c, i;
-    teste(1);
+    int a, c;
+    float b;
+    string g, h;
+    
+    a = 1 + 1.0;
 }

@@ -32,6 +32,7 @@ void printComandos(Item *cmds);
 
 Item *tbl_fun;
 Item *tbl_sim;
+int tp_sim;
 
 %}
 
@@ -124,9 +125,9 @@ Declaracoes: Declaracoes Declaracao {AddListaDecl($1, criaListaDecl($2));$$ = $1
 	;
 Declaracao: Tipo ListaId SIM_FIM {$$ = criaDeclaracao($1, $2);}
 	;
-Tipo: TIPO_INT {$$ = TIPO_INT;}
-	| TIPO_STRING {$$ = TIPO_STRING;}
-	| TIPO_FLOAT {$$ = TIPO_FLOAT;}
+Tipo: TIPO_INT {tp_sim = TIPO_INT;$$ = TIPO_INT;}
+	| TIPO_STRING {tp_sim = TIPO_STRING;$$ = TIPO_STRING;}
+	| TIPO_FLOAT {tp_sim = TIPO_FLOAT;$$ = TIPO_FLOAT;}
 	;
 ListaId: ListaId SIM_VIRGULA TID {AddItem($1, criaItem(criaId($3, 2)));$$ = $1;}
 	| TID {$$ = criaItem(criaId($1, 2));}
@@ -214,22 +215,22 @@ int yyerror (const char *str)
 	
 }
 
-int lookupIndexId(char* n){
+tipoNo* lookupId(char* n){
 	Item *i = tbl_sim;
 	while(i != NULL){
 		if (!strcmp(i->arv->id.name, n))
-			return i->arv->id.i;
+			return i->arv;
 		i = i->prox;
 	}
 	printf("Variável %s não foi encontrada.\n", n);
 	exit(1);
 }
 
-int lookupIndexFunc(char* n){
+tipoNo* lookupFunc(char* n){
 	Item *i = tbl_fun;
 	while(i != NULL){
 		if (!strcmp(i->arv->id.name, n))
-			return i->arv->id.i;
+			return i->arv;
 		i = i->prox;
 	}
 	printf("Função %s não foi encontrada.\n", n);
@@ -256,6 +257,8 @@ char *getIdTipo(eTipo v){
 		return "string";
 	else if (v == typeVoid)
 		return "void";
+	else if (v == typeId)
+		return "id";
 }
 
 int inFila(Item *f, char *name){
@@ -305,15 +308,15 @@ tipoNo *criaId(char *name, int tipo){
 	size_t tam_no = SIZEOF_TIPONO + sizeof(typeId);
 	if ((no = malloc(tam_no)) == NULL)
 		yyerror("Sem memória");
-	
 	no->type = typeId;
 	no->id.name = strdup(name);
 	no->id.tipo = getTipoId(tipo);
 	if (tipo == 0){
-		no->id.i = lookupIndexId(name);
+		no = lookupId(name);
 	}else if (tipo == 1){
-		no->id.i = lookupIndexFunc(name);
+		no = lookupFunc(name);
 	} else if (tipo == 2){
+		no->id.tipo = getTipoId(tp_sim);
 		if (tbl_sim == NULL){
 			tbl_sim = criaItem(no);
 		}else{
@@ -325,7 +328,6 @@ tipoNo *criaId(char *name, int tipo){
 			}
 		}
 	}
-	
 	return no;
 }
 
@@ -349,6 +351,41 @@ tipoNo *criaOpr(int opr, Repeticao *rep, int nOps, ...){
 		no->opr.op[i] = va_arg(ap, tipoNo*);
 	}
 	va_end(ap);
+
+	if (opr != SIM_E && opr != SIM_OU && opr != SIM_NEGACAO){
+		if (no->opr.op[0]->id.tipo == typeString){
+			printf("Strings só podem ser usadas em expressões relacionais\n");
+			exit(1);
+		}
+		if (no->opr.op[1] != NULL){
+			if (no->opr.op[1]->id.tipo == typeString){
+				printf("Strings só podem ser usadas em expressões relacionais\n");
+				exit(1);
+			}
+		}
+	}
+
+	if (opr == SIM_IGUAL){
+		if (no->opr.op[0]->id.tipo == typeInt && no->opr.op[1]->id.tipo == typeFloat){
+			printf("Aviso:Tipo float sendo atribuído a tipo int\n");
+		} else if (no->opr.op[0]->id.tipo == typeFloat && no->opr.op[1]->id.tipo == typeInt){
+			printf("Aviso:Tipo int sendo atribuído a tipo float\n");
+		}
+	} else if (opr == SIM_E || opr == SIM_OU){
+		if ((no->opr.op[0]->id.tipo == typeString && no->opr.op[1]->id.tipo != typeString) || (no->opr.op[0]->id.tipo != typeString && no->opr.op[1]->id.tipo == typeString)){
+			printf("Os dois operandos de operações relacionais devem ser strings\n");
+			exit(1);
+		}
+	} else if (opr == SIM_ADICAO || opr == SIM_SUBTRACAO || opr == SIM_MULTIPLICACAO || opr == SIM_DIVISAO){
+		if (no->opr.op[0]->type == typeInt && no->opr.op[1]->type == typeFloat){
+			no->opr.op[0]->type = typeFloat;
+			no->opr.op[0]->real.val = (float)no->opr.op[0]->inteiro.val;
+		} else if (no->opr.op[0]->type == typeFloat && no->opr.op[1]->type == typeInt){
+			no->opr.op[1]->type = typeFloat;
+			no->opr.op[1]->real.val = (float)no->opr.op[1]->inteiro.val;
+		}
+	}
+
 	return no;
 }
 
@@ -369,8 +406,6 @@ Item* criaItem(tipoNo *arv){
 		printf("Error ao alocar memória para o Item");
 		exit(1);
 	}
-	if (arv->type == typeId)
-		arv->id.i = 0;
 	
 	i->prox = NULL;
 	i->arv = arv;
@@ -398,7 +433,8 @@ Declaracao* criaDeclaracao(int tipo, Item *vars){
 	d->vars = vars;
 	Item *var = d->vars;
 	while (var != NULL){
-		var->arv->type = getTipoId(tipo);
+		var->arv->type = typeId;
+		var->arv->id.tipo = getTipoId(tipo);
 		var = var->prox;
 	}
 	return d;
@@ -434,6 +470,7 @@ Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
 	}
 	if (tbl_fun == NULL){
 		tbl_fun = criaItem(criaId(nome, tipo));
+		tbl_fun->arv->id.i = 0;
 	} else{
 		if (!inFila(tbl_fun, nome)){
 			AddItem(tbl_fun, criaItem(criaId(nome, tipo)));
@@ -442,10 +479,10 @@ Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
 			exit(1);
 		}
 	}
-	f->i = 0;
 	f->tipo = getTipoId(tipo);
 	f->name = strdup(nome);
 	f->syms = tbl_sim;
+	f->i = 0;
 	tbl_sim = NULL;
 	f->prms = prms;
 	f->blc = blc;

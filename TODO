@@ -28,9 +28,6 @@ deve ser emitida uma mensagem de advertência. Isso é válido para comandos de
 atribuição, passagem de parâmetros em chamadas de funções e para o retorno de
 funções.
 
-•O tipo string pode ocorrer apenas em expressões relacionais, os dois operandos
-devem ser do mesmo tipo, caso contrário uma mensagem de erro deve ser emitida.
-
 •Expressões com tipos incompatíveis devem emitir mensagens de erro.
 
 •Chamadas de funções com número de parâmetros errados ou com parâmetros
