@@ -67,9 +67,7 @@ typedef struct Bloco{
 
 typedef struct Funcao{
     struct Funcao *prox; // Proxima funcao na lista
-    int i;
-    eTipo tipo; // Tipo
-    char *name; // Nome
+    tipoNo *no;
     Item *syms; // Simbolos
     Item *prms; // Parametros
     Bloco *blc; // Bloco

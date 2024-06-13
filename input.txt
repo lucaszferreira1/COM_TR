@@ -1,14 +1,15 @@
-int fat(int a){
+float fat(int a, int c, int d){
     int b;
-    if (a == 0){
-        return a;
-    }
-    a = a + fat(a-1);
+    fat(b, 2, 2);
+}
+
+int x(){
+    x();
 }
 
 {
     int a;
     string b;
-
+    fat(a, a, a);
     a = 1+1;
 }
