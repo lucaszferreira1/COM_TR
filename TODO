@@ -1,4 +1,4 @@
-1. Pensar em uma solução para o problema da recursividade
+1. TESTES
 
 
 2. Análise Semântica (Ver Atividade no Moodle)
@@ -21,7 +21,3 @@ double, o resultado da expressão deve ser convertido para o tipo int, nesse cas
 deve ser emitida uma mensagem de advertência. Isso é válido para comandos de
 atribuição, passagem de parâmetros em chamadas de funções e para o retorno de
 funções.
-
-•Chamadas de funções com número de parâmetros errados ou com parâmetros
-formais e reais com tipos conflitantes devem ocasionar a emissão de mensagens
-de erro.
