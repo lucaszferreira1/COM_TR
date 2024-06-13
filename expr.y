@@ -333,70 +333,79 @@ void comparaParametros(char* n, Item* prms, tipoNo *op){
 }
 
 void detectaErros(int opr, tipoNo *no){
-	if (opr == SIM_IGUAL){
-		if (no->opr.op[1]->type == typeOpr){ // Operação
-			if (no->opr.op[1]->opr.opr == 1){ // Chama Função
-				if (no->opr.op[0]->id.tipo != no->opr.op[1]->opr.op[0]->id.tipo){
-					printf("Retorno %s da função %s não pode ser atribuído à variável %s a qual tem tipo %s\n", getIdTipo(no->opr.op[1]->opr.op[0]->id.tipo), no->opr.op[1]->opr.op[0]->id.name, no->opr.op[0]->id.name, getIdTipo(no->opr.op[0]->id.tipo)); 
-					exit(1);
+	if (no->type == typeOpr){
+		for (int i=0;i<no->opr.nOps;i++){
+			printf("%d\n", no->opr.opr);
+			detectaErros(opr, no->opr.op[i]);
+		}
+	
+		if (opr == SIM_IGUAL){
+			if (no->opr.op[1]->type == typeOpr){ // Operação
+				if (no->opr.op[1]->opr.opr == 1){ // Chama Função
+					if (no->opr.op[0]->id.tipo != no->opr.op[1]->opr.op[0]->id.tipo){
+						printf("Retorno %s da função %s não pode ser atribuído à variável %s a qual tem tipo %s\n", getIdTipo(no->opr.op[1]->opr.op[0]->id.tipo), no->opr.op[1]->opr.op[0]->id.name, no->opr.op[0]->id.name, getIdTipo(no->opr.op[0]->id.tipo)); 
+						exit(1);
+					}
 				}
+			} else if (no->opr.op[0]->id.tipo == typeString || no->opr.op[1]->id.tipo == typeString){
+				printf("Não é possível atribuir %s á %s", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
+				exit(1);
+			} else if (no->opr.op[0]->id.tipo != no->opr.op[1]->id.tipo){
+				printf("Aviso:Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
 			}
-		} else if (no->opr.op[0]->id.tipo == typeString || no->opr.op[1]->id.tipo == typeString){
-			printf("Não é possível atribuir %s á %s", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
-			exit(1);
-		} else if (no->opr.op[0]->id.tipo != no->opr.op[1]->id.tipo){
-			printf("Aviso:Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
-		}
-	} else if (opr == SIM_E || opr == SIM_OU){
-		if ((no->opr.op[0]->id.tipo == typeString && no->opr.op[1]->id.tipo != typeString) || (no->opr.op[0]->id.tipo != typeString && no->opr.op[1]->id.tipo == typeString)){
-			printf("Os dois operandos de operações relacionais devem ser strings\n");
-			exit(1);
-		}
-	} else if (opr == SIM_ADICAO || opr == SIM_SUBTRACAO || opr == SIM_MULTIPLICACAO || opr == SIM_DIVISAO || opr == SIM_IGUALIGUAL || opr == SIM_DIFERENTE || opr == SIM_MAIORQUE || opr == SIM_MENORQUE || opr == SIM_MAIOROUIGUAL || opr == SIM_MENOROUIGUAL){
-		if (no->opr.op[0]->id.tipo == typeString){
-			printf("Strings só podem ser usadas em expressões relacionais\n");
-			exit(1);
-		} else if (no->opr.op[1] != NULL){
-			if (no->opr.op[1]->type == typeId){
-				if (no->opr.op[1]->id.tipo == typeString){
+		} else if (opr == SIM_E || opr == SIM_OU){
+			if ((no->opr.op[0]->id.tipo == typeString && no->opr.op[1]->id.tipo != typeString) || (no->opr.op[0]->id.tipo != typeString && no->opr.op[1]->id.tipo == typeString)){
+				printf("Os dois operandos de operações relacionais devem ser strings\n");
+				exit(1);
+			}
+		} else if (opr == SIM_ADICAO || opr == SIM_SUBTRACAO || opr == SIM_MULTIPLICACAO || opr == SIM_DIVISAO || opr == SIM_IGUALIGUAL || opr == SIM_DIFERENTE || opr == SIM_MAIORQUE || opr == SIM_MENORQUE || opr == SIM_MAIOROUIGUAL || opr == SIM_MENOROUIGUAL){
+			if (no->opr.op[0]->id.tipo == typeString){
+				printf("Strings só podem ser usadas em expressões relacionais\n");
+				exit(1);
+			} else if (no->opr.op[1] != NULL){
+				if (no->opr.op[1]->type == typeId){
+					if (no->opr.op[1]->id.tipo == typeString){
+						printf("Strings só podem ser usadas em expressões relacionais\n");
+						exit(1);
+					}
+				} else if (no->opr.op[1]->type == typeString){
 					printf("Strings só podem ser usadas em expressões relacionais\n");
 					exit(1);
 				}
-			} else if (no->opr.op[1]->type == typeString){
-				printf("Strings só podem ser usadas em expressões relacionais\n");
-				exit(1);
 			}
-		}
-		if (no->opr.op[1]->type == typeOpr){
-			if (no->opr.op[0]->type == typeInt && no->opr.op[1]->opr.op[0]->type == typeFloat){
+			if (no->opr.op[1]->type == typeOpr){
+				if (no->opr.op[0]->type == typeInt && no->opr.op[1]->opr.op[0]->type == typeFloat){
+					no->opr.op[0]->type = typeFloat;
+					no->opr.op[0]->real.val = (float)no->opr.op[0]->inteiro.val;
+				} else if (no->opr.op[0]->type == typeFloat && no->opr.op[1]->opr.op[0]->type == typeInt){
+					no->opr.op[1]->opr.op[1]->type = typeFloat;
+					no->opr.op[1]->opr.op[1]->real.val = (float)no->opr.op[1]->opr.op[0]->inteiro.val;
+				}	
+			}
+			if (no->opr.op[0]->type == typeInt && no->opr.op[1]->type == typeFloat){
 				no->opr.op[0]->type = typeFloat;
 				no->opr.op[0]->real.val = (float)no->opr.op[0]->inteiro.val;
-			} else if (no->opr.op[0]->type == typeFloat && no->opr.op[1]->opr.op[0]->type == typeInt){
-				no->opr.op[1]->opr.op[1]->type = typeFloat;
-				no->opr.op[1]->opr.op[1]->real.val = (float)no->opr.op[1]->opr.op[0]->inteiro.val;
-			}	
-		}
-		if (no->opr.op[0]->type == typeInt && no->opr.op[1]->type == typeFloat){
-			no->opr.op[0]->type = typeFloat;
-			no->opr.op[0]->real.val = (float)no->opr.op[0]->inteiro.val;
-		} else if (no->opr.op[0]->type == typeFloat && no->opr.op[1]->type == typeInt){
-			no->opr.op[1]->type = typeFloat;
-			no->opr.op[1]->real.val = (float)no->opr.op[1]->inteiro.val;
-		}
-	} else if (opr = 1){
-		if (temp_fun->no){
-			if (!strcmp(no->opr.op[0]->id.name, temp_fun->no->id.name)) // Recursiva
-				comparaParametros(temp_fun->no->id.name, temp_fun->prms, no->opr.op[1]);
-		} else {
-			Funcao *i = tbl_fun;
-			while(i != NULL){
-				if (!strcmp(i->no->id.name, no->opr.op[0]->id.name)){
-					comparaParametros(no->opr.op[0]->id.name, i->prms, no->opr.op[1]);					
-					break;
-				}
-				i = i->prox;
+			} else if (no->opr.op[0]->type == typeFloat && no->opr.op[1]->type == typeInt){
+				no->opr.op[1]->type = typeFloat;
+				no->opr.op[1]->real.val = (float)no->opr.op[1]->inteiro.val;
 			}
-		} 
+		} else if (opr = 1){
+			if (no->opr.op[0]->type == typeId){
+				if (temp_fun->no){
+					if (!strcmp(no->opr.op[0]->id.name, temp_fun->no->id.name)) // Recursiva
+						comparaParametros(temp_fun->no->id.name, temp_fun->prms, no->opr.op[1]);
+				} else {
+					Funcao *i = tbl_fun;
+					while(i != NULL){
+						if (!strcmp(i->no->id.name, no->opr.op[0]->id.name)){
+							comparaParametros(no->opr.op[0]->id.name, i->prms, no->opr.op[1]);					
+							break;
+						}
+						i = i->prox;
+					}
+				}
+			}
+		}
 	}
 }
 

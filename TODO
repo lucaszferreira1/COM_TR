@@ -1,13 +1,17 @@
-1. TESTES
+1. Consertar operações, 2 + 2 + 2.0, é lido como int
+Sugestão: Criar uma função recursiva que funcione
 
 
-2. Análise Semântica (Ver Atividade no Moodle)
+2. TESTAR
 
 
-3. Traduzir a linguagem retornada para assembly
+3. Análise Semântica (Ver Atividade no Moodle)
 
 
-4. (Opcional) Refatorar o .y para que as funções no final do arquivo fiquem em um arquivo separado para melhor organização
+4. Traduzir a linguagem retornada para assembly
+
+
+5. (Opcional) Refatorar o .y para que as funções no final do arquivo fiquem em um arquivo separado para melhor organização
 
 
 

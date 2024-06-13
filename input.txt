@@ -1,6 +1,6 @@
-float fat(int a, int c, int d){
+float fat(int a, int c, float d){
     int b;
-    fat(b, 2, 2);
+    fat(b, 2, 2+2+2.0);
 }
 
 int x(){
@@ -10,6 +10,5 @@ int x(){
 {
     int a;
     string b;
-    fat(a, a, a);
     a = 1+1;
 }
