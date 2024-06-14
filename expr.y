@@ -29,6 +29,7 @@ void AddItem(Item *o, Item *ad);
 void AddFuncao(Funcao *f1, Funcao *f2);
 void printFuncao(Funcao *f);
 void printComandos(Item *cmds);
+tipoNo* lookupFunc(char *n);
 
 Funcao *tbl_fun;
 Funcao *temp_fun;
@@ -99,10 +100,11 @@ int tp_fun;
 %type <funcao> Funcao ListaFuncoes
 
 %%
-Programa: ListaFuncoes BlocoPrincipal YYEOF {AddFuncao($1, criaFuncao(TIPO_INT, "main", NULL, $2));printFuncao($1);}
-	| BlocoPrincipal YYEOF {printFuncao(criaFuncao(285, "main", NULL, $1));}
+Programa: ListaFuncoes Main BlocoPrincipal YYEOF {AddFuncao($1, criaFuncao(TIPO_INT, "main", NULL, $3));printFuncao($1);}
+	| Main BlocoPrincipal YYEOF {printFuncao(criaFuncao(285, "main", NULL, $2));}
 	| YYEOF {exit(0);}
 	;
+Main: {lookupFunc("main");};
 ListaFuncoes: ListaFuncoes Funcao {AddFuncao($1, $2);$$ = $1;}
 	| Funcao {$$ = $1;}
 	;
@@ -120,7 +122,6 @@ Parametro: Tipo TID {$$ = criaId($2, $1);}
 BlocoPrincipal: SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES {$$ = criaBloco($2, $3);}
 	| SIM_ABRECHAVES Declaracoes SIM_FECHACHAVES {$$ = criaBloco($2, NULL);}
 	| SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES {$$ = criaBloco(NULL, $2);}
-	| SIM_ABRECHAVES SIM_FECHACHAVES {$$ = NULL;}
 	;
 Declaracoes: Declaracoes Declaracao {AddListaDecl($1, criaListaDecl($2));$$ = $1;}
 	| Declaracao {$$ = criaListaDecl($1);}
@@ -135,7 +136,6 @@ ListaId: ListaId SIM_VIRGULA TID {AddItem($1, criaItem(criaId($3, 2)));$$ = $1;}
 	| TID {$$ = criaItem(criaId($1, 2));}
 	;
 Bloco: SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES {$$ = $2;}
-	| SIM_ABRECHAVES SIM_FECHACHAVES {$$ = NULL;}
 	;
 ListaCmd: ListaCmd Comando {$1->prox = criaItem($2); $$ = $1;}
 	| Comando {$$ = criaItem($1);}
@@ -285,10 +285,10 @@ tipoNo* lookupFunc(char* n){
 		return temp_fun->no;
 	} else if (!strcmp(temp_fun->no->id.name, n)){
 		return temp_fun->no;
-	} else { 
-		printf("Função não foi encontrada.\n");
-		exit(1);
-	}
+	} 
+	printf("Função não foi encontrada.\n");
+	exit(1);
+
 }
 
 eTipo getTipoOpr(tipoNo *no){
@@ -493,6 +493,15 @@ int inFila(Item *f, char *name){
 	return 0;
 }
 
+int inFilaFunc(Funcao* f, char *name){
+	while(f){
+		if (!strcmp(f->no->id.name, name))
+			return 1;
+		f = f->prox;
+	}
+	return 0;
+}
+
 tipoNo *criaInteger(int val){
 	tipoNo *no;
 	size_t tam_no = SIZEOF_TIPONO + sizeof(typeInt);
@@ -543,7 +552,7 @@ tipoNo *criaId(char *name, int tipo){
 		if (tbl_sim == NULL){
 			tbl_sim = criaItem(no);
 		}else{
-			if (!inFila(tbl_sim, no->id.name)){
+			if (!inFila(tbl_sim, no->id.name) && !inFilaFunc(tbl_fun, no->id.name)){
 				AddItem(tbl_sim, criaItem(no));
 			} else {
 				printf("Variável %s já foi declarada anteriormente\n", name);
@@ -681,15 +690,14 @@ Bloco* criaBloco(ListaDecl *decl, Item *cmds){
 Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
 	Funcao *f = malloc(sizeof(Funcao));
 	if (f == NULL){
-		printf("Error ao alocar memória para a função");
+		printf("Error ao alocar memória para a função\n");
 		exit(1);
 	}
 	tipoNo *n = malloc(sizeof(tipoNo));
 	if (n == NULL){
-		printf("Error ao alocar memória para a função");
+		printf("Error ao alocar memória para a função\n");
 		exit(1);
 	}
-	
 	n->type = typeId;
 	n->id.tipo = getTipoId(tipo);
 	n->id.name = strdup(nome);
@@ -699,6 +707,10 @@ Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
 	f->no->id.i = 0;
 	f->prms = prms;
 	f->blc = blc;
+	if (inFilaFunc(tbl_fun, nome)){
+		printf("Função %s já foi declarada anteriormente\n", nome);
+		exit(1);
+	}
 	temp_fun = NULL;
 	if (tbl_fun == NULL)
 		tbl_fun = f;
@@ -712,7 +724,7 @@ void AddItem(Item *o, Item *ad){
 		o = o->prox;
 	o->prox = malloc(sizeof(Item));
 	if (o->prox == NULL){
-		printf("Erro ao alocar memória para o próximo item");
+		printf("Erro ao alocar memória para o próximo item\n");
 		exit(1);
 	}
 	if (o->arv->type == typeId && ad->arv->type == typeId)
@@ -725,7 +737,7 @@ void AddListaDecl(ListaDecl *o, ListaDecl *ad){
 		o = o->prox;
 	o->prox = malloc(sizeof(ListaDecl));
 	if (o->prox == NULL){
-		printf("Erro ao alocar memória para a próxima Lista de Declarações");
+		printf("Erro ao alocar memória para a próxima Lista de Declarações\n");
 		exit(1);
 	}
 	o->prox = ad;
@@ -734,13 +746,13 @@ void AddListaDecl(ListaDecl *o, ListaDecl *ad){
 void AddFuncao(Funcao *f1, Funcao *f2){
 	while(f1->prox != NULL){
 		if (f1->no->id.name == f2->no->id.name){
-			printf("Função %s já foi declarada anteriormente", f2->no->id.name);
+			printf("Função %s já foi declarada anteriormente\n", f2->no->id.name);
 		}
 		f1 = f1->prox;
 	}
 	f1->prox = malloc(sizeof(Funcao));
 	if (f1->prox == NULL){
-		printf("Erro ao alocar memória para a próxima função");
+		printf("Erro ao alocar memória para a próxima função\n");
 		exit(1);
 	}
 	f2->no->id.i = f1->no->id.i + 1;
