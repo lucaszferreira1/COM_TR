@@ -1,9 +1,11 @@
-float fat(float d){
+int fat(float d){
+    string a;
     float b;
-    fat(2+2+b/(2+2));
+    b = fat(2);
+    return 2+2;
 }
 
 {
     int a;
-    a = 1.0+1;
+    a = 1+1;
 }

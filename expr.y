@@ -301,38 +301,49 @@ eTipo getTipoOpr(tipoNo *no){
 void comparaParametros(char* n, Item* prms, tipoNo *op){
 	while (prms != NULL && op != NULL){
 		if (op->type == typeOpr){
-			if (op->opr.op[1]->type != typeId && op->opr.op[1]->type != typeOpr){
+			if (op->opr.op[1]->type == typeString){ // String
 				if (prms->arv->id.tipo != op->opr.op[1]->type){
-					printf("%s %s\n", getIdTipo(prms->arv->id.tipo), getIdTipo(op->opr.op[0]->type));
 					printf("Parâmetros passados para função %s são de tipos diferentes\n", n);
 					exit(1);
 				}
-			}else if (op->opr.op[1]->type == typeId){
+			}else if (op->opr.op[1]->type == typeId){ // Id
 				if (prms->arv->id.tipo != op->opr.op[1]->id.tipo){
-					printf("Parâmetros passados para função %s são de tipos diferentes\n", n);
-					exit(1);
+					if (op->opr.op[1]->id.tipo == typeString){
+						printf("Parâmetros passados para função %s são de tipos diferentes\n", n);
+						exit(1);
+					} else
+						printf("Aviso: Parâmetros passados para função %s são de tipos diferentes\n", n);
 				}
 			} else {
-				if (prms->arv->id.tipo != getTipoOpr(op)){
-					printf("Parâmetros passados para função %s são de tipos diferentes\n", n);
-					exit(1);
+				if (prms->arv->id.tipo != getTipoOpr(op)){ // Opr
+					if (getTipoOpr(op) == typeString){
+						printf("Parâmetros passados para função %s são de tipos diferentes\n", n);
+						exit(1);
+					} else
+						printf("Aviso: Parâmetros passados para função %s são de tipos diferentes\n", n);
 				}
 			}
 		} else if (op->type == typeId){
-			if (prms->arv->id.tipo != op->id.tipo){
-				printf("Parâmetros passados para função %s são de tipos diferentes\n", n);
-				exit(1);
+			if (prms->arv->id.tipo != op->id.tipo){ // id
+				if (op->id.tipo == typeString){ // string id
+					printf("Parâmetros passados para função %s são de tipos diferentes\n", n);
+					exit(1);
+				} else
+					printf("Aviso: Parâmetros passados para função %s são de tipos diferentes\n", n);
 			}
 		} else {
-			if (prms->arv->id.tipo != op->type){
-				printf("Parâmetros passados para função %s são de tipos diferentes\n", n);
-				exit(1);
+			if (prms->arv->id.tipo != op->type){ // cons
+				if (op->type == typeString){ // string cons
+					printf("Parâmetros passados para função %s são de tipos diferentes\n", n);
+					exit(1);
+				} else
+					printf("Aviso: Parâmetros passados para função %s são de tipos diferentes\n", n);
 			}
 		}
-		if (prms->prox != NULL && op->type != typeOpr){
+		if (prms->prox != NULL && op->type != typeOpr){ // < nParametros
 			printf("Número de parâmetros passados para a função %s está abaixo do número de parâmetros declarados\n", n);
 			exit(1);
-		} else if (prms->prox == NULL && op->type == typeOpr){
+		} else if (prms->prox == NULL && op->type == typeOpr){ // > nParametros
 			if (op->opr.opr == 2){
 				printf("Número de parâmetros passados para a função %s excede o número de parâmetros declarados\n", n);
 				exit(1);
@@ -381,20 +392,44 @@ void detectaErros(int opr, tipoNo *no){
 		for (int i=0;i<no->opr.nOps;i++){
 			detectaErros(opr, no->opr.op[i]);
 		}
-	
-		if (opr == SIM_IGUAL){
+
+		if (opr == COM_RETORNO){
+			if (no->opr.op[0]){
+				if (no->opr.op[0]->type == typeId){
+					if (no->opr.op[0]->id.tipo != temp_fun->no->id.tipo){
+						printf("Função %s tipo %s está retornando um valor %s\n", temp_fun->no->id.name, getIdTipo(temp_fun->no->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
+						exit(1);
+					}
+				} else if (no->opr.op[0]->type == typeOpr){
+					if (!hasFloatInOpr(no->opr.op[0]) && temp_fun->no->id.tipo == typeFloat){
+						printf("Função %s tipo float está retornando um valor int\n", temp_fun->no->id.name);
+						exit(1);
+					} else if (hasFloatInOpr(no->opr.op[0]) && temp_fun->no->id.tipo == typeInt){
+						printf("Função %s tipo int está retornando um valor float\n", temp_fun->no->id.name);
+						exit(1);
+					}
+				} else {
+					if (no->opr.op[0]->type != temp_fun->no->id.tipo){
+						printf("Função %s tipo %s está retornando um valor %s\n", temp_fun->no->id.name, getIdTipo(temp_fun->no->id.tipo), getIdTipo(no->opr.op[0]->type));
+						exit(1);
+					}
+				}
+			} else { // Void
+				if (temp_fun->no->id.tipo != typeVoid){
+					printf("Função %s tipo void está retornando um valor\n", temp_fun->no->id.name);
+					exit(1);
+				}
+			}
+		} else if (opr == SIM_IGUAL){
 			if (no->opr.op[1]->type == typeOpr){ // Operação
 				if (no->opr.op[1]->opr.opr == 1){ // Chama Função
 					if (no->opr.op[0]->id.tipo != no->opr.op[1]->opr.op[0]->id.tipo){
-						printf("Retorno %s da função %s não pode ser atribuído à variável %s a qual tem tipo %s\n", getIdTipo(no->opr.op[1]->opr.op[0]->id.tipo), no->opr.op[1]->opr.op[0]->id.name, no->opr.op[0]->id.name, getIdTipo(no->opr.op[0]->id.tipo)); 
-						exit(1);
+						printf("Aviso: Retorno da função %s tipo %s sendo atribuído a tipo %s\n", no->opr.op[1]->opr.op[0]->id.name, getIdTipo(no->opr.op[1]->opr.op[0]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo)); 
 					}
 				} else if (hasFloatInOpr(no->opr.op[1]) && no->opr.op[0]->id.tipo == typeInt){
-					printf("Não é possível atribuir float à variável int\n");
-					exit(1);
+					printf("Aviso: Tipo float sendo atribuído a tipo int\n");
 				} else if (!hasFloatInOpr(no->opr.op[1]) && no->opr.op[1]->id.tipo == typeFloat){
-					printf("Não é possível atribuir int à variável float\n");
-					exit(1);
+					printf("Aviso: Tipo int sendo atribuído a tipo float\n");
 				}
 			} else if (no->opr.op[0]->id.tipo == typeString || no->opr.op[1]->id.tipo == typeString){
 				printf("Não é possível atribuir %s à %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
