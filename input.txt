@@ -1,14 +1,9 @@
-float fat(int a, int c, float d){
-    int b;
-    fat(b, 2, 2+2+2.0);
-}
-
-int x(){
-    x();
+float fat(float d){
+    float b;
+    fat(2+2+b/(2+2));
 }
 
 {
     int a;
-    string b;
-    a = 1+1;
+    a = 1.0+1;
 }

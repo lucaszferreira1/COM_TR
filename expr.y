@@ -291,17 +291,29 @@ tipoNo* lookupFunc(char* n){
 	}
 }
 
+eTipo getTipoOpr(tipoNo *no){
+	if (no->type == typeOpr)
+		getTipoOpr(no->opr.op[0]);
+	else 
+		return no->type;
+}
+
 void comparaParametros(char* n, Item* prms, tipoNo *op){
 	while (prms != NULL && op != NULL){
 		if (op->type == typeOpr){
-			if (op->opr.op[0]->type != typeId){
-				if (prms->arv->id.tipo != op->opr.op[0]->type){
+			if (op->opr.op[1]->type != typeId && op->opr.op[1]->type != typeOpr){
+				if (prms->arv->id.tipo != op->opr.op[1]->type){
 					printf("%s %s\n", getIdTipo(prms->arv->id.tipo), getIdTipo(op->opr.op[0]->type));
 					printf("Parâmetros passados para função %s são de tipos diferentes\n", n);
 					exit(1);
 				}
-			}else {
-				if (prms->arv->id.tipo != op->opr.op[0]->id.tipo){
+			}else if (op->opr.op[1]->type == typeId){
+				if (prms->arv->id.tipo != op->opr.op[1]->id.tipo){
+					printf("Parâmetros passados para função %s são de tipos diferentes\n", n);
+					exit(1);
+				}
+			} else {
+				if (prms->arv->id.tipo != getTipoOpr(op)){
 					printf("Parâmetros passados para função %s são de tipos diferentes\n", n);
 					exit(1);
 				}
@@ -332,10 +344,41 @@ void comparaParametros(char* n, Item* prms, tipoNo *op){
 	}
 }
 
+int hasFloatInOpr(tipoNo *opr){
+	int r1, r2;
+	if (opr->type == typeOpr){
+		r1 = hasFloatInOpr(opr->opr.op[0]);
+		r2 = hasFloatInOpr(opr->opr.op[1]);
+		if (r1 != r2)
+			return 1;
+	} else if (opr->type == typeFloat)
+		return 1;
+	else if (opr->type == typeId){
+		if (opr->id.tipo == typeFloat)
+			return 1;
+	}
+}
+
+void turnIntoFloat(tipoNo *no){
+	if (no->type == typeOpr){
+		turnIntoFloat(no->opr.op[0]);
+		turnIntoFloat(no->opr.op[1]);
+	} else if (no->type == typeInt){
+		no->type = typeFloat;
+		no->real.val = (float)no->inteiro.val;
+	}
+}
+
+void detectaFloatInt(tipoNo *no){
+	if (no){
+		if (hasFloatInOpr(no))
+			turnIntoFloat(no);
+	}
+}
+
 void detectaErros(int opr, tipoNo *no){
 	if (no->type == typeOpr){
 		for (int i=0;i<no->opr.nOps;i++){
-			printf("%d\n", no->opr.opr);
 			detectaErros(opr, no->opr.op[i]);
 		}
 	
@@ -346,9 +389,15 @@ void detectaErros(int opr, tipoNo *no){
 						printf("Retorno %s da função %s não pode ser atribuído à variável %s a qual tem tipo %s\n", getIdTipo(no->opr.op[1]->opr.op[0]->id.tipo), no->opr.op[1]->opr.op[0]->id.name, no->opr.op[0]->id.name, getIdTipo(no->opr.op[0]->id.tipo)); 
 						exit(1);
 					}
+				} else if (hasFloatInOpr(no->opr.op[1]) && no->opr.op[0]->id.tipo == typeInt){
+					printf("Não é possível atribuir float à variável int\n");
+					exit(1);
+				} else if (!hasFloatInOpr(no->opr.op[1]) && no->opr.op[1]->id.tipo == typeFloat){
+					printf("Não é possível atribuir int à variável float\n");
+					exit(1);
 				}
 			} else if (no->opr.op[0]->id.tipo == typeString || no->opr.op[1]->id.tipo == typeString){
-				printf("Não é possível atribuir %s á %s", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
+				printf("Não é possível atribuir %s à %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
 				exit(1);
 			} else if (no->opr.op[0]->id.tipo != no->opr.op[1]->id.tipo){
 				printf("Aviso:Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
@@ -373,22 +422,7 @@ void detectaErros(int opr, tipoNo *no){
 					exit(1);
 				}
 			}
-			if (no->opr.op[1]->type == typeOpr){
-				if (no->opr.op[0]->type == typeInt && no->opr.op[1]->opr.op[0]->type == typeFloat){
-					no->opr.op[0]->type = typeFloat;
-					no->opr.op[0]->real.val = (float)no->opr.op[0]->inteiro.val;
-				} else if (no->opr.op[0]->type == typeFloat && no->opr.op[1]->opr.op[0]->type == typeInt){
-					no->opr.op[1]->opr.op[1]->type = typeFloat;
-					no->opr.op[1]->opr.op[1]->real.val = (float)no->opr.op[1]->opr.op[0]->inteiro.val;
-				}	
-			}
-			if (no->opr.op[0]->type == typeInt && no->opr.op[1]->type == typeFloat){
-				no->opr.op[0]->type = typeFloat;
-				no->opr.op[0]->real.val = (float)no->opr.op[0]->inteiro.val;
-			} else if (no->opr.op[0]->type == typeFloat && no->opr.op[1]->type == typeInt){
-				no->opr.op[1]->type = typeFloat;
-				no->opr.op[1]->real.val = (float)no->opr.op[1]->inteiro.val;
-			}
+			detectaFloatInt(no);
 		} else if (opr = 1){
 			if (no->opr.op[0]->type == typeId){
 				if (temp_fun->no){
