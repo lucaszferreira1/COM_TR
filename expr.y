@@ -299,6 +299,14 @@ eTipo getTipoOpr(tipoNo *no){
 }
 
 void comparaParametros(char* n, Item* prms, tipoNo *op){
+	if (prms == NULL && op != NULL){
+		printf("Número de parâmetros passados para a função %s excede o número de parâmetros declarados\n", n);
+		exit(1);
+	} else if(prms != NULL && op == NULL){
+		printf("Número de parâmetros passados para a função %s está abaixo do número de parâmetros declarados\n", n);
+		exit(1);
+	}
+
 	while (prms != NULL && op != NULL){
 		if (op->type == typeOpr){
 			if (op->opr.op[1]->type == typeString){ // String
@@ -389,9 +397,7 @@ void detectaFloatInt(tipoNo *no){
 
 void detectaErros(int opr, tipoNo *no){
 	if (no->type == typeOpr){
-		for (int i=0;i<no->opr.nOps;i++){
-			detectaErros(opr, no->opr.op[i]);
-		}
+		
 
 		if (opr == COM_RETORNO){
 			if (no->opr.op[0]){
@@ -540,7 +546,7 @@ tipoNo *criaId(char *name, int tipo){
 			if (!inFila(tbl_sim, no->id.name)){
 				AddItem(tbl_sim, criaItem(no));
 			} else {
-				printf("Variável %s já foi declarada anteriormente", name);
+				printf("Variável %s já foi declarada anteriormente\n", name);
 				exit(1);
 			}
 		}
