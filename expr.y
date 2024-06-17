@@ -137,7 +137,7 @@ ListaId: ListaId SIM_VIRGULA TID {AddItem($1, criaItem(criaId($3, 2)));$$ = $1;}
 	;
 Bloco: SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES {$$ = $2;}
 	;
-ListaCmd: ListaCmd Comando {$1->prox = criaItem($2); $$ = $1;}
+ListaCmd: ListaCmd Comando {AddItem($1, criaItem($2)); $$ = $1;}
 	| Comando {$$ = criaItem($1);}
 	;
 Comando: CmdIf {$$ = $1;}
@@ -306,7 +306,7 @@ void comparaParametros(char* n, Item* prms, tipoNo *op){
 		printf("Número de parâmetros passados para a função %s está abaixo do número de parâmetros declarados\n", n);
 		exit(1);
 	}
-
+	
 	while (prms != NULL && op != NULL){
 		if (op->type == typeOpr){
 			if (op->opr.op[1]->type == typeString){ // String
@@ -397,8 +397,6 @@ void detectaFloatInt(tipoNo *no){
 
 void detectaErros(int opr, tipoNo *no){
 	if (no->type == typeOpr){
-		
-
 		if (opr == COM_RETORNO){
 			if (no->opr.op[0]){
 				if (no->opr.op[0]->type == typeId){
@@ -429,8 +427,11 @@ void detectaErros(int opr, tipoNo *no){
 		} else if (opr == SIM_IGUAL){
 			if (no->opr.op[1]->type == typeOpr){ // Operação
 				if (no->opr.op[1]->opr.opr == 1){ // Chama Função
-					if (no->opr.op[0]->id.tipo != no->opr.op[1]->opr.op[0]->id.tipo){
-						printf("Aviso: Retorno da função %s tipo %s sendo atribuído a tipo %s\n", no->opr.op[1]->opr.op[0]->id.name, getIdTipo(no->opr.op[1]->opr.op[0]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo)); 
+					if (no->opr.op[0]->id.tipo == typeString && no->opr.op[1]->opr.op[0]->id.tipo != typeString){
+						printf("Retorno da função %s tipo %s sendo atribuído a tipo %s\n", no->opr.op[1]->opr.op[0]->id.name, getIdTipo(no->opr.op[1]->opr.op[0]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
+						exit(1); 
+					} else if (no->opr.op[0]->id.tipo != no->opr.op[1]->opr.op[0]->id.tipo){
+						printf("Aviso: Retorno da função %s tipo %s sendo atribuído a tipo %s\n", no->opr.op[1]->opr.op[0]->id.name, getIdTipo(no->opr.op[1]->opr.op[0]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
 					}
 				} else if (hasFloatInOpr(no->opr.op[1]) && no->opr.op[0]->id.tipo == typeInt){
 					printf("Aviso: Tipo float sendo atribuído a tipo int\n");

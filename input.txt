@@ -1,13 +1,11 @@
 int fat(float d){
     string a;
-    int b;
+    float b;
     float c;
-    b = fat(c);
-    return 2+2;
+    b = fat(2);
+    return 2;
 }
-
 
 {
     string a;
-    x();
 }

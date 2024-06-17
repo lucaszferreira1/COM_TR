@@ -1698,7 +1698,7 @@ yyreduce:
 
   case 27: /* ListaCmd: ListaCmd Comando  */
 #line 140 "expr.y"
-                           {(yyvsp[-1].item)->prox = criaItem((yyvsp[0].nPtr)); (yyval.item) = (yyvsp[-1].item);}
+                           {AddItem((yyvsp[-1].item), criaItem((yyvsp[0].nPtr))); (yyval.item) = (yyvsp[-1].item);}
 #line 1703 "expr.tab.c"
     break;
 
@@ -2338,7 +2338,7 @@ void comparaParametros(char* n, Item* prms, tipoNo *op){
 		printf("Número de parâmetros passados para a função %s está abaixo do número de parâmetros declarados\n", n);
 		exit(1);
 	}
-
+	
 	while (prms != NULL && op != NULL){
 		if (op->type == typeOpr){
 			if (op->opr.op[1]->type == typeString){ // String
@@ -2429,8 +2429,6 @@ void detectaFloatInt(tipoNo *no){
 
 void detectaErros(int opr, tipoNo *no){
 	if (no->type == typeOpr){
-		
-
 		if (opr == COM_RETORNO){
 			if (no->opr.op[0]){
 				if (no->opr.op[0]->type == typeId){
@@ -2461,8 +2459,11 @@ void detectaErros(int opr, tipoNo *no){
 		} else if (opr == SIM_IGUAL){
 			if (no->opr.op[1]->type == typeOpr){ // Operação
 				if (no->opr.op[1]->opr.opr == 1){ // Chama Função
-					if (no->opr.op[0]->id.tipo != no->opr.op[1]->opr.op[0]->id.tipo){
-						printf("Aviso: Retorno da função %s tipo %s sendo atribuído a tipo %s\n", no->opr.op[1]->opr.op[0]->id.name, getIdTipo(no->opr.op[1]->opr.op[0]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo)); 
+					if (no->opr.op[0]->id.tipo == typeString && no->opr.op[1]->opr.op[0]->id.tipo != typeString){
+						printf("Retorno da função %s tipo %s sendo atribuído a tipo %s\n", no->opr.op[1]->opr.op[0]->id.name, getIdTipo(no->opr.op[1]->opr.op[0]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
+						exit(1); 
+					} else if (no->opr.op[0]->id.tipo != no->opr.op[1]->opr.op[0]->id.tipo){
+						printf("Aviso: Retorno da função %s tipo %s sendo atribuído a tipo %s\n", no->opr.op[1]->opr.op[0]->id.name, getIdTipo(no->opr.op[1]->opr.op[0]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
 					}
 				} else if (hasFloatInOpr(no->opr.op[1]) && no->opr.op[0]->id.tipo == typeInt){
 					printf("Aviso: Tipo float sendo atribuído a tipo int\n");
