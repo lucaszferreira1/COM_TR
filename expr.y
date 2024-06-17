@@ -344,8 +344,14 @@ void comparaParametros(char* n, Item* prms, tipoNo *op){
 				if (op->type == typeString){ // string cons
 					printf("Parâmetros passados para função %s são de tipos diferentes\n", n);
 					exit(1);
-				} else
-					printf("Aviso: Parâmetros passados para função %s são de tipos diferentes\n", n);
+				} else if (op->type == typeInt){
+					op->type = typeFloat;
+					op->real.val = (float)op->inteiro.val;
+				} else if (op->type == typeFloat){
+					op->type = typeInt;
+					op->inteiro.val = (int)op->real.val;
+				}
+				printf("Aviso: Parâmetros passados para função %s são de tipos diferentes\n", n);
 			}
 		}
 		if (prms->prox != NULL && op->type != typeOpr){ // < nParametros
@@ -438,11 +444,24 @@ void detectaErros(int opr, tipoNo *no){
 				} else if (!hasFloatInOpr(no->opr.op[1]) && no->opr.op[1]->id.tipo == typeFloat){
 					printf("Aviso: Tipo int sendo atribuído a tipo float\n");
 				}
-			} else if (no->opr.op[0]->id.tipo == typeString || no->opr.op[1]->id.tipo == typeString){
-				printf("Não é possível atribuir %s à %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
-				exit(1);
-			} else if (no->opr.op[0]->id.tipo != no->opr.op[1]->id.tipo){
-				printf("Aviso:Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
+			} else if (no->opr.op[1]->type == typeString){
+				if (no->opr.op[0]->id.tipo != typeString){
+					printf("Não é possível atribuir %s à %s\n", getIdTipo(no->opr.op[1]->type), getIdTipo(no->opr.op[0]->id.tipo));
+					exit(1);
+				}
+			} else {
+				if (no->opr.op[0]->id.tipo == typeInt && no->opr.op[1]->type == typeFloat){
+					no->opr.op[1]->type = typeInt;
+					no->opr.op[1]->inteiro.val = (int)no->opr.op[1]->real.val;
+					printf("Aviso:Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
+				} else if (no->opr.op[0]->id.tipo == typeFloat && no->opr.op[1]->type == typeInt){
+					no->opr.op[1]->type = typeFloat;
+					no->opr.op[1]->real.val = (float)no->opr.op[1]->inteiro.val;
+					printf("Aviso:Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
+				} else if (no->opr.op[0]->id.tipo != no->opr.op[1]->type){
+					printf("Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
+					exit(1);
+				}
 			}
 		} else if (opr == SIM_E || opr == SIM_OU){
 			if ((no->opr.op[0]->id.tipo == typeString && no->opr.op[1]->id.tipo != typeString) || (no->opr.op[0]->id.tipo != typeString && no->opr.op[1]->id.tipo == typeString)){

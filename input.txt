@@ -1,7 +1,7 @@
 int fat(float d){
-    string a;
+    int a;
     float b;
-    float c;
+    a = 2.2;
     b = fat(2);
     return 2;
 }
