@@ -199,6 +199,7 @@ Termo: Termo SIM_MULTIPLICACAO Fator {$$ = criaOpr(SIM_MULTIPLICACAO, NULL, 2, $
 	;
 Fator: CONS_INT {$$ = criaInteger($1);}
 	| CONS_FLOAT {$$ = criaReal($1);}
+	| CONS_LITERAL {$$ = criaString($1);}
 	| TID {$$ = criaId($1, 0);}
 	| ChamaFuncao {$$ = $1;}
 	| SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES {$$ = $2;}
@@ -394,6 +395,16 @@ void turnIntoFloat(tipoNo *no){
 	}
 }
 
+void turnIntoInt(tipoNo *no){
+	if (no->type == typeOpr){
+		turnIntoInt(no->opr.op[0]);
+		turnIntoInt(no->opr.op[1]);
+	} else if (no->type == typeFloat){
+		no->type = typeInt;
+		no->inteiro.val = (int)no->real.val;
+	}
+}
+
 void detectaFloatInt(tipoNo *no){
 	if (no){
 		if (hasFloatInOpr(no))
@@ -419,9 +430,11 @@ void detectaErros(int opr, tipoNo *no){
 						exit(1);
 					}
 				} else {
-					if (no->opr.op[0]->type != temp_fun->no->id.tipo){
-						printf("Função %s tipo %s está retornando um valor %s\n", temp_fun->no->id.name, getIdTipo(temp_fun->no->id.tipo), getIdTipo(no->opr.op[0]->type));
-						exit(1);
+					if (temp_fun->no != NULL){
+						if (no->opr.op[0]->type != temp_fun->no->id.tipo){
+							printf("Função %s tipo %s está retornando um valor %s\n", temp_fun->no->id.name, getIdTipo(temp_fun->no->id.tipo), getIdTipo(no->opr.op[0]->type));
+							exit(1);
+						}
 					}
 				}
 			} else { // Void
@@ -453,20 +466,91 @@ void detectaErros(int opr, tipoNo *no){
 				if (no->opr.op[0]->id.tipo == typeInt && no->opr.op[1]->type == typeFloat){
 					no->opr.op[1]->type = typeInt;
 					no->opr.op[1]->inteiro.val = (int)no->opr.op[1]->real.val;
-					printf("Aviso:Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
+					printf("Aviso:Tipo float sendo atribuído a tipo int\n");
 				} else if (no->opr.op[0]->id.tipo == typeFloat && no->opr.op[1]->type == typeInt){
 					no->opr.op[1]->type = typeFloat;
 					no->opr.op[1]->real.val = (float)no->opr.op[1]->inteiro.val;
-					printf("Aviso:Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
+					printf("Aviso:Tipo int sendo atribuído a tipo float\n");
 				} else if (no->opr.op[0]->id.tipo != no->opr.op[1]->type){
 					printf("Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
 					exit(1);
 				}
 			}
 		} else if (opr == SIM_E || opr == SIM_OU){
-			if ((no->opr.op[0]->id.tipo == typeString && no->opr.op[1]->id.tipo != typeString) || (no->opr.op[0]->id.tipo != typeString && no->opr.op[1]->id.tipo == typeString)){
-				printf("Os dois operandos de operações relacionais devem ser strings\n");
-				exit(1);
+			if (no->opr.op[0]->type == typeId && no->opr.op[1]->type == typeId){
+				if ((no->opr.op[0]->id.tipo == typeString && no->opr.op[1]->id.tipo != typeString) || (no->opr.op[0]->id.tipo != typeString && no->opr.op[1]->id.tipo == typeString)){
+					printf("Os dois operandos de operações relacionais devem ser de tipos iguais\n");
+					exit(1);
+				}
+			} else if (no->opr.op[0]->type == typeId){
+				if (no->opr.op[0]->id.tipo == typeInt && no->opr.op[1]->type == typeFloat){
+					no->opr.op[1]->type = typeInt;
+					no->opr.op[1]->inteiro.val = (int)no->opr.op[1]->real.val;
+					printf("Aviso:Tipo float sendo comparado com tipo int\n");
+				} else if (no->opr.op[0]->id.tipo == typeFloat && no->opr.op[1]->type == typeInt){
+					no->opr.op[1]->type = typeFloat;
+					no->opr.op[1]->real.val = (float)no->opr.op[1]->inteiro.val;
+					printf("Aviso:Tipo int sendo comparado com tipo float\n");
+				} else if (no->opr.op[1]->type == typeOpr){
+					if (hasFloatInOpr(no->opr.op[1]) && no->opr.op[0]->id.tipo == typeInt){
+						turnIntoInt(no->opr.op[1]);
+						printf("Aviso:Tipo float sendo comparado com tipo int\n");
+					} else if (!hasFloatInOpr(no->opr.op[1]) && no->opr.op[0]->id.tipo == typeFloat){
+						turnIntoFloat(no->opr.op[1]);
+						printf("Aviso:Tipo int sendo comparado com tipo float\n");
+					}
+				} else if (no->opr.op[0]->id.tipo != no->opr.op[1]->type){
+					printf("Os dois operandos de operações relacionais devem ser de tipos iguais\n");
+					exit(1);
+				}
+			} else if (no->opr.op[1]->type == typeId){
+				if (no->opr.op[1]->id.tipo == typeInt && no->opr.op[0]->type == typeFloat){
+					no->opr.op[0]->type = typeInt;
+					no->opr.op[0]->inteiro.val = (int)no->opr.op[0]->real.val;
+					printf("Aviso:Tipo float sendo comparado com tipo int\n");
+				} else if (no->opr.op[1]->id.tipo == typeFloat && no->opr.op[0]->type == typeInt){
+					no->opr.op[0]->type = typeFloat;
+					no->opr.op[0]->real.val = (float)no->opr.op[0]->inteiro.val;
+					printf("Aviso:Tipo int sendo comparado com tipo float\n");
+				} else if (no->opr.op[0]->type == typeOpr){
+					if (hasFloatInOpr(no->opr.op[0]) && no->opr.op[1]->id.tipo == typeInt){
+						turnIntoInt(no->opr.op[0]);
+						printf("Aviso:Tipo float sendo comparado com tipo int\n");
+					} else if (!hasFloatInOpr(no->opr.op[0]) && no->opr.op[1]->id.tipo == typeFloat){
+						turnIntoFloat(no->opr.op[0]);
+						printf("Aviso:Tipo int sendo comparado com tipo float\n");
+					}
+				} else if (no->opr.op[1]->id.tipo != no->opr.op[0]->type){
+					printf("Os dois operandos de operações relacionais devem ser de tipos iguais\n");
+					exit(1);
+				}
+			} else{
+				if (no->opr.op[0]->type == typeOpr && no->opr.op[1]->type != typeOpr){
+					if ((hasFloatInOpr(no->opr.op[0]) && no->opr.op[1]->type != typeFloat) || (!hasFloatInOpr(no->opr.op[0]) && no->opr.op[1]->type == typeFloat)){
+						printf("Os dois operandos de operações relacionais devem ser de tipos iguais\n");
+						exit(1);
+					}
+				} else if (no->opr.op[1]->type == typeOpr && no->opr.op[0]->type != typeOpr){
+					if ((hasFloatInOpr(no->opr.op[1]) && no->opr.op[0]->type != typeFloat) || (!hasFloatInOpr(no->opr.op[1]) && no->opr.op[0]->type == typeFloat)){
+						printf("Os dois operandos de operações relacionais devem ser de tipos iguais\n");
+						exit(1);
+					}
+				} else if (no->opr.op[0]->type == typeOpr && no->opr.op[1]->type == typeOpr){
+					if ((hasFloatInOpr(no->opr.op[0]) && !hasFloatInOpr(no->opr.op[1])) || (!hasFloatInOpr(no->opr.op[0]) && hasFloatInOpr(no->opr.op[1]))){
+						printf("Os dois operandos de operações relacionais devem ser de tipos iguais\n");
+						exit(1);
+					}
+				}else if (no->opr.op[0]->type != no->opr.op[1]->type){
+					if (no->opr.op[0]->type == typeInt && no->opr.op[1]->type == typeFloat){
+						no->opr.op[1]->type = typeInt;
+						no->opr.op[1]->inteiro.val = (int)no->opr.op[1]->real.val;
+						printf("Aviso:Tipo float sendo atribuído a tipo int\n");
+					} else if (no->opr.op[0]->type == typeFloat && no->opr.op[1]->type == typeInt){
+						no->opr.op[1]->type = typeFloat;
+						no->opr.op[1]->real.val = (float)no->opr.op[1]->inteiro.val;
+						printf("Aviso:Tipo int sendo atribuído a tipo float\n");
+					}
+				} 
 			}
 		} else if (opr == SIM_ADICAO || opr == SIM_SUBTRACAO || opr == SIM_MULTIPLICACAO || opr == SIM_DIVISAO || opr == SIM_IGUALIGUAL || opr == SIM_DIFERENTE || opr == SIM_MAIORQUE || opr == SIM_MENORQUE || opr == SIM_MAIOROUIGUAL || opr == SIM_MENOROUIGUAL){
 			if (no->opr.op[0]->id.tipo == typeString){

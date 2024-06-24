@@ -1,11 +1,14 @@
 int fat(float d){
-    int a;
+    float a;
     float b;
     a = 2.2;
-    b = fat(2);
+    fat(a);
     return 2;
 }
 
 {
-    string a;
+    float a;
+    if (a && a){
+        print(a);
+    }
 }

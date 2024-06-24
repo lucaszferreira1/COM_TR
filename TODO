@@ -1,27 +1,7 @@
-1. Consertar operações, 2 + 2 + 2.0, é lido como int
-Sugestão: Criar uma função recursiva que funcione
+1. TESTAR
 
 
-2. TESTAR
+2. Traduzir a linguagem retornada para assembly
 
 
-3. Análise Semântica (Ver Atividade no Moodle)
-
-
-4. Traduzir a linguagem retornada para assembly
-
-
-5. (Opcional) Refatorar o .y para que as funções no final do arquivo fiquem em um arquivo separado para melhor organização
-
-
-
-•Quando uma variável declarada como double receber o valor de uma expressão
-de tipo int, o resultado da expressão deve ser convertido para o tipo double. Isso
-é válido para comandos de atribuição, passagem de parâmetros em chamadas de
-funções e para o retorno de funções.
-
-•Quando uma variável declarada como int receber o valor de uma expressão de tipo
-double, o resultado da expressão deve ser convertido para o tipo int, nesse caso
-deve ser emitida uma mensagem de advertência. Isso é válido para comandos de
-atribuição, passagem de parâmetros em chamadas de funções e para o retorno de
-funções.
+3. (Opcional) Refatorar o .y para que as funções no final do arquivo fiquem em um arquivo separado para melhor organização
