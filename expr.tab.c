@@ -1591,7 +1591,7 @@ yyreduce:
 
   case 5: /* Main: %empty  */
 #line 109 "expr.y"
-      {lookupFunc("main");}
+      {tp_fun = TIPO_INT; lookupFunc("main");}
 #line 1596 "expr.tab.c"
     break;
 

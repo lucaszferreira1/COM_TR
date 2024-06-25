@@ -55,5 +55,5 @@ void imprimir(string s, float r)
     print("Teste");
   }while(1);
   imprimir("teste:", a);
-  return ;
+  return 1;
 }

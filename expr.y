@@ -106,7 +106,7 @@ Programa: ListaFuncoes Main BlocoPrincipal YYEOF {AddFuncao($1, criaFuncao(TIPO_
 	| Main BlocoPrincipal YYEOF {printFuncao(criaFuncao(TIPO_INT, "main", NULL, $2));}
 	| YYEOF {exit(0);}
 	;
-Main: {lookupFunc("main");}
+Main: {tp_fun = TIPO_INT; lookupFunc("main");}
 	;
 ListaFuncoes: ListaFuncoes Funcao {AddFuncao($1, $2);$$ = $1;}
 	| Funcao {$$ = $1;}
