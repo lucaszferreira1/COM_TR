@@ -80,14 +80,16 @@ extern int yydebug;
     COM_ENQUANTO = 281,            /* COM_ENQUANTO  */
     COM_IMPRIME = 282,             /* COM_IMPRIME  */
     COM_LER = 283,                 /* COM_LER  */
-    TIPO_VOID = 284,               /* TIPO_VOID  */
-    TIPO_INT = 285,                /* TIPO_INT  */
-    TIPO_STRING = 286,             /* TIPO_STRING  */
-    TIPO_FLOAT = 287,              /* TIPO_FLOAT  */
-    TID = 288,                     /* TID  */
-    CONS_INT = 289,                /* CONS_INT  */
-    CONS_LITERAL = 290,            /* CONS_LITERAL  */
-    CONS_FLOAT = 291               /* CONS_FLOAT  */
+    COM_PARA = 284,                /* COM_PARA  */
+    COM_FACA = 285,                /* COM_FACA  */
+    TIPO_VOID = 286,               /* TIPO_VOID  */
+    TIPO_INT = 287,                /* TIPO_INT  */
+    TIPO_STRING = 288,             /* TIPO_STRING  */
+    TIPO_FLOAT = 289,              /* TIPO_FLOAT  */
+    TID = 290,                     /* TID  */
+    CONS_INT = 291,                /* CONS_INT  */
+    CONS_LITERAL = 292,            /* CONS_LITERAL  */
+    CONS_FLOAT = 293               /* CONS_FLOAT  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -110,7 +112,7 @@ union YYSTYPE
 	Declaracao *declaracao;
 	ListaDecl *listadecl;
 
-#line 113 "expr.tab.h"
+#line 115 "expr.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

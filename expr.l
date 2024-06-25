@@ -36,6 +36,8 @@ ws	{delim}+
 "while" {return COM_ENQUANTO;}
 "print" {return COM_IMPRIME;}
 "read" {return COM_LER;}
+"for" {return COM_PARA;}
+"do" {return COM_FACA;}
 
 "+"	{return SIM_ADICAO;}
 "-"	{return SIM_SUBTRACAO;}

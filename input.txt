@@ -10,7 +10,7 @@ float maior (float a, float b)
 int fat (int n)
 {
   int f;
-  
+  f = fat(f);
   f = 2;
   if (1 + 2){
     print(n);
@@ -51,6 +51,9 @@ void imprimir(string s, float r)
   read (num);
   x = fat (4.5);
   a = maior (2.5, 10);
-  imprimir("teste:");
+  do{
+    print("Teste");
+  }while(1);
+  imprimir("teste:", a);
   return ;
 }

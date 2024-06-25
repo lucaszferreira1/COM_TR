@@ -78,6 +78,8 @@ int tp_fun;
 %token COM_ENQUANTO
 // Print e Read
 %token COM_IMPRIME COM_LER
+// For e Do (While)
+%token COM_PARA COM_FACA
 
 // Tipos void, int, literal, string e float
 %token TIPO_VOID TIPO_INT TIPO_STRING TIPO_FLOAT
@@ -91,7 +93,7 @@ int tp_fun;
 %left SIM_ADICAO SIM_SUBTRACAO
 %left SIM_MULTIPLICACAO SIM_DIVISAO
 
-%type <nPtr> Expr Expra Exprl Exprr Termo Fator Parametro Comando CmdIf CmdWhile CmdAtrib CmdWrite CmdRead ChamadaProc Retorno ListaParametros ChamaFuncao
+%type <nPtr> Expr Expra Exprl Exprr Termo Fator Parametro Comando CmdIf CmdWhile CmdAtrib CmdWrite CmdRead CmdFor CmdDo ChamadaProc Retorno ListaParametros ChamaFuncao
 %type <integer> Tipo TipoRetorno
 %type <item> ListaCmd Bloco ListaId DeclParametros
 %type <listadecl> Declaracoes
@@ -143,11 +145,13 @@ ListaCmd: ListaCmd Comando {AddItem($1, criaItem($2)); $$ = $1;}
 	;
 Comando: CmdIf {$$ = $1;}
 	| CmdWhile {$$ = $1;}
-	| CmdAtrib {$$ = $1;}
+	| CmdAtrib SIM_FIM{$$ = $1;}
 	| CmdWrite {$$ = $1;}
 	| CmdRead {$$ = $1;}
 	| ChamadaProc {$$ = $1;}
 	| Retorno {$$ = $1;}
+	| CmdFor {$$ = $1;}
+	| CmdDo {$$ = $1;}
 	;
 Retorno: COM_RETORNO Expra SIM_FIM {$$ = criaOpr(COM_RETORNO, NULL, 1, $2);}
 	| COM_RETORNO CONS_LITERAL SIM_FIM {$$ = criaOpr(COM_RETORNO, NULL, 1, criaString($2));}
@@ -158,14 +162,20 @@ CmdIf: COM_SE SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco {$$ = criaOpr(CO
 	;
 CmdWhile: COM_ENQUANTO SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco {$$ = criaOpr(COM_ENQUANTO, criaRepeticao($5, NULL), 1, $3);}
 	;
-CmdAtrib: TID SIM_IGUAL Expra SIM_FIM {$$ = criaOpr(SIM_IGUAL, NULL, 2, criaId($1, 0), $3);}
-	| TID SIM_IGUAL CONS_LITERAL SIM_FIM {$$ = criaOpr(SIM_IGUAL, NULL, 2, criaId($1, 0), criaString($3));}
+CmdAtrib: TID SIM_IGUAL Expra {$$ = criaOpr(SIM_IGUAL, NULL, 2, criaId($1, 0), $3);}
+	| TID SIM_IGUAL CONS_LITERAL {$$ = criaOpr(SIM_IGUAL, NULL, 2, criaId($1, 0), criaString($3));}
+	| TID SIM_ADICAO SIM_ADICAO {$$ = criaOpr(SIM_IGUAL, NULL, 2, criaId($1, 0), criaOpr(SIM_ADICAO, NULL, 2, criaId($1, 0), criaInteger(1)));}
+	| TID SIM_SUBTRACAO SIM_SUBTRACAO {$$ = criaOpr(SIM_IGUAL, NULL, 2, criaId($1, 0), criaOpr(SIM_SUBTRACAO, NULL, 2, criaId($1, 0), criaInteger(1)));}
 	;
 CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES SIM_FIM {$$ = criaOpr(COM_IMPRIME, NULL, 1, $3);}
 	| COM_IMPRIME SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES SIM_FIM {$$ = criaOpr(COM_IMPRIME, NULL, 1, $3);}
 	| COM_IMPRIME SIM_ABREPARENTESES CONS_LITERAL SIM_FECHAPARENTESES SIM_FIM {$$ = criaOpr(COM_IMPRIME, NULL, 1, criaString($3));}
 	;
 CmdRead: COM_LER SIM_ABREPARENTESES TID SIM_FECHAPARENTESES SIM_FIM {$$ = criaOpr(COM_LER, NULL, 1, criaId($3, 0));}
+	;
+CmdFor: COM_PARA SIM_ABREPARENTESES CmdAtrib SIM_FIM Expr SIM_FIM CmdAtrib SIM_FECHAPARENTESES Bloco {$$ = criaOpr(COM_PARA, criaRepeticao($9, NULL), 3, $3, $5, $7);}
+	;
+CmdDo: COM_FACA Bloco COM_ENQUANTO SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES SIM_FIM {$$ = criaOpr(COM_FACA, criaRepeticao($2, NULL), 1, $5);}
 	;
 ChamadaProc: ChamaFuncao SIM_FIM {$$ = $1;}
 	;
@@ -1075,6 +1085,22 @@ void printNo(tipoNo *cmd){
 					printNo(cmd->opr.op[0]);
 					printf(")");
 					break;
+				case COM_PARA:
+					printf("for(");
+					printNo(cmd->opr.op[0]);
+					printf(";");
+					printNo(cmd->opr.op[1]);
+					printf(";");
+					printNo(cmd->opr.op[2]);
+					printf("){\n");
+					printComandos(cmd->opr.rep->cmds);
+					printf("}");
+				case COM_FACA:
+					printf("do{\n");
+					printComandos(cmd->opr.rep->cmds);
+					printf("}while(");
+					printNo(cmd->opr.op[0]);
+					printf(")");
 			}
 			break;
 	}
