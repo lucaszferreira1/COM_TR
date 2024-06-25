@@ -1,14 +1,56 @@
-int fat(float d){
-    float a;
-    float b;
-    a = 2.2;
-    fat(a);
-    return 2;
+float maior (float a, float b)
+{
+  float m;
+  
+  if (a > b) {m = a;}
+  else {m = b;}
+  return m;
+}
+
+int fat (int n)
+{
+  int f;
+  
+  f = 2;
+  if (1 + 2){
+    print(n);
+  }
+  while (1 + 0)
+  { 
+    f = f * n;
+    n = n - 1;
+  }
+  return f;
+}
+
+int somatorio (int n)
+{
+   int i; 
+   float s;
+   
+   s = 0.2;
+   
+   return s;
+}   
+   
+
+void imprimir(string s, float r)
+{
+  
+  
+  print (s);
+  print (r);
+  return 0;
 }
 
 {
-    float a;
-    if (a && a){
-        print(a);
-    }
+  int x, num;
+  float a;
+  
+  print("Numero:");
+  read (num);
+  x = fat (4.5);
+  a = maior (2.5, 10);
+  imprimir("teste:");
+  return ;
 }

@@ -101,10 +101,11 @@ int tp_fun;
 
 %%
 Programa: ListaFuncoes Main BlocoPrincipal YYEOF {AddFuncao($1, criaFuncao(TIPO_INT, "main", NULL, $3));printFuncao($1);}
-	| Main BlocoPrincipal YYEOF {printFuncao(criaFuncao(285, "main", NULL, $2));}
+	| Main BlocoPrincipal YYEOF {printFuncao(criaFuncao(TIPO_INT, "main", NULL, $2));}
 	| YYEOF {exit(0);}
 	;
-Main: {lookupFunc("main");};
+Main: {lookupFunc("main");}
+	;
 ListaFuncoes: ListaFuncoes Funcao {AddFuncao($1, $2);$$ = $1;}
 	| Funcao {$$ = $1;}
 	;
@@ -289,7 +290,6 @@ tipoNo* lookupFunc(char* n){
 	} 
 	printf("Função não foi encontrada.\n");
 	exit(1);
-
 }
 
 eTipo getTipoOpr(tipoNo *no){
@@ -358,8 +358,9 @@ void comparaParametros(char* n, Item* prms, tipoNo *op){
 		if (prms->prox != NULL && op->type != typeOpr){ // < nParametros
 			printf("Número de parâmetros passados para a função %s está abaixo do número de parâmetros declarados\n", n);
 			exit(1);
-		} else if (prms->prox == NULL && op->type == typeOpr){ // > nParametros
-			if (op->opr.opr == 2){
+		}
+		if (prms->prox == NULL && op->type == typeOpr){ // > nParametros
+			if (op->opr.op[0]){
 				printf("Número de parâmetros passados para a função %s excede o número de parâmetros declarados\n", n);
 				exit(1);
 			}
@@ -412,11 +413,33 @@ void detectaFloatInt(tipoNo *no){
 	}
 }
 
+void debugNo(tipoNo *no){
+	switch(no->type){
+		case typeId:
+			printf("%s %s\n", getIdTipo(no->id.tipo), no->id.name);
+			break;
+		case typeOpr:
+			printf("Opr: %d %d operandos\n", no->opr.opr, no->opr.nOps);
+			for (int i=0;i<no->opr.nOps;i++)
+				debugNo(no->opr.op[i]);
+			break;
+		case typeInt:
+			printf("Int: %d\n", no->inteiro.val);
+			break;
+		case typeFloat:
+			printf("Float: %f\n", no->real.val);
+			break;
+		case typeString:
+			printf("String: %s\n", no->string.str);
+			break;
+	}
+}
+
 void detectaErros(int opr, tipoNo *no){
 	if (no->type == typeOpr){
 		if (opr == COM_RETORNO){
 			if (no->opr.op[0]){
-				if (no->opr.op[0]->type == typeId){
+				if (no->opr.op[0]->type == typeId && temp_fun->no != NULL){
 					if (no->opr.op[0]->id.tipo != temp_fun->no->id.tipo){
 						printf("Função %s tipo %s está retornando um valor %s\n", temp_fun->no->id.name, getIdTipo(temp_fun->no->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
 						exit(1);
@@ -471,9 +494,8 @@ void detectaErros(int opr, tipoNo *no){
 					no->opr.op[1]->type = typeFloat;
 					no->opr.op[1]->real.val = (float)no->opr.op[1]->inteiro.val;
 					printf("Aviso:Tipo int sendo atribuído a tipo float\n");
-				} else if (no->opr.op[0]->id.tipo != no->opr.op[1]->type){
-					printf("Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
-					exit(1);
+				} else if (no->opr.op[0]->id.tipo != no->opr.op[1]->id.tipo){
+					printf("Aviso:Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
 				}
 			}
 		} else if (opr == SIM_E || opr == SIM_OU){
@@ -553,12 +575,18 @@ void detectaErros(int opr, tipoNo *no){
 				} 
 			}
 		} else if (opr == SIM_ADICAO || opr == SIM_SUBTRACAO || opr == SIM_MULTIPLICACAO || opr == SIM_DIVISAO || opr == SIM_IGUALIGUAL || opr == SIM_DIFERENTE || opr == SIM_MAIORQUE || opr == SIM_MENORQUE || opr == SIM_MAIOROUIGUAL || opr == SIM_MENOROUIGUAL){
-			if (no->opr.op[0]->id.tipo == typeString){
-				printf("Strings só podem ser usadas em expressões relacionais\n");
-				exit(1);
-			} else if (no->opr.op[1] != NULL){
+			if (no->opr.op[0]->type == typeId){
+				if (no->opr.op[0]->id.tipo == typeString){
+					printf("Strings só podem ser usadas em expressões relacionais\n");
+					exit(1);
+				}
+			}
+			if (no->opr.op[1] != NULL){
 				if (no->opr.op[1]->type == typeId){
 					if (no->opr.op[1]->id.tipo == typeString){
+						printf("Strings só podem ser usadas em expressões relacionais\n");
+						exit(1);
+					} else if (no->opr.op[1]->type == typeString){
 						printf("Strings só podem ser usadas em expressões relacionais\n");
 						exit(1);
 					}
@@ -567,26 +595,30 @@ void detectaErros(int opr, tipoNo *no){
 					exit(1);
 				}
 			}
+			if (no->opr.op[0]->type == typeString){
+				printf("Strings só podem ser usadas em expressões relacionais\n");
+				exit(1);
+			}
 			detectaFloatInt(no);
-		} else if (opr = 1){
-			if (no->opr.op[0]->type == typeId){
-				if (temp_fun->no){
-					if (!strcmp(no->opr.op[0]->id.name, temp_fun->no->id.name)) // Recursiva
-						comparaParametros(temp_fun->no->id.name, temp_fun->prms, no->opr.op[1]);
-				} else {
-					Funcao *i = tbl_fun;
-					while(i != NULL){
-						if (!strcmp(i->no->id.name, no->opr.op[0]->id.name)){
-							comparaParametros(no->opr.op[0]->id.name, i->prms, no->opr.op[1]);					
-							break;
-						}
-						i = i->prox;
-					}
+		} else if (opr == 1){
+			if (temp_fun->no){
+				if (!strcmp(no->opr.op[0]->id.name, temp_fun->no->id.name)){
+					comparaParametros(temp_fun->no->id.name, temp_fun->prms, no->opr.op[1]);
+					return;
 				}
 			}
-		}
+			Funcao *f = tbl_fun;
+			while (f != NULL){
+				if (!strcmp(f->no->id.name, no->opr.op[0]->id.name)){
+					comparaParametros(no->opr.op[0]->id.name, f->prms, no->opr.op[1]);
+					return;
+				}
+				f = f->prox;
+			}
+		}	
 	}
 }
+
 
 int inFila(Item *f, char *name){
 	while(f){
@@ -598,10 +630,12 @@ int inFila(Item *f, char *name){
 }
 
 int inFilaFunc(Funcao* f, char *name){
-	while(f){
-		if (!strcmp(f->no->id.name, name))
-			return 1;
-		f = f->prox;
+	if (f != NULL){
+		while(f){
+			if (!strcmp(f->no->id.name, name))
+				return 1;
+			f = f->prox;
+		}
 	}
 	return 0;
 }
@@ -687,7 +721,7 @@ tipoNo *criaOpr(int opr, Repeticao *rep, int nOps, ...){
 		no->opr.op[i] = va_arg(ap, tipoNo*);
 	}
 	va_end(ap);
-	
+
 	detectaErros(opr, no);
 
 	return no;
@@ -808,7 +842,6 @@ Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
 	f->no = n;
 	f->syms = tbl_sim;
 	tbl_sim = NULL;
-	f->no->id.i = 0;
 	f->prms = prms;
 	f->blc = blc;
 	if (inFilaFunc(tbl_fun, nome)){
@@ -816,10 +849,18 @@ Funcao* criaFuncao(int tipo, char *nome, Item *prms, Bloco *blc){
 		exit(1);
 	}
 	temp_fun = NULL;
-	if (tbl_fun == NULL)
+	if (tbl_fun == NULL){
+		tbl_fun = malloc(sizeof(Funcao));
+		if (tbl_fun == NULL){
+			printf("Erro ao alocar memória para a tabela de funções");
+			exit(1);
+		}
+		f->no->id.i = 0;
 		tbl_fun = f;
-	else
+	} else{
 		AddFuncao(tbl_fun, f);
+		f->no->id.i--;
+	}
 	return f;
 }
 
@@ -896,6 +937,7 @@ void printDeclaracoes(ListaDecl *decl){
 }
 
 void printNo(tipoNo *cmd){
+	
 	switch(cmd->type){
 		case typeInt:
 			printf("%d", cmd->inteiro.val);
@@ -996,7 +1038,8 @@ void printNo(tipoNo *cmd){
 					break;
 				case COM_RETORNO:
 					printf("return ");
-					printNo(cmd->opr.op[0]);
+					if (cmd->opr.op[0] != NULL)
+						printNo(cmd->opr.op[0]);
 					break;
 				case COM_SE:
 					printf("if(");
