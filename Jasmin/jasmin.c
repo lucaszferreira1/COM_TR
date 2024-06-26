@@ -4,6 +4,21 @@
 #include "expr.tab.h"
 #include "tipoNo.h"
 
+int id_cont, label_cont;
+
+int getNumItems(Item *i){
+	int cont = 0;
+	while(i != NULL){
+		cont++;
+		i = i->prox;
+	}
+	return cont;
+}
+
+void printLabel(){
+	fprintf("L%d", label_cont);
+	label_cont++;
+}
 
 void printParametros(Item *prms){
 	printf("%s ", getIdTipo(prms->arv->id.tipo));
@@ -40,25 +55,41 @@ void printNo(tipoNo *cmd){
 	
 	switch(cmd->type){
 		case typeInt:
+			fprintf("ldc %d\n", cmd->inteiro.val);
 			printf("%d", cmd->inteiro.val);
 			break;
 		case typeFloat:
+			fprintf("ldc %f\n", cmd->real.val);
 			printf("%f", cmd->real.val);
 			break;
 		case typeString:
+			fprintf("ldc %s\n", cmd->string.str);
 			printf("%s", cmd->string.str);
 			break;
 		case typeId:
+			switch (cmd->id.tipo){
+				case typeInt:
+					fprintf("iload %d\n", cmd->id.i);
+					break;
+				case typeFloat: 
+					fprintf("fload %d\n", cmd->id.i);
+					break;
+				case typeString:
+					fprintf("aload %d\n", cmd->id.i);
+					break;
+			}
 			printf("%s", cmd->id.name);
 			break;
 		case typeOpr:
 			switch(cmd->opr.opr){
 				case 1: // Chama Função
-					printNo(cmd->opr.op[0]);
-					printf("(");
-					if (cmd->opr.op[1])
-						printNo(cmd->opr.op[1]);
-					printf(")");
+					fprintf("invokestatic output/%s", cmd->opr.op[0]->id.name);
+					// printNo(cmd->opr.op[0]);
+					// printf("(");
+					// if (cmd->opr.op[1]){	
+					// 	printNo(cmd->opr.op[1]);
+					// }
+					// printf(")");
 					break;
 				case 2: // Parâmetros da Função
 					printNo(cmd->opr.op[0]);
@@ -137,9 +168,19 @@ void printNo(tipoNo *cmd){
 					printNo(cmd->opr.op[0]);
 					break;
 				case COM_RETORNO:
-					printf("return ");
-					if (cmd->opr.op[0] != NULL)
-						printNo(cmd->opr.op[0]);
+					if (cmd->opr.op[0] != NULL){
+						if (cmd->opr.op[0]->type == typeInt || cmd->opr.op[0]->id.tipo == typeInt)
+							fprintf("ireturn\n");
+						else if (cmd->opr.op[0]->type == typeFloat || cmd->opr.op[0]->id.tipo == typeFloat)
+							fprintf("freturn\n");
+						else if (cmd->opr.op[0]->type == typeString || cmd->opr.op[0]->id.tipo == typeString)
+							fprintf("areturn\n");
+					} else {
+						fprintf("return\n");
+					}
+					// printf("return ");
+					// if (cmd->opr.op[0] != NULL)
+					// 	printNo(cmd->opr.op[0]);
 					break;
 				case COM_SE:
 					printf("if(");
@@ -216,19 +257,20 @@ void printFuncao(Funcao *f){
     if (!strcmpr(f->no->id.name, "main")){
         fprintf("
         .method public static main([Ljava/lang/String;)V
-        .limit locals 100\n.limit stack 100
+        .limit locals %d\n
+		.limit stack 100
         ; code start
-        ");
+        ", getNumItems(f->tbl->syms));
     } else {
-        // hashmap_set(fun_map, fun->name, (void*) fun);
+        // hashmap_set(fun_map, f->no->id.name, (void*) f);
         // id_map = hashmap_create(HASHMAP_BUCKET_SZ);
-        // id_cont = vector_size(fun->params);
-        // write_code(concat(".method public static ", fun->full_header));
-        // for (int i = 0; i < vector_size(fun->params); i++) {
+        // id_cont = getNumItems(f->prms);
+        // fprintf(".method public static %s", f->no->id.name);
+        // for (int i = 0; i < vector_size(f->prms); i++) {
         //     symbol* smb = vector_get(fun->params, i);
         //     hashmap_set(id_map, smb->id, (void*) smb);
         // }
-        // write_code("\t.limit locals 100");
+        // write_code("\t.limit locals %d", getNumItems(f->tbl->syms));
         // write_code("\t.limit stack 100");
     }
 	printf("%s ", getIdTipo(f->no->id.tipo));
@@ -260,10 +302,12 @@ void printFuncao(Funcao *f){
 }
 
 void printPrograma(Funcao *fun){
+	label_cont = 0;
+	id_cont = 0;
     FILE *f = fopen("output.j", "w");
     // write_code(concat(".source ", source_file");
 	fprintf("
-    .class public output/Verb\n.super java/lang/Object\n
+    .class public output\n.super java/lang/Object\n
 	.method public <init>()V
 		aload_0
 		invokenonvirtual java/lang/Object/<init>()V
@@ -272,105 +316,6 @@ void printPrograma(Funcao *fun){
     ");
 
     fprintf("
-    .method public static input_int()I
-		.limit locals 10
-		.limit stack 10
-		ldc 0
-		istore 1
-	Label1:
-		getstatic java/lang/System/in Ljava/io/InputStream;
-		invokevirtual java/io/InputStream/read()I
-		istore 2
-		iload 2
-		ldc 10
-		isub
-		ifeq Label2
-		iload 2
-		ldc 32
-		isub
-		ifeq Label2
-		iload 2
-		ldc 48
-		isub
-		ldc 10
-		iload 1
-		imul
-		iadd
-		istore 1
-		goto Label1
-	Label2:
-		iload 1
-		ireturn
-	.end method\n
-	.method public static input_float()F
-		.limit locals 10
-		.limit stack 10
-		ldc 0.0
-		fstore 1
-		ldc 0
-		istore 3
-	Label1:
-		getstatic java/lang/System/in Ljava/io/InputStream;
-		invokevirtual java/io/InputStream/read()I
-		istore 2
-		iload 2
-		ldc 10
-		isub
-		ifeq Label3
-		iload 2
-		ldc 32
-		isub
-		ifeq Label3
-		iload 2
-		ldc 46
-		isub
-		ifeq Label2
-		iload 2
-		ldc 48
-		isub
-		i2f
-		ldc 10.0
-		fload 1
-		fmul
-		fadd
-		fstore 1
-		goto Label1
-	Label2:
-		getstatic java/lang/System/in Ljava/io/InputStream;
-		invokevirtual java/io/InputStream/read()I
-		istore 2
-		iload 2
-		ldc 10
-		isub
-		ifeq Label3
-		iload 2
-		ldc 32
-		isub
-		ifeq Label3
-		iload 2
-		ldc 48
-		isub
-		i2f
-		ldc 10.0
-		fload 1
-		fmul
-		fadd
-		fstore 1
-		iinc 3 1
-		goto Label2
-	Label3:
-		iload 3
-		ifeq Label4
-		fload 1
-		ldc 10.0
-		fdiv
-		fstore 1
-		iinc 3 -1
-		goto Label3
-	Label4:
-		fload 1
-		freturn
-	.end method\n
 	.method public static output_int(I)V
 		.limit locals 5
 		.limit stack 5
