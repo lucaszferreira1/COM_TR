@@ -74,6 +74,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include "tipoNo.h"
+#include "Jasmin/jasmin.h"
 
 #define NUM_FUNCOES 128
 #define TAM_MAX_STRING 1024
@@ -97,8 +98,8 @@ Repeticao* criaRepeticao(Item *cmds, Item *senao);
 void AddListaDecl(ListaDecl *o, ListaDecl *ad);
 void AddItem(Item *o, Item *ad);
 void AddFuncao(Funcao *f1, Funcao *f2);
-void printFuncao(Funcao *f);
-void printComandos(Item *cmds);
+// void printFuncao(Funcao *f);
+// void printComandos(Item *cmds);
 tipoNo* lookupFunc(char *n);
 
 Funcao *tbl_fun;
@@ -108,7 +109,7 @@ int tp_sim;
 int tp_fun;
 
 
-#line 112 "expr.tab.c"
+#line 113 "expr.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -597,15 +598,15 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   105,   105,   106,   107,   109,   111,   112,   114,   115,
-     117,   118,   120,   121,   123,   125,   126,   127,   129,   130,
-     132,   134,   135,   136,   138,   139,   141,   143,   144,   146,
-     147,   148,   149,   150,   151,   152,   153,   154,   156,   157,
-     158,   160,   161,   163,   165,   166,   167,   168,   170,   171,
-     172,   174,   176,   178,   180,   182,   183,   185,   186,   187,
-     188,   191,   192,   193,   195,   196,   197,   198,   199,   200,
-     201,   203,   204,   205,   207,   208,   209,   211,   212,   213,
-     214,   215,   216,   218,   219,   220,   221
+       0,   106,   106,   107,   108,   110,   112,   113,   115,   116,
+     118,   119,   121,   122,   124,   126,   127,   128,   130,   131,
+     133,   135,   136,   137,   139,   140,   142,   144,   145,   147,
+     148,   149,   150,   151,   152,   153,   154,   155,   157,   158,
+     159,   161,   162,   164,   166,   167,   168,   169,   171,   172,
+     173,   175,   177,   179,   181,   183,   184,   186,   187,   188,
+     189,   192,   193,   194,   196,   197,   198,   199,   200,   201,
+     202,   204,   205,   206,   208,   209,   210,   212,   213,   214,
+     215,   216,   217,   219,   220,   221,   222
 };
 #endif
 
@@ -1572,517 +1573,517 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* Programa: ListaFuncoes Main BlocoPrincipal $end  */
-#line 105 "expr.y"
-                                                 {AddFuncao((yyvsp[-3].funcao), criaFuncao(TIPO_INT, "main", NULL, (yyvsp[-1].bloco)));printFuncao((yyvsp[-3].funcao));}
-#line 1578 "expr.tab.c"
+#line 106 "expr.y"
+                                                 {AddFuncao((yyvsp[-3].funcao), criaFuncao(TIPO_INT, "main", NULL, (yyvsp[-1].bloco)));printPrograma((yyvsp[-3].funcao));}
+#line 1579 "expr.tab.c"
     break;
 
   case 3: /* Programa: Main BlocoPrincipal $end  */
-#line 106 "expr.y"
-                                    {printFuncao(criaFuncao(TIPO_INT, "main", NULL, (yyvsp[-1].bloco)));}
-#line 1584 "expr.tab.c"
+#line 107 "expr.y"
+                                    {printPrograma(criaFuncao(TIPO_INT, "main", NULL, (yyvsp[-1].bloco)));}
+#line 1585 "expr.tab.c"
     break;
 
   case 4: /* Programa: $end  */
-#line 107 "expr.y"
+#line 108 "expr.y"
                 {exit(0);}
-#line 1590 "expr.tab.c"
+#line 1591 "expr.tab.c"
     break;
 
   case 5: /* Main: %empty  */
-#line 109 "expr.y"
+#line 110 "expr.y"
       {tp_fun = TIPO_INT; lookupFunc("main");}
-#line 1596 "expr.tab.c"
+#line 1597 "expr.tab.c"
     break;
 
   case 6: /* ListaFuncoes: ListaFuncoes Funcao  */
-#line 111 "expr.y"
+#line 112 "expr.y"
                                   {AddFuncao((yyvsp[-1].funcao), (yyvsp[0].funcao));(yyval.funcao) = (yyvsp[-1].funcao);}
-#line 1602 "expr.tab.c"
+#line 1603 "expr.tab.c"
     break;
 
   case 7: /* ListaFuncoes: Funcao  */
-#line 112 "expr.y"
+#line 113 "expr.y"
                  {(yyval.funcao) = (yyvsp[0].funcao);}
-#line 1608 "expr.tab.c"
+#line 1609 "expr.tab.c"
     break;
 
   case 8: /* Funcao: TipoRetorno TID SIM_ABREPARENTESES DeclParametros SIM_FECHAPARENTESES BlocoPrincipal  */
-#line 114 "expr.y"
+#line 115 "expr.y"
                                                                                              {(yyval.funcao) = criaFuncao((yyvsp[-5].integer), (yyvsp[-4].id), (yyvsp[-2].item), (yyvsp[0].bloco));}
-#line 1614 "expr.tab.c"
+#line 1615 "expr.tab.c"
     break;
 
   case 9: /* Funcao: TipoRetorno TID SIM_ABREPARENTESES SIM_FECHAPARENTESES BlocoPrincipal  */
-#line 115 "expr.y"
+#line 116 "expr.y"
                                                                                 {(yyval.funcao) = criaFuncao((yyvsp[-4].integer), (yyvsp[-3].id), NULL, (yyvsp[0].bloco));}
-#line 1620 "expr.tab.c"
+#line 1621 "expr.tab.c"
     break;
 
   case 10: /* TipoRetorno: Tipo  */
-#line 117 "expr.y"
+#line 118 "expr.y"
                   {tp_fun = (yyvsp[0].integer);(yyval.integer) = (yyvsp[0].integer);}
-#line 1626 "expr.tab.c"
+#line 1627 "expr.tab.c"
     break;
 
   case 11: /* TipoRetorno: TIPO_VOID  */
-#line 118 "expr.y"
+#line 119 "expr.y"
                     {tp_fun = TIPO_VOID;(yyval.integer) = TIPO_VOID;}
-#line 1632 "expr.tab.c"
+#line 1633 "expr.tab.c"
     break;
 
   case 12: /* DeclParametros: DeclParametros SIM_VIRGULA Parametro  */
-#line 120 "expr.y"
+#line 121 "expr.y"
                                                      {AddItem(temp_fun->prms, criaItem((yyvsp[0].nPtr)));AddItem((yyvsp[-2].item), criaItem((yyvsp[0].nPtr)));(yyval.item) = (yyvsp[-2].item);}
-#line 1638 "expr.tab.c"
+#line 1639 "expr.tab.c"
     break;
 
   case 13: /* DeclParametros: Parametro  */
-#line 121 "expr.y"
+#line 122 "expr.y"
                     {temp_fun->prms = criaItem((yyvsp[0].nPtr));(yyval.item) = criaItem((yyvsp[0].nPtr));}
-#line 1644 "expr.tab.c"
+#line 1645 "expr.tab.c"
     break;
 
   case 14: /* Parametro: Tipo TID  */
-#line 123 "expr.y"
+#line 124 "expr.y"
                     {(yyval.nPtr) = criaId((yyvsp[0].id), (yyvsp[-1].integer));}
-#line 1650 "expr.tab.c"
+#line 1651 "expr.tab.c"
     break;
 
   case 15: /* BlocoPrincipal: SIM_ABRECHAVES Declaracoes ListaCmd SIM_FECHACHAVES  */
-#line 125 "expr.y"
+#line 126 "expr.y"
                                                                     {(yyval.bloco) = criaBloco((yyvsp[-2].listadecl), (yyvsp[-1].item));}
-#line 1656 "expr.tab.c"
+#line 1657 "expr.tab.c"
     break;
 
   case 16: /* BlocoPrincipal: SIM_ABRECHAVES Declaracoes SIM_FECHACHAVES  */
-#line 126 "expr.y"
+#line 127 "expr.y"
                                                      {(yyval.bloco) = criaBloco((yyvsp[-1].listadecl), NULL);}
-#line 1662 "expr.tab.c"
+#line 1663 "expr.tab.c"
     break;
 
   case 17: /* BlocoPrincipal: SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES  */
-#line 127 "expr.y"
+#line 128 "expr.y"
                                                   {(yyval.bloco) = criaBloco(NULL, (yyvsp[-1].item));}
-#line 1668 "expr.tab.c"
+#line 1669 "expr.tab.c"
     break;
 
   case 18: /* Declaracoes: Declaracoes Declaracao  */
-#line 129 "expr.y"
+#line 130 "expr.y"
                                     {AddListaDecl((yyvsp[-1].listadecl), criaListaDecl((yyvsp[0].declaracao)));(yyval.listadecl) = (yyvsp[-1].listadecl);}
-#line 1674 "expr.tab.c"
+#line 1675 "expr.tab.c"
     break;
 
   case 19: /* Declaracoes: Declaracao  */
-#line 130 "expr.y"
+#line 131 "expr.y"
                      {(yyval.listadecl) = criaListaDecl((yyvsp[0].declaracao));}
-#line 1680 "expr.tab.c"
+#line 1681 "expr.tab.c"
     break;
 
   case 20: /* Declaracao: Tipo ListaId SIM_FIM  */
-#line 132 "expr.y"
+#line 133 "expr.y"
                                  {(yyval.declaracao) = criaDeclaracao((yyvsp[-2].integer), (yyvsp[-1].item));}
-#line 1686 "expr.tab.c"
+#line 1687 "expr.tab.c"
     break;
 
   case 21: /* Tipo: TIPO_INT  */
-#line 134 "expr.y"
+#line 135 "expr.y"
                {tp_sim = TIPO_INT;(yyval.integer) = TIPO_INT;}
-#line 1692 "expr.tab.c"
+#line 1693 "expr.tab.c"
     break;
 
   case 22: /* Tipo: TIPO_STRING  */
-#line 135 "expr.y"
+#line 136 "expr.y"
                       {tp_sim = TIPO_STRING;(yyval.integer) = TIPO_STRING;}
-#line 1698 "expr.tab.c"
+#line 1699 "expr.tab.c"
     break;
 
   case 23: /* Tipo: TIPO_FLOAT  */
-#line 136 "expr.y"
+#line 137 "expr.y"
                      {tp_sim = TIPO_FLOAT;(yyval.integer) = TIPO_FLOAT;}
-#line 1704 "expr.tab.c"
+#line 1705 "expr.tab.c"
     break;
 
   case 24: /* ListaId: ListaId SIM_VIRGULA TID  */
-#line 138 "expr.y"
+#line 139 "expr.y"
                                  {AddItem((yyvsp[-2].item), criaItem(criaId((yyvsp[0].id), 2)));(yyval.item) = (yyvsp[-2].item);}
-#line 1710 "expr.tab.c"
+#line 1711 "expr.tab.c"
     break;
 
   case 25: /* ListaId: TID  */
-#line 139 "expr.y"
+#line 140 "expr.y"
               {(yyval.item) = criaItem(criaId((yyvsp[0].id), 2));}
-#line 1716 "expr.tab.c"
+#line 1717 "expr.tab.c"
     break;
 
   case 26: /* Bloco: SIM_ABRECHAVES ListaCmd SIM_FECHACHAVES  */
-#line 141 "expr.y"
+#line 142 "expr.y"
                                                {(yyval.item) = (yyvsp[-1].item);}
-#line 1722 "expr.tab.c"
+#line 1723 "expr.tab.c"
     break;
 
   case 27: /* ListaCmd: ListaCmd Comando  */
-#line 143 "expr.y"
+#line 144 "expr.y"
                            {AddItem((yyvsp[-1].item), criaItem((yyvsp[0].nPtr))); (yyval.item) = (yyvsp[-1].item);}
-#line 1728 "expr.tab.c"
+#line 1729 "expr.tab.c"
     break;
 
   case 28: /* ListaCmd: Comando  */
-#line 144 "expr.y"
+#line 145 "expr.y"
                   {(yyval.item) = criaItem((yyvsp[0].nPtr));}
-#line 1734 "expr.tab.c"
+#line 1735 "expr.tab.c"
     break;
 
   case 29: /* Comando: CmdIf  */
-#line 146 "expr.y"
+#line 147 "expr.y"
                {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 1740 "expr.tab.c"
+#line 1741 "expr.tab.c"
     break;
 
   case 30: /* Comando: CmdWhile  */
-#line 147 "expr.y"
+#line 148 "expr.y"
                    {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 1746 "expr.tab.c"
+#line 1747 "expr.tab.c"
     break;
 
   case 31: /* Comando: CmdAtrib SIM_FIM  */
-#line 148 "expr.y"
+#line 149 "expr.y"
                           {(yyval.nPtr) = (yyvsp[-1].nPtr);}
-#line 1752 "expr.tab.c"
+#line 1753 "expr.tab.c"
     break;
 
   case 32: /* Comando: CmdWrite  */
-#line 149 "expr.y"
+#line 150 "expr.y"
                    {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 1758 "expr.tab.c"
+#line 1759 "expr.tab.c"
     break;
 
   case 33: /* Comando: CmdRead  */
-#line 150 "expr.y"
+#line 151 "expr.y"
                   {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 1764 "expr.tab.c"
+#line 1765 "expr.tab.c"
     break;
 
   case 34: /* Comando: ChamadaProc  */
-#line 151 "expr.y"
+#line 152 "expr.y"
                       {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 1770 "expr.tab.c"
+#line 1771 "expr.tab.c"
     break;
 
   case 35: /* Comando: Retorno  */
-#line 152 "expr.y"
+#line 153 "expr.y"
                   {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 1776 "expr.tab.c"
+#line 1777 "expr.tab.c"
     break;
 
   case 36: /* Comando: CmdFor  */
-#line 153 "expr.y"
+#line 154 "expr.y"
                  {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 1782 "expr.tab.c"
+#line 1783 "expr.tab.c"
     break;
 
   case 37: /* Comando: CmdDo  */
-#line 154 "expr.y"
+#line 155 "expr.y"
                 {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 1788 "expr.tab.c"
+#line 1789 "expr.tab.c"
     break;
 
   case 38: /* Retorno: COM_RETORNO Expra SIM_FIM  */
-#line 156 "expr.y"
+#line 157 "expr.y"
                                    {(yyval.nPtr) = criaOpr(COM_RETORNO, NULL, 1, (yyvsp[-1].nPtr));}
-#line 1794 "expr.tab.c"
+#line 1795 "expr.tab.c"
     break;
 
   case 39: /* Retorno: COM_RETORNO CONS_LITERAL SIM_FIM  */
-#line 157 "expr.y"
+#line 158 "expr.y"
                                            {(yyval.nPtr) = criaOpr(COM_RETORNO, NULL, 1, criaString((yyvsp[-1].string)));}
-#line 1800 "expr.tab.c"
+#line 1801 "expr.tab.c"
     break;
 
   case 40: /* Retorno: COM_RETORNO SIM_FIM  */
-#line 158 "expr.y"
+#line 159 "expr.y"
                               {(yyval.nPtr) = criaOpr(COM_RETORNO, NULL, 0);}
-#line 1806 "expr.tab.c"
+#line 1807 "expr.tab.c"
     break;
 
   case 41: /* CmdIf: COM_SE SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco  */
-#line 160 "expr.y"
+#line 161 "expr.y"
                                                                 {(yyval.nPtr) = criaOpr(COM_SE, criaRepeticao((yyvsp[0].item), NULL), 1, (yyvsp[-2].nPtr));}
-#line 1812 "expr.tab.c"
+#line 1813 "expr.tab.c"
     break;
 
   case 42: /* CmdIf: COM_SE SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco COM_SENAO Bloco  */
-#line 161 "expr.y"
+#line 162 "expr.y"
                                                                                    {(yyval.nPtr) = criaOpr(COM_SENAO, criaRepeticao((yyvsp[-2].item), (yyvsp[0].item)), 1, (yyvsp[-4].nPtr));}
-#line 1818 "expr.tab.c"
+#line 1819 "expr.tab.c"
     break;
 
   case 43: /* CmdWhile: COM_ENQUANTO SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES Bloco  */
-#line 163 "expr.y"
+#line 164 "expr.y"
                                                                          {(yyval.nPtr) = criaOpr(COM_ENQUANTO, criaRepeticao((yyvsp[0].item), NULL), 1, (yyvsp[-2].nPtr));}
-#line 1824 "expr.tab.c"
+#line 1825 "expr.tab.c"
     break;
 
   case 44: /* CmdAtrib: TID SIM_IGUAL Expra  */
-#line 165 "expr.y"
+#line 166 "expr.y"
                               {(yyval.nPtr) = criaOpr(SIM_IGUAL, NULL, 2, criaId((yyvsp[-2].id), 0), (yyvsp[0].nPtr));}
-#line 1830 "expr.tab.c"
+#line 1831 "expr.tab.c"
     break;
 
   case 45: /* CmdAtrib: TID SIM_IGUAL CONS_LITERAL  */
-#line 166 "expr.y"
+#line 167 "expr.y"
                                      {(yyval.nPtr) = criaOpr(SIM_IGUAL, NULL, 2, criaId((yyvsp[-2].id), 0), criaString((yyvsp[0].string)));}
-#line 1836 "expr.tab.c"
+#line 1837 "expr.tab.c"
     break;
 
   case 46: /* CmdAtrib: TID SIM_ADICAO SIM_ADICAO  */
-#line 167 "expr.y"
+#line 168 "expr.y"
                                     {(yyval.nPtr) = criaOpr(SIM_IGUAL, NULL, 2, criaId((yyvsp[-2].id), 0), criaOpr(SIM_ADICAO, NULL, 2, criaId((yyvsp[-2].id), 0), criaInteger(1)));}
-#line 1842 "expr.tab.c"
+#line 1843 "expr.tab.c"
     break;
 
   case 47: /* CmdAtrib: TID SIM_SUBTRACAO SIM_SUBTRACAO  */
-#line 168 "expr.y"
+#line 169 "expr.y"
                                           {(yyval.nPtr) = criaOpr(SIM_IGUAL, NULL, 2, criaId((yyvsp[-2].id), 0), criaOpr(SIM_SUBTRACAO, NULL, 2, criaId((yyvsp[-2].id), 0), criaInteger(1)));}
-#line 1848 "expr.tab.c"
+#line 1849 "expr.tab.c"
     break;
 
   case 48: /* CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES SIM_FIM  */
-#line 170 "expr.y"
+#line 171 "expr.y"
                                                                            {(yyval.nPtr) = criaOpr(COM_IMPRIME, NULL, 1, (yyvsp[-2].nPtr));}
-#line 1854 "expr.tab.c"
+#line 1855 "expr.tab.c"
     break;
 
   case 49: /* CmdWrite: COM_IMPRIME SIM_ABREPARENTESES Exprl SIM_FECHAPARENTESES SIM_FIM  */
-#line 171 "expr.y"
+#line 172 "expr.y"
                                                                            {(yyval.nPtr) = criaOpr(COM_IMPRIME, NULL, 1, (yyvsp[-2].nPtr));}
-#line 1860 "expr.tab.c"
+#line 1861 "expr.tab.c"
     break;
 
   case 50: /* CmdWrite: COM_IMPRIME SIM_ABREPARENTESES CONS_LITERAL SIM_FECHAPARENTESES SIM_FIM  */
-#line 172 "expr.y"
+#line 173 "expr.y"
                                                                                   {(yyval.nPtr) = criaOpr(COM_IMPRIME, NULL, 1, criaString((yyvsp[-2].string)));}
-#line 1866 "expr.tab.c"
+#line 1867 "expr.tab.c"
     break;
 
   case 51: /* CmdRead: COM_LER SIM_ABREPARENTESES TID SIM_FECHAPARENTESES SIM_FIM  */
-#line 174 "expr.y"
+#line 175 "expr.y"
                                                                     {(yyval.nPtr) = criaOpr(COM_LER, NULL, 1, criaId((yyvsp[-2].id), 0));}
-#line 1872 "expr.tab.c"
+#line 1873 "expr.tab.c"
     break;
 
   case 52: /* CmdFor: COM_PARA SIM_ABREPARENTESES CmdAtrib SIM_FIM Expr SIM_FIM CmdAtrib SIM_FECHAPARENTESES Bloco  */
-#line 176 "expr.y"
+#line 177 "expr.y"
                                                                                                      {(yyval.nPtr) = criaOpr(COM_PARA, criaRepeticao((yyvsp[0].item), NULL), 3, (yyvsp[-6].nPtr), (yyvsp[-4].nPtr), (yyvsp[-2].nPtr));}
-#line 1878 "expr.tab.c"
+#line 1879 "expr.tab.c"
     break;
 
   case 53: /* CmdDo: COM_FACA Bloco COM_ENQUANTO SIM_ABREPARENTESES Expr SIM_FECHAPARENTESES SIM_FIM  */
-#line 178 "expr.y"
+#line 179 "expr.y"
                                                                                        {(yyval.nPtr) = criaOpr(COM_FACA, criaRepeticao((yyvsp[-5].item), NULL), 1, (yyvsp[-2].nPtr));}
-#line 1884 "expr.tab.c"
+#line 1885 "expr.tab.c"
     break;
 
   case 54: /* ChamadaProc: ChamaFuncao SIM_FIM  */
-#line 180 "expr.y"
+#line 181 "expr.y"
                                  {(yyval.nPtr) = (yyvsp[-1].nPtr);}
-#line 1890 "expr.tab.c"
+#line 1891 "expr.tab.c"
     break;
 
   case 55: /* ChamaFuncao: TID SIM_ABREPARENTESES ListaParametros SIM_FECHAPARENTESES  */
-#line 182 "expr.y"
+#line 183 "expr.y"
                                                                         {(yyval.nPtr) = criaOpr(1, NULL, 2, criaId((yyvsp[-3].id), 1), (yyvsp[-1].nPtr));}
-#line 1896 "expr.tab.c"
+#line 1897 "expr.tab.c"
     break;
 
   case 56: /* ChamaFuncao: TID SIM_ABREPARENTESES SIM_FECHAPARENTESES  */
-#line 183 "expr.y"
+#line 184 "expr.y"
                                                      {(yyval.nPtr) = criaOpr(1, NULL, 1, criaId((yyvsp[-2].id), 1));}
-#line 1902 "expr.tab.c"
+#line 1903 "expr.tab.c"
     break;
 
   case 57: /* ListaParametros: Expra SIM_VIRGULA ListaParametros  */
-#line 185 "expr.y"
+#line 186 "expr.y"
                                                    {(yyval.nPtr) = criaOpr(2, NULL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
-#line 1908 "expr.tab.c"
+#line 1909 "expr.tab.c"
     break;
 
   case 58: /* ListaParametros: TID SIM_VIRGULA ListaParametros  */
-#line 186 "expr.y"
+#line 187 "expr.y"
                                           {(yyval.nPtr) = criaOpr(2, NULL, 2, criaId((yyvsp[-2].id), 0), (yyvsp[0].nPtr));}
-#line 1914 "expr.tab.c"
+#line 1915 "expr.tab.c"
     break;
 
   case 59: /* ListaParametros: Expra  */
-#line 187 "expr.y"
+#line 188 "expr.y"
                 {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 1920 "expr.tab.c"
+#line 1921 "expr.tab.c"
     break;
 
   case 60: /* ListaParametros: TID  */
-#line 188 "expr.y"
+#line 189 "expr.y"
               {(yyval.nPtr) = criaId((yyvsp[0].id), 0);}
-#line 1926 "expr.tab.c"
+#line 1927 "expr.tab.c"
     break;
 
   case 61: /* Expr: Exprl  */
-#line 191 "expr.y"
+#line 192 "expr.y"
             {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 1932 "expr.tab.c"
+#line 1933 "expr.tab.c"
     break;
 
   case 62: /* Expr: Expra  */
-#line 192 "expr.y"
+#line 193 "expr.y"
                 {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 1938 "expr.tab.c"
+#line 1939 "expr.tab.c"
     break;
 
   case 63: /* Expr: Exprr  */
-#line 193 "expr.y"
+#line 194 "expr.y"
                 {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 1944 "expr.tab.c"
+#line 1945 "expr.tab.c"
     break;
 
   case 64: /* Exprr: Exprr SIM_MAIORQUE Expra  */
-#line 195 "expr.y"
+#line 196 "expr.y"
                                 {(yyval.nPtr) = criaOpr(SIM_MAIORQUE, NULL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
-#line 1950 "expr.tab.c"
+#line 1951 "expr.tab.c"
     break;
 
   case 65: /* Exprr: Exprr SIM_MENORQUE Expra  */
-#line 196 "expr.y"
+#line 197 "expr.y"
                                    {(yyval.nPtr) = criaOpr(SIM_MENORQUE, NULL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
-#line 1956 "expr.tab.c"
+#line 1957 "expr.tab.c"
     break;
 
   case 66: /* Exprr: Exprr SIM_MAIOROUIGUAL Expra  */
-#line 197 "expr.y"
+#line 198 "expr.y"
                                        {(yyval.nPtr) = criaOpr(SIM_MAIOROUIGUAL, NULL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
-#line 1962 "expr.tab.c"
+#line 1963 "expr.tab.c"
     break;
 
   case 67: /* Exprr: Exprr SIM_MENOROUIGUAL Expra  */
-#line 198 "expr.y"
+#line 199 "expr.y"
                                        {(yyval.nPtr) = criaOpr(SIM_MENOROUIGUAL, NULL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
-#line 1968 "expr.tab.c"
+#line 1969 "expr.tab.c"
     break;
 
   case 68: /* Exprr: Exprr SIM_IGUALIGUAL Expra  */
-#line 199 "expr.y"
+#line 200 "expr.y"
                                      {(yyval.nPtr) = criaOpr(SIM_IGUALIGUAL, NULL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
-#line 1974 "expr.tab.c"
+#line 1975 "expr.tab.c"
     break;
 
   case 69: /* Exprr: Exprr SIM_DIFERENTE Expra  */
-#line 200 "expr.y"
+#line 201 "expr.y"
                                     {(yyval.nPtr) = criaOpr(SIM_DIFERENTE, NULL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
-#line 1980 "expr.tab.c"
+#line 1981 "expr.tab.c"
     break;
 
   case 70: /* Exprr: Expra  */
-#line 201 "expr.y"
+#line 202 "expr.y"
                 {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 1986 "expr.tab.c"
+#line 1987 "expr.tab.c"
     break;
 
   case 71: /* Expra: Expra SIM_ADICAO Termo  */
-#line 203 "expr.y"
+#line 204 "expr.y"
                               {(yyval.nPtr) = criaOpr(SIM_ADICAO, NULL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
-#line 1992 "expr.tab.c"
+#line 1993 "expr.tab.c"
     break;
 
   case 72: /* Expra: Expra SIM_SUBTRACAO Termo  */
-#line 204 "expr.y"
+#line 205 "expr.y"
                                     {(yyval.nPtr) = criaOpr(SIM_SUBTRACAO, NULL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
-#line 1998 "expr.tab.c"
+#line 1999 "expr.tab.c"
     break;
 
   case 73: /* Expra: Termo  */
-#line 205 "expr.y"
+#line 206 "expr.y"
                 {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 2004 "expr.tab.c"
+#line 2005 "expr.tab.c"
     break;
 
   case 74: /* Termo: Termo SIM_MULTIPLICACAO Fator  */
-#line 207 "expr.y"
+#line 208 "expr.y"
                                      {(yyval.nPtr) = criaOpr(SIM_MULTIPLICACAO, NULL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
-#line 2010 "expr.tab.c"
+#line 2011 "expr.tab.c"
     break;
 
   case 75: /* Termo: Termo SIM_DIVISAO Fator  */
-#line 208 "expr.y"
+#line 209 "expr.y"
                                   {(yyval.nPtr) = criaOpr(SIM_DIVISAO, NULL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
-#line 2016 "expr.tab.c"
+#line 2017 "expr.tab.c"
     break;
 
   case 76: /* Termo: Fator  */
-#line 209 "expr.y"
+#line 210 "expr.y"
                 {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 2022 "expr.tab.c"
+#line 2023 "expr.tab.c"
     break;
 
   case 77: /* Fator: CONS_INT  */
-#line 211 "expr.y"
+#line 212 "expr.y"
                 {(yyval.nPtr) = criaInteger((yyvsp[0].integer));}
-#line 2028 "expr.tab.c"
+#line 2029 "expr.tab.c"
     break;
 
   case 78: /* Fator: CONS_FLOAT  */
-#line 212 "expr.y"
+#line 213 "expr.y"
                      {(yyval.nPtr) = criaReal((yyvsp[0].real));}
-#line 2034 "expr.tab.c"
+#line 2035 "expr.tab.c"
     break;
 
   case 79: /* Fator: CONS_LITERAL  */
-#line 213 "expr.y"
+#line 214 "expr.y"
                        {(yyval.nPtr) = criaString((yyvsp[0].string));}
-#line 2040 "expr.tab.c"
+#line 2041 "expr.tab.c"
     break;
 
   case 80: /* Fator: TID  */
-#line 214 "expr.y"
+#line 215 "expr.y"
               {(yyval.nPtr) = criaId((yyvsp[0].id), 0);}
-#line 2046 "expr.tab.c"
+#line 2047 "expr.tab.c"
     break;
 
   case 81: /* Fator: ChamaFuncao  */
-#line 215 "expr.y"
+#line 216 "expr.y"
                       {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 2052 "expr.tab.c"
+#line 2053 "expr.tab.c"
     break;
 
   case 82: /* Fator: SIM_ABREPARENTESES Exprr SIM_FECHAPARENTESES  */
-#line 216 "expr.y"
+#line 217 "expr.y"
                                                        {(yyval.nPtr) = (yyvsp[-1].nPtr);}
-#line 2058 "expr.tab.c"
+#line 2059 "expr.tab.c"
     break;
 
   case 83: /* Exprl: Exprl SIM_E Expra  */
-#line 218 "expr.y"
+#line 219 "expr.y"
                          {(yyval.nPtr) = criaOpr(SIM_E, NULL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
-#line 2064 "expr.tab.c"
+#line 2065 "expr.tab.c"
     break;
 
   case 84: /* Exprl: Exprl SIM_OU Expra  */
-#line 219 "expr.y"
+#line 220 "expr.y"
                              {(yyval.nPtr) = criaOpr(SIM_OU, NULL, 2, (yyvsp[-2].nPtr), (yyvsp[0].nPtr));}
-#line 2070 "expr.tab.c"
+#line 2071 "expr.tab.c"
     break;
 
   case 85: /* Exprl: SIM_NEGACAO Expra  */
-#line 220 "expr.y"
+#line 221 "expr.y"
                             {(yyval.nPtr) = criaOpr(SIM_NEGACAO, NULL, 1, (yyvsp[0].nPtr));}
-#line 2076 "expr.tab.c"
+#line 2077 "expr.tab.c"
     break;
 
   case 86: /* Exprl: Expra  */
-#line 221 "expr.y"
+#line 222 "expr.y"
                 {(yyval.nPtr) = (yyvsp[0].nPtr);}
-#line 2082 "expr.tab.c"
+#line 2083 "expr.tab.c"
     break;
 
 
-#line 2086 "expr.tab.c"
+#line 2087 "expr.tab.c"
 
       default: break;
     }
@@ -2306,7 +2307,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 223 "expr.y"
+#line 224 "expr.y"
 
 #define SIZEOF_TIPONO ((char *)&no->inteiro - (char *)no)
 
@@ -2465,21 +2466,6 @@ void comparaParametros(char* n, Item* prms, tipoNo *op){
 		prms = prms->prox;
 		if (op->type == typeOpr)
 			op = op->opr.op[1];
-	}
-}
-
-int hasFloatInOpr(tipoNo *opr){
-	int r1, r2;
-	if (opr->type == typeOpr){
-		r1 = hasFloatInOpr(opr->opr.op[0]);
-		r2 = hasFloatInOpr(opr->opr.op[1]);
-		if (r1 != r2)
-			return 1;
-	} else if (opr->type == typeFloat)
-		return 1;
-	else if (opr->type == typeId){
-		if (opr->id.tipo == typeFloat)
-			return 1;
 	}
 }
 
@@ -3001,7 +2987,7 @@ void AddFuncao(Funcao *f1, Funcao *f2){
 	f1->prox = f2;
 	f2->prox = NULL;
 }
-
+/* 
 void printParametros(Item *prms){
 	printf("%s ", getIdTipo(prms->arv->id.tipo));
 	printf("%s", prms->arv->id.name);
@@ -3210,6 +3196,7 @@ void printBloco(Bloco *blc){
 }
 
 void printFuncao(Funcao *f){
+	printPrograma(f);
 	printf("%s ", getIdTipo(f->no->id.tipo));
 	printf("%s", f->no->id.name);
 	
@@ -3225,4 +3212,4 @@ void printFuncao(Funcao *f){
 	printf("\n");
 	if (f->prox != NULL)
 		printFuncao(f->prox);
-}
+} */

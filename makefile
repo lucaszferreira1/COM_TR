@@ -8,7 +8,9 @@ lex.yy.c: expr.l
 
 main: lex.yy.c expr.tab.c 
 	./consertotabh.sh
-	gcc -o expr lex.yy.c expr.tab.c exprMain.c -g
+	gcc Jasmin/jasmin.c lex.yy.c expr.tab.c exprMain.c -o expr -g
+	./expr
+	java -jar Jasmin/jasmin.jar output.j
 
 clean: 
 	rm -f lex.yy.c expr.tab.c expr.tab.h

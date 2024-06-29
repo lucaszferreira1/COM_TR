@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include "tipoNo.h"
+#include "Jasmin/jasmin.h"
 
 #define NUM_FUNCOES 128
 #define TAM_MAX_STRING 1024
@@ -27,8 +28,8 @@ Repeticao* criaRepeticao(Item *cmds, Item *senao);
 void AddListaDecl(ListaDecl *o, ListaDecl *ad);
 void AddItem(Item *o, Item *ad);
 void AddFuncao(Funcao *f1, Funcao *f2);
-void printFuncao(Funcao *f);
-void printComandos(Item *cmds);
+// void printFuncao(Funcao *f);
+// void printComandos(Item *cmds);
 tipoNo* lookupFunc(char *n);
 
 Funcao *tbl_fun;
@@ -102,8 +103,8 @@ int tp_fun;
 %type <funcao> Funcao ListaFuncoes
 
 %%
-Programa: ListaFuncoes Main BlocoPrincipal YYEOF {AddFuncao($1, criaFuncao(TIPO_INT, "main", NULL, $3));printFuncao($1);}
-	| Main BlocoPrincipal YYEOF {printFuncao(criaFuncao(TIPO_INT, "main", NULL, $2));}
+Programa: ListaFuncoes Main BlocoPrincipal YYEOF {AddFuncao($1, criaFuncao(TIPO_INT, "main", NULL, $3));printPrograma($1);}
+	| Main BlocoPrincipal YYEOF {printPrograma(criaFuncao(TIPO_INT, "main", NULL, $2));}
 	| YYEOF {exit(0);}
 	;
 Main: {tp_fun = TIPO_INT; lookupFunc("main");}
@@ -378,21 +379,6 @@ void comparaParametros(char* n, Item* prms, tipoNo *op){
 		prms = prms->prox;
 		if (op->type == typeOpr)
 			op = op->opr.op[1];
-	}
-}
-
-int hasFloatInOpr(tipoNo *opr){
-	int r1, r2;
-	if (opr->type == typeOpr){
-		r1 = hasFloatInOpr(opr->opr.op[0]);
-		r2 = hasFloatInOpr(opr->opr.op[1]);
-		if (r1 != r2)
-			return 1;
-	} else if (opr->type == typeFloat)
-		return 1;
-	else if (opr->type == typeId){
-		if (opr->id.tipo == typeFloat)
-			return 1;
 	}
 }
 
@@ -914,7 +900,7 @@ void AddFuncao(Funcao *f1, Funcao *f2){
 	f1->prox = f2;
 	f2->prox = NULL;
 }
-
+/* 
 void printParametros(Item *prms){
 	printf("%s ", getIdTipo(prms->arv->id.tipo));
 	printf("%s", prms->arv->id.name);
@@ -1123,6 +1109,7 @@ void printBloco(Bloco *blc){
 }
 
 void printFuncao(Funcao *f){
+	printPrograma(f);
 	printf("%s ", getIdTipo(f->no->id.tipo));
 	printf("%s", f->no->id.name);
 	
@@ -1138,4 +1125,4 @@ void printFuncao(Funcao *f){
 	printf("\n");
 	if (f->prox != NULL)
 		printFuncao(f->prox);
-}
+} */
