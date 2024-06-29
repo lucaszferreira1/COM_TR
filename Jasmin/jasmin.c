@@ -6,6 +6,21 @@
 
 int id_cont, label_cont;
 
+int hasFloatInOpr(tipoNo *opr){
+	int r1, r2;
+	if (opr->type == typeOpr){
+		r1 = hasFloatInOpr(opr->opr.op[0]);
+		r2 = hasFloatInOpr(opr->opr.op[1]);
+		if (r1 != r2)
+			return 1;
+	} else if (opr->type == typeFloat)
+		return 1;
+	else if (opr->type == typeId){
+		if (opr->id.tipo == typeFloat)
+			return 1;
+	}
+}
+
 int getNumItems(Item *i){
 	int cont = 0;
 	while(i != NULL){
@@ -15,75 +30,78 @@ int getNumItems(Item *i){
 	return cont;
 }
 
-void printLabel(){
-	fprintf("L%d", label_cont);
+void printAfterIf(FILE *f){
+	fprintf(f, "iconst_0\n");
+	fprintf(f, "goto L%d", label_cont);
+	fprintf(f, "L:%d\n", label_cont);
+	label_cont++;
+	fprintf(f, "iconst_1\n");
+	fprintf(f, "L:%d\n", label_cont);
 	label_cont++;
 }
 
-void printParametros(Item *prms){
+void printParametros(Item *prms, FILE *f){
 	printf("%s ", getIdTipo(prms->arv->id.tipo));
 	printf("%s", prms->arv->id.name);
 
 	if (prms->prox != NULL){
 		printf(", ");
-		printParametros(prms->prox);
+		printParametros(prms->prox, f);
 	}
 }
 
-void printVariaveis(Item *vars){
+void printVariaveis(Item *vars, FILE *f){
 	printf("%s", vars->arv->id.name);
 
 	if (vars->prox != NULL){
 		printf(", ");
-		printVariaveis(vars->prox);
+		printVariaveis(vars->prox, f);
 	}
 }
 
-void printDeclaracao(Declaracao *decl){
+void printDeclaracao(Declaracao *decl, FILE *f){
 	printf("%s ", getIdTipo(decl->tipo));
-	printVariaveis(decl->vars);
+	printVariaveis(decl->vars, f);
 	printf(";\n");
 }
 
-void printDeclaracoes(ListaDecl *decl){
-	printDeclaracao(decl->decl);
+void printDeclaracoes(ListaDecl *decl, FILE *f){
+	printDeclaracao(decl->decl, f);
 	if (decl->prox != NULL)
-		printDeclaracoes(decl->prox);
+		printDeclaracoes(decl->prox, f);
 }
 
-void printNo(tipoNo *cmd){
+void printNo(tipoNo *cmd, FILE *f){
 	
 	switch(cmd->type){
 		case typeInt:
-			fprintf("ldc %d\n", cmd->inteiro.val);
-			printf("%d", cmd->inteiro.val);
+			fprintf(f, "ldc %d\n", cmd->inteiro.val);
 			break;
 		case typeFloat:
-			fprintf("ldc %f\n", cmd->real.val);
-			printf("%f", cmd->real.val);
+			fprintf(f, "ldc %f\n", cmd->real.val);
 			break;
 		case typeString:
-			fprintf("ldc %s\n", cmd->string.str);
-			printf("%s", cmd->string.str);
+			fprintf(f, "ldc %s\n", cmd->string.str);
 			break;
 		case typeId:
 			switch (cmd->id.tipo){
 				case typeInt:
-					fprintf("iload %d\n", cmd->id.i);
+					fprintf(f, "iload %d\n", cmd->id.i);
 					break;
 				case typeFloat: 
-					fprintf("fload %d\n", cmd->id.i);
+					fprintf(f, "fload %d\n", cmd->id.i);
 					break;
 				case typeString:
-					fprintf("aload %d\n", cmd->id.i);
+					fprintf(f, "aload %d\n", cmd->id.i);
 					break;
 			}
-			printf("%s", cmd->id.name);
 			break;
 		case typeOpr:
 			switch(cmd->opr.opr){
 				case 1: // Chama Função
-					fprintf("invokestatic output/%s", cmd->opr.op[0]->id.name);
+					if(cmd->opr.op[1])
+						printNo(cmd->opr.op[1], f);
+					fprintf(f, "invokestatic output/%s", cmd->opr.op[0]->id.name);
 					// printNo(cmd->opr.op[0]);
 					// printf("(");
 					// if (cmd->opr.op[1]){	
@@ -92,173 +110,202 @@ void printNo(tipoNo *cmd){
 					// printf(")");
 					break;
 				case 2: // Parâmetros da Função
-					printNo(cmd->opr.op[0]);
+					printNo(cmd->opr.op[0], f);
 					if (cmd->opr.op[1]){
-						printf(", ");
-						printNo(cmd->opr.op[1]);
+						// printf(", ");
+						printNo(cmd->opr.op[1], f);
 					}
 					break;
 				case SIM_ADICAO:
-					printNo(cmd->opr.op[0]);
-					printf("+");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[0], f);
+					printNo(cmd->opr.op[1], f);
+					fprintf(f, "add\n");
 					break;
 				case SIM_MULTIPLICACAO:
-					printNo(cmd->opr.op[0]);
-					printf("*");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[0], f);
+					printNo(cmd->opr.op[1], f);
+					fprintf(f, "mul\n");
 					break;
 				case SIM_SUBTRACAO:
-					printNo(cmd->opr.op[0]);
-					printf("-");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[0], f);
+					printNo(cmd->opr.op[1], f);
+					printf(f, "sub\n");
 					break;
 				case SIM_DIVISAO:
-					printNo(cmd->opr.op[0]);
-					printf("/");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[0], f);
+					printNo(cmd->opr.op[1], f);
+					printf(f, "div\n");
 					break;
-				case SIM_IGUAL:
-					printNo(cmd->opr.op[0]);
+				case SIM_IGUAL://
+					printNo(cmd->opr.op[0], f);
 					printf("=");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[1], f);
 					break;
 				case SIM_IGUALIGUAL:
-					printNo(cmd->opr.op[0]);
-					printf("==");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[0], f);
+					printNo(cmd->opr.op[1], f);
+					if (!hasFloatInOpr(cmd->opr.op[0]) && !hasFloatInOpr(cmd->opr.op[1]))
+						fprintf(f, "if_icmpeq L%d\n", label_cont);
+					else
+						fprintf(f, "if_ifeq L%d\n", label_cont);
+					printAfterIf(f);
 					break;
 				case SIM_DIFERENTE:
-					printNo(cmd->opr.op[0]);
-					printf("!=");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[0], f);
+					printNo(cmd->opr.op[1], f);
+					if (!hasFloatInOpr(cmd->opr.op[0]) && !hasFloatInOpr(cmd->opr.op[1]))
+						fprintf(f, "if_icmpne L%d\n", label_cont);
+					else
+						fprintf(f, "if_ifne L%d\n", label_cont);
+					printAfterIf(f);
 					break;
 				case SIM_MAIORQUE:
-					printNo(cmd->opr.op[0]);
-					printf(">");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[0], f);
+					printNo(cmd->opr.op[1], f);
+					if (!hasFloatInOpr(cmd->opr.op[0]) && !hasFloatInOpr(cmd->opr.op[1]))
+						fprintf(f, "if_icmpgt L%d\n", label_cont);
+					else
+						fprintf(f, "if_ifgt L%d\n", label_cont);
+					printAfterIf(f);
 					break;
 				case SIM_MENORQUE:
-					printNo(cmd->opr.op[0]);
-					printf("<");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[0], f);
+					printNo(cmd->opr.op[1], f);
+					if (!hasFloatInOpr(cmd->opr.op[0]) && !hasFloatInOpr(cmd->opr.op[1]))
+						fprintf(f, "if_icmplt L%d\n", label_cont);
+					else
+						fprintf(f, "if_iflt L%d\n", label_cont);
+					printAfterIf(f);
 					break;
 				case SIM_MAIOROUIGUAL:
-					printNo(cmd->opr.op[0]);
-					printf(">=");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[0], f);
+					printNo(cmd->opr.op[1], f);
+					if (!hasFloatInOpr(cmd->opr.op[0]) && !hasFloatInOpr(cmd->opr.op[1]))
+						fprintf(f, "if_icmpge L%d\n", label_cont);
+					else
+						fprintf(f, "if_ifge L%d\n", label_cont);
+					printAfterIf(f);
 					break;
 				case SIM_MENOROUIGUAL:
-					printNo(cmd->opr.op[0]);
-					printf("<=");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[0], f);
+					printNo(cmd->opr.op[1], f);
+					if (!hasFloatInOpr(cmd->opr.op[0]) && !hasFloatInOpr(cmd->opr.op[1]))
+						fprintf(f, "if_icmple L%d\n", label_cont);
+					else
+						fprintf(f, "if_ifle L%d\n", label_cont);
+					printAfterIf(f);
 					break;
 				case SIM_E:
-					printNo(cmd->opr.op[0]);
-					printf("&&");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[0], f);
+					printNo(cmd->opr.op[1], f);
+					fprintf(f, "and\n");
 					break;
 				case SIM_OU:
-					printNo(cmd->opr.op[0]);
-					printf("||");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[0], f);
+					printNo(cmd->opr.op[1], f);
+					fprintf(f, "or\n");
 					break;
 				case SIM_NEGACAO:
-					printf("!");
-					printNo(cmd->opr.op[0]);
+					printNo(cmd->opr.op[0], f);
+					fprintf(f, "if_ifeq L%d\n", label_cont);
+					printAfterIf(f);
 					break;
 				case COM_RETORNO:
 					if (cmd->opr.op[0] != NULL){
+						printNo(cmd->opr.op[0], f);
 						if (cmd->opr.op[0]->type == typeInt || cmd->opr.op[0]->id.tipo == typeInt)
-							fprintf("ireturn\n");
+							fprintf(f, "ireturn\n");
 						else if (cmd->opr.op[0]->type == typeFloat || cmd->opr.op[0]->id.tipo == typeFloat)
-							fprintf("freturn\n");
+							fprintf(f, "freturn\n");
 						else if (cmd->opr.op[0]->type == typeString || cmd->opr.op[0]->id.tipo == typeString)
-							fprintf("areturn\n");
+							fprintf(f, "areturn\n");
 					} else {
-						fprintf("return\n");
+						fprintf(f, "return\n");
 					}
-					// printf("return ");
-					// if (cmd->opr.op[0] != NULL)
-					// 	printNo(cmd->opr.op[0]);
 					break;
 				case COM_SE:
-					printf("if(");
-					printNo(cmd->opr.op[0]);
-					printf("){\n");
-					printComandos(cmd->opr.rep->cmds);
-					printf("}");
+					printNo(cmd->opr.op[0], f);
+					fprintf(f, "ifeq L\n", label_cont);
+					printComandos(cmd->opr.rep->cmds, f);
+					fprintf(f, "L%d:", label_cont);
 					break;
 				case COM_SENAO:
-					printf("if(");
-					printNo(cmd->opr.op[0]);
-					printf("){\n");
-					printComandos(cmd->opr.rep->cmds);
-					printf("}");
-					printf("else{\n");
-					printComandos(cmd->opr.rep->senao);
-					printf("}");
+					printNo(cmd->opr.op[0], f);
+					fprintf(f, "ifeq L\n", label_cont);
+					int temp = label_cont;
+					label_cont++;
+					printComandos(cmd->opr.rep->cmds, f);
+					fprintf(f, "goto L%d\n", label_cont);
+					fprintf(f, "L%d:", temp);
+					printComandos(cmd->opr.rep->senao, f);
+					fprintf(f, "L%d:", label_cont);
 					break;
 				case COM_ENQUANTO:
-					printf("while(");
-					printNo(cmd->opr.op[0]);
-					printf("){\n");
-					printComandos(cmd->opr.rep->cmds);
-					printf("}");
+					printNo(cmd->opr.op[0], f);
+					fprintf("L%d:", label_cont);
+					int temp = label_cont;
+					label_cont++;
+					fprintf(f, "ifeq L%d\n", label_cont);
+					printComandos(cmd->opr.rep->cmds, f);
+					fprintf(f, "goto L%d", temp);
+					fprintf(f, "L%d:", label_cont);
 					break;
 				case COM_IMPRIME:
+					printNo(cmd->opr.op[0], f);
+					if (cmd->opr.op[0]->type == typeString)
+						fprintf(f, "invokestatic output/Verb/output_str(Ljava/lang/String;)V")
 					printf("print(");
-					printNo(cmd->opr.op[0]);
+					printNo(cmd->opr.op[0], f);
 					printf(")");
 					break;
 				case COM_LER:
 					printf("read(");
-					printNo(cmd->opr.op[0]);
+					printNo(cmd->opr.op[0], f);
 					printf(")");
 					break;
 				case COM_PARA:
 					printf("for(");
-					printNo(cmd->opr.op[0]);
+					printNo(cmd->opr.op[0], f);
 					printf(";");
-					printNo(cmd->opr.op[1]);
+					printNo(cmd->opr.op[1], f);
 					printf(";");
-					printNo(cmd->opr.op[2]);
+					printNo(cmd->opr.op[2], f);
 					printf("){\n");
-					printComandos(cmd->opr.rep->cmds);
+					printComandos(cmd->opr.rep->cmds, f);
 					printf("}");
 				case COM_FACA:
 					printf("do{\n");
-					printComandos(cmd->opr.rep->cmds);
+					printComandos(cmd->opr.rep->cmds, f);
 					printf("}while(");
-					printNo(cmd->opr.op[0]);
+					printNo(cmd->opr.op[0], f);
 					printf(")");
 			}
 			break;
 	}
 }
 
-void printComandos(Item *cmds){
-	printNo(cmds->arv);
+void printComandos(Item *cmds, FILE *f){
+	printNo(cmds->arv, f);
 	printf(";\n");
 	if (cmds->prox != NULL)
-		printComandos(cmds->prox);
+		printComandos(cmds->prox, f);
 }
 
-void printBloco(Bloco *blc){
+void printBloco(Bloco *blc, FILE *f){
 	printf("{\n");
 	if (blc->decl)
-		printDeclaracoes(blc->decl);
+		printDeclaracoes(blc->decl, f);
 	if (blc->cmds)
-		printComandos(blc->cmds);
+		printComandos(blc->cmds, f);
 	printf("}\n");
 }
 
-void printFuncao(Funcao *f){
+void printFuncao(Funcao *f, FILE *file){
     if (!strcmpr(f->no->id.name, "main")){
-        fprintf("
+        fprintf(file, "
         .method public static main([Ljava/lang/String;)V
-        .limit locals %d\n
-		.limit stack 100
+        .limit locals 8\n
+		.limit stack %d
         ; code start
         ", getNumItems(f->tbl->syms));
     } else {
@@ -278,14 +325,14 @@ void printFuncao(Funcao *f){
 	
 	printf("(");
 	if (f->prms != NULL)
-		printParametros(f->prms);
+		printParametros(f->prms, file);
 	printf(")");
 
 	if (f->blc != NULL)
-		printBloco(f->blc);
+		printBloco(f->blc, file);
 	
     if (!strcmp(f->no->id.name, "main")){
-        fprintf("
+        fprintf(file, "
         ; code end
         return
         .end method
@@ -298,7 +345,7 @@ void printFuncao(Funcao *f){
     }
 	printf("\n");
 	if (f->prox != NULL)
-		printFuncao(f->prox);
+		printFuncao(f->prox, file);
 }
 
 void printPrograma(Funcao *fun){
@@ -306,7 +353,7 @@ void printPrograma(Funcao *fun){
 	id_cont = 0;
     FILE *f = fopen("output.j", "w");
     // write_code(concat(".source ", source_file");
-	fprintf("
+	fprintf(f, "
     .class public output\n.super java/lang/Object\n
 	.method public <init>()V
 		aload_0
@@ -315,7 +362,7 @@ void printPrograma(Funcao *fun){
 	.end method\n
     ");
 
-    fprintf("
+    fprintf(f, "
 	.method public static output_int(I)V
 		.limit locals 5
 		.limit stack 5
@@ -348,6 +395,6 @@ void printPrograma(Funcao *fun){
 		return
 	.end method\n
     ");
-    printFuncao(fun);
+    printFuncao(fun, f);
     fclose(f);
 }
