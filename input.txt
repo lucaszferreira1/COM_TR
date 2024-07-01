@@ -1,7 +1,6 @@
 {
-  int x;
-  x = 10;
-  x = x + 3;
+  string x;
+  x = "Teste"; 
   print(x);
   return 0;
 }
