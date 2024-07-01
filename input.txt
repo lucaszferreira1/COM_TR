@@ -1,6 +1,8 @@
 {
-  string x;
-  x = "Teste"; 
-  print(x);
+  int x;
+  x = 1;
+  if ((1 == 1) && (1 == 1)){
+    print(x);
+  }
   return 0;
 }

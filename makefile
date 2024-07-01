@@ -7,6 +7,7 @@ lex.yy.c: expr.l
 	flex expr.l
 
 run: 
+	clear
 	./expr
 	java -jar Jasmin/jasmin.jar Jasmin/output.j
 	java output
@@ -14,6 +15,7 @@ run:
 main: lex.yy.c expr.tab.c 
 	./consertotabh.sh
 	gcc Jasmin/jasmin.c lex.yy.c expr.tab.c exprMain.c -o expr -g
+	clear
 
 clean: 
 	rm -f lex.yy.c expr.tab.c expr.tab.h
