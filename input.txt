@@ -1,6 +1,6 @@
 int igual (float a, float b)
 { 
-  if (a > b) {
+  if (a != b) {
     return 1;
   }
   return 0;
@@ -9,7 +9,7 @@ int igual (float a, float b)
 {
   int a;
   
-  a = igual (2.5, 10.2);
+  a = igual (2.7, 2.5);
   print(a);
   return 0;
 }

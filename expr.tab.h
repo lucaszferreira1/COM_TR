@@ -101,6 +101,12 @@ extern int yydebug;
 #include "tipoNo.h"
 #include "tipoNo.h"
 #include "tipoNo.h"
+#include "tipoNo.h"
+#include "tipoNo.h"
+#include "tipoNo.h"
+#include "tipoNo.h"
+#include "tipoNo.h"
+#include "tipoNo.h"
 union YYSTYPE
 {
 #line 44 "expr.y"

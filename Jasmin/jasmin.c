@@ -8,6 +8,7 @@
 int label_cont;
 Funcao* tbl_funcoes;
 int isMain;
+eTipo tipoFuncaoAtual;
 
 Funcao* searchFuncoes(char *name){
 	Funcao* f = tbl_funcoes;
@@ -211,8 +212,13 @@ void printNo(tipoNo *cmd, FILE *f){
 					printNo(cmd->opr.op[1], f);
 					if (!hasFloatInOpr(cmd->opr.op[0]) && !hasFloatInOpr(cmd->opr.op[1]))
 						fprintf(f, "if_icmpeq L%d\n", label_cont);
-					else
-						fprintf(f, "ifeq L%d\n", label_cont);
+					else {
+						fprintf(f, "fcmpg\n");
+						printNo(cmd->opr.op[0], f);
+						printNo(cmd->opr.op[1], f);
+						fprintf(f, "fcmpl\n");
+						fprintf(f, "ifge L%d\n", label_cont);
+					}
 					printAfterIf(f);
 					break;
 				case SIM_DIFERENTE:
@@ -221,6 +227,10 @@ void printNo(tipoNo *cmd, FILE *f){
 					if (!hasFloatInOpr(cmd->opr.op[0]) && !hasFloatInOpr(cmd->opr.op[1]))
 						fprintf(f, "if_icmpne L%d\n", label_cont);
 					else
+						fprintf(f, "fcmpg\n");
+						printNo(cmd->opr.op[0], f);
+						printNo(cmd->opr.op[1], f);
+						fprintf(f, "fcmpl\n");
 						fprintf(f, "ifne L%d\n", label_cont);
 					printAfterIf(f);
 					break;
@@ -251,8 +261,10 @@ void printNo(tipoNo *cmd, FILE *f){
 					printNo(cmd->opr.op[1], f);
 					if (!hasFloatInOpr(cmd->opr.op[0]) && !hasFloatInOpr(cmd->opr.op[1]))
 						fprintf(f, "if_icmpge L%d\n", label_cont);
-					else
+					else {
+						fprintf(f, "fcmpg\n");
 						fprintf(f, "ifge L%d\n", label_cont);
+					}
 					printAfterIf(f);
 					break;
 				case SIM_MENOROUIGUAL:
@@ -260,8 +272,10 @@ void printNo(tipoNo *cmd, FILE *f){
 					printNo(cmd->opr.op[1], f);
 					if (!hasFloatInOpr(cmd->opr.op[0]) && !hasFloatInOpr(cmd->opr.op[1]))
 						fprintf(f, "if_icmple L%d\n", label_cont);
-					else
-						fprintf(f, "ifle L%d\n", label_cont);
+					else {
+						fprintf(f, "fcmpl\n");
+						fprintf(f, "ifge L%d\n", label_cont);
+					}
 					printAfterIf(f);
 					break;
 				case SIM_E:
@@ -282,6 +296,16 @@ void printNo(tipoNo *cmd, FILE *f){
 				case COM_RETORNO:
 					if (cmd->opr.op[0] != NULL)
 						printNo(cmd->opr.op[0], f);
+					if (isMain){
+						fprintf(f, "return\n");
+					} else {
+						if (tipoFuncaoAtual == typeInt)
+							fprintf(f, "ireturn\n");
+						else if (tipoFuncaoAtual == typeFloat)
+							fprintf(f, "freturn\n");
+						else if (tipoFuncaoAtual == typeString)
+							fprintf(f, "areturn\n");
+					}
 					break;
 				case COM_SE:
 					printNo(cmd->opr.op[0], f);
@@ -384,6 +408,7 @@ void printBloco(Bloco *blc, FILE *f){
 }
 
 void printFuncao(Funcao *f, FILE *file){
+	tipoFuncaoAtual = f->no->id.tipo;
     if (!strcmp(f->no->id.name, "main")){
         fprintf(file, ".method public static main([Ljava/lang/String;)V\n.limit locals 100\n.limit stack 100\n");
 		isMain = 1;
@@ -416,16 +441,6 @@ void printFuncao(Funcao *f, FILE *file){
 		printParametros(f->prms, file);
 	if (f->blc != NULL)
 		printBloco(f->blc, file);
-	if (!strcmp(f->no->id.name, "main")){
-		fprintf(file, "return\n");
-	} else {
-		if (f->no->id.tipo == typeInt)
-			fprintf(file, "ireturn\n");
-		else if (f->no->id.tipo == typeFloat)
-			fprintf(file, "freturn\n");
-		else if (f->no->id.tipo == typeString)
-			fprintf(file, "areturn\n");
-	}
 	fprintf(file, ".end method\n\n");
 	if (f->prox != NULL)
 		printFuncao(f->prox, file);
