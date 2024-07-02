@@ -227,10 +227,12 @@ void printNo(tipoNo *cmd, FILE *f){
 				case SIM_MAIORQUE:
 					printNo(cmd->opr.op[0], f);
 					printNo(cmd->opr.op[1], f);
-					if (!hasFloatInOpr(cmd->opr.op[0]) && !hasFloatInOpr(cmd->opr.op[1]))
+					if (!hasFloatInOpr(cmd->opr.op[0]) && !hasFloatInOpr(cmd->opr.op[1])){
 						fprintf(f, "if_icmpgt L%d\n", label_cont);
-					else
-						fprintf(f, "ifgt L%d\n", label_cont);
+					} else {
+						fprintf(f, "fcmpg\n");
+						fprintf(f, "ifge L%d\n", label_cont);
+					}
 					printAfterIf(f);
 					break;
 				case SIM_MENORQUE:
@@ -238,8 +240,10 @@ void printNo(tipoNo *cmd, FILE *f){
 					printNo(cmd->opr.op[1], f);
 					if (!hasFloatInOpr(cmd->opr.op[0]) && !hasFloatInOpr(cmd->opr.op[1]))
 						fprintf(f, "if_icmplt L%d\n", label_cont);
-					else
-						fprintf(f, "iflt L%d\n", label_cont);
+					else{
+						fprintf(f, "fcmpl\n");
+						fprintf(f, "ifge L%d\n", label_cont);
+					}
 					printAfterIf(f);
 					break;
 				case SIM_MAIOROUIGUAL:
@@ -299,9 +303,9 @@ void printNo(tipoNo *cmd, FILE *f){
 					break;
 				case COM_ENQUANTO:
 					fprintf(f, "L%d:\n", label_cont);
-					printNo(cmd->opr.op[0], f);
 					temp = label_cont;
 					label_cont++;
+					printNo(cmd->opr.op[0], f);
 					fprintf(f, "ifeq L%d\n", label_cont);
 					printComandos(cmd->opr.rep->cmds, f);
 					fprintf(f, "goto L%d\n", temp);
@@ -337,20 +341,25 @@ void printNo(tipoNo *cmd, FILE *f){
 				case COM_PARA:
 					printNo(cmd->opr.op[0], f);
 					fprintf(f, "L%d:\n", label_cont);
-					printNo(cmd->opr.op[1], f);
 					temp = label_cont;
 					label_cont++;
+					printNo(cmd->opr.op[1], f);
 					fprintf(f, "ifeq L%d\n", label_cont);
-					printNo(cmd->opr.op[2], f);
 					printComandos(cmd->opr.rep->cmds, f);
+					printNo(cmd->opr.op[2], f);
 					fprintf(f, "goto L%d\n", temp);
 					fprintf(f, "L%d:\n", label_cont);
+					label_cont++;
 					break;
 				case COM_FACA:
 					fprintf(f, "L%d:\n", label_cont);
+					temp = label_cont;
+					label_cont++;
 					printComandos(cmd->opr.rep->cmds, f);
 					printNo(cmd->opr.op[0], f);
 					fprintf(f, "ifeq L%d\n", label_cont);
+					fprintf(f, "goto L%d\n", temp);
+					fprintf(f, "L%d:\n", label_cont);
 					label_cont++;
 					break;
 			}

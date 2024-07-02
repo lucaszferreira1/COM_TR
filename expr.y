@@ -31,6 +31,7 @@ void AddFuncao(Funcao *f1, Funcao *f2);
 // void printFuncao(Funcao *f);
 // void printComandos(Item *cmds);
 tipoNo* lookupFunc(char *n);
+Funcao* posVerifica(Funcao *funcao);
 
 Funcao *tbl_fun;
 Funcao *temp_fun;
@@ -103,8 +104,8 @@ int tp_fun;
 %type <funcao> Funcao ListaFuncoes
 
 %%
-Programa: ListaFuncoes Main BlocoPrincipal YYEOF {AddFuncao($1, criaFuncao(TIPO_INT, "main", NULL, $3));printPrograma($1);}
-	| Main BlocoPrincipal YYEOF {printPrograma(criaFuncao(TIPO_INT, "main", NULL, $2));}
+Programa: ListaFuncoes Main BlocoPrincipal YYEOF {AddFuncao($1, criaFuncao(TIPO_INT, "main", NULL, $3));printPrograma(posVerifica($1));}
+	| Main BlocoPrincipal YYEOF {printPrograma(posVerifica(criaFuncao(TIPO_INT, "main", NULL, $2)));}
 	| YYEOF {exit(0);}
 	;
 Main: {tp_fun = TIPO_INT; lookupFunc("main");}
@@ -455,40 +456,7 @@ void detectaFloatInt(tipoNo *no){
 
 void detectaErros(int opr, tipoNo *no){
 	if (no->type == typeOpr){
-		if (opr == COM_RETORNO){
-			if (no->opr.op[0]){
-				if (no->opr.op[0]->type == typeId && temp_fun->no != NULL){
-					if (no->opr.op[0]->id.tipo != temp_fun->no->id.tipo){
-						printf("Função %s tipo %s está retornando um valor %s\n", temp_fun->no->id.name, getIdTipo(temp_fun->no->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
-						exit(1);
-					}
-				} else if (no->opr.op[0]->type == typeOpr){
-					if (temp_fun->no != NULL){
-						if (!hasFloatInOpr(no->opr.op[0]) && temp_fun->no->id.tipo == typeFloat){
-							printf("Função %s tipo float está retornando um valor int\n", temp_fun->no->id.name);
-							exit(1);
-						} else if (hasFloatInOpr(no->opr.op[0]) && temp_fun->no->id.tipo == typeInt){
-							printf("Função %s tipo int está retornando um valor float\n", temp_fun->no->id.name);
-							exit(1);
-						}
-					}
-				} else {
-					if (temp_fun != NULL){
-						if (temp_fun->no != NULL){
-							if (no->opr.op[0]->type != temp_fun->no->id.tipo){
-								printf("Função %s tipo %s está retornando um valor %s\n", temp_fun->no->id.name, getIdTipo(temp_fun->no->id.tipo), getIdTipo(no->opr.op[0]->type));
-								exit(1);
-							}
-						}
-					}
-				}
-			} else { // Void
-				if (temp_fun->no->id.tipo != typeVoid){
-					printf("Função %s tipo void está retornando um valor\n", temp_fun->no->id.name);
-					exit(1);
-				}
-			}
-		} else if (opr == SIM_IGUAL){
+		if (opr == SIM_IGUAL){
 			if (no->opr.op[1]->type == typeOpr){ // Operação
 				if (no->opr.op[1]->opr.opr != 1){
 					if (hasFloatInOpr(no->opr.op[1]) && no->opr.op[0]->id.tipo == typeInt){
@@ -515,6 +483,7 @@ void detectaErros(int opr, tipoNo *no){
 					printf("Aviso:Tipo int sendo atribuído a tipo float\n");
 				} else if (no->opr.op[0]->id.tipo != no->opr.op[1]->id.tipo){
 					printf("Aviso:Tipo %s sendo atribuído a tipo %s\n", getIdTipo(no->opr.op[1]->id.tipo), getIdTipo(no->opr.op[0]->id.tipo));
+					exit(1);
 				}
 			}
 		} else if (opr == SIM_E || opr == SIM_OU){
@@ -930,229 +899,45 @@ void AddFuncao(Funcao *f1, Funcao *f2){
 	f1->prox = f2;
 	f2->prox = NULL;
 }
-/* 
-void printParametros(Item *prms){
-	printf("%s ", getIdTipo(prms->arv->id.tipo));
-	printf("%s", prms->arv->id.name);
 
-	if (prms->prox != NULL){
-		printf(", ");
-		printParametros(prms->prox);
-	}
-}
-
-void printVariaveis(Item *vars){
-	printf("%s", vars->arv->id.name);
-
-	if (vars->prox != NULL){
-		printf(", ");
-		printVariaveis(vars->prox);
-	}
-}
-
-void printDeclaracao(Declaracao *decl){
-	printf("%s ", getIdTipo(decl->tipo));
-	printVariaveis(decl->vars);
-	printf(";\n");
-}
-
-void printDeclaracoes(ListaDecl *decl){
-	printDeclaracao(decl->decl);
-	if (decl->prox != NULL)
-		printDeclaracoes(decl->prox);
-}
-
-void printNo(tipoNo *cmd){
-	
-	switch(cmd->type){
-		case typeInt:
-			printf("%d", cmd->inteiro.val);
-			break;
-		case typeFloat:
-			printf("%f", cmd->real.val);
-			break;
-		case typeString:
-			printf("%s", cmd->string.str);
-			break;
-		case typeId:
-			printf("%s", cmd->id.name);
-			break;
-		case typeOpr:
-			switch(cmd->opr.opr){
-				case 1: // Chama Função
-					printNo(cmd->opr.op[0]);
-					printf("(");
-					if (cmd->opr.op[1])
-						printNo(cmd->opr.op[1]);
-					printf(")");
-					break;
-				case 2: // Parâmetros da Função
-					printNo(cmd->opr.op[0]);
-					if (cmd->opr.op[1]){
-						printf(", ");
-						printNo(cmd->opr.op[1]);
+Funcao* posVerifica(Funcao *funcao){
+	Funcao* f = funcao;
+	Item* cmd;
+	while(f != NULL){
+		cmd = f->blc->cmds;
+		while(cmd != NULL){
+			switch (cmd->arv->type){
+				case typeOpr:
+					switch (cmd->arv->opr.opr){
+						case COM_RETORNO:
+							if (cmd->arv->opr.nOps != 0){
+								if (cmd->arv->opr.op[0]->type == typeOpr){
+									if ((hasFloatInOpr(cmd->arv->opr.op[0]) && f->no->id.tipo != typeFloat) || (!hasFloatInOpr(cmd->arv->opr.op[0]) && f->no->id.tipo != typeInt)){
+										printf("Função %s tipo %s está retornando um valor de um tipo diferente\n", f->no->id.name, getIdTipo(f->no->id.tipo));
+										exit(1);
+									}
+								} else if (cmd->arv->opr.op[0]->type == typeId){
+									if (cmd->arv->opr.op[0]->id.tipo != f->no->id.tipo){
+										printf("Função %s tipo %s está retornando um valor %s\n", f->no->id.name, getIdTipo(f->no->id.tipo), getIdTipo(cmd->arv->opr.op[0]->id.tipo));
+										exit(1);
+									}
+								}else if (cmd->arv->opr.op[0]->type != f->no->id.tipo){
+									printf("Função %s tipo %s está retornando um valor %s\n", f->no->id.name, getIdTipo(f->no->id.tipo), getIdTipo(cmd->arv->opr.op[0]->type));
+									exit(1);
+								}
+							} else{
+								if (f->no->id.tipo != typeVoid){
+									printf("Função %s tipo void está retornando um valor\n", f->no->id.name);
+									exit(1);
+								}
+							}
+							break;
 					}
 					break;
-				case SIM_ADICAO:
-					printNo(cmd->opr.op[0]);
-					printf("+");
-					printNo(cmd->opr.op[1]);
-					break;
-				case SIM_MULTIPLICACAO:
-					printNo(cmd->opr.op[0]);
-					printf("*");
-					printNo(cmd->opr.op[1]);
-					break;
-				case SIM_SUBTRACAO:
-					printNo(cmd->opr.op[0]);
-					printf("-");
-					printNo(cmd->opr.op[1]);
-					break;
-				case SIM_DIVISAO:
-					printNo(cmd->opr.op[0]);
-					printf("/");
-					printNo(cmd->opr.op[1]);
-					break;
-				case SIM_IGUAL:
-					printNo(cmd->opr.op[0]);
-					printf("=");
-					printNo(cmd->opr.op[1]);
-					break;
-				case SIM_IGUALIGUAL:
-					printNo(cmd->opr.op[0]);
-					printf("==");
-					printNo(cmd->opr.op[1]);
-					break;
-				case SIM_DIFERENTE:
-					printNo(cmd->opr.op[0]);
-					printf("!=");
-					printNo(cmd->opr.op[1]);
-					break;
-				case SIM_MAIORQUE:
-					printNo(cmd->opr.op[0]);
-					printf(">");
-					printNo(cmd->opr.op[1]);
-					break;
-				case SIM_MENORQUE:
-					printNo(cmd->opr.op[0]);
-					printf("<");
-					printNo(cmd->opr.op[1]);
-					break;
-				case SIM_MAIOROUIGUAL:
-					printNo(cmd->opr.op[0]);
-					printf(">=");
-					printNo(cmd->opr.op[1]);
-					break;
-				case SIM_MENOROUIGUAL:
-					printNo(cmd->opr.op[0]);
-					printf("<=");
-					printNo(cmd->opr.op[1]);
-					break;
-				case SIM_E:
-					printNo(cmd->opr.op[0]);
-					printf("&&");
-					printNo(cmd->opr.op[1]);
-					break;
-				case SIM_OU:
-					printNo(cmd->opr.op[0]);
-					printf("||");
-					printNo(cmd->opr.op[1]);
-					break;
-				case SIM_NEGACAO:
-					printf("!");
-					printNo(cmd->opr.op[0]);
-					break;
-				case COM_RETORNO:
-					printf("return ");
-					if (cmd->opr.op[0] != NULL)
-						printNo(cmd->opr.op[0]);
-					break;
-				case COM_SE:
-					printf("if(");
-					printNo(cmd->opr.op[0]);
-					printf("){\n");
-					printComandos(cmd->opr.rep->cmds);
-					printf("}");
-					break;
-				case COM_SENAO:
-					printf("if(");
-					printNo(cmd->opr.op[0]);
-					printf("){\n");
-					printComandos(cmd->opr.rep->cmds);
-					printf("}");
-					printf("else{\n");
-					printComandos(cmd->opr.rep->senao);
-					printf("}");
-					break;
-				case COM_ENQUANTO:
-					printf("while(");
-					printNo(cmd->opr.op[0]);
-					printf("){\n");
-					printComandos(cmd->opr.rep->cmds);
-					printf("}");
-					break;
-				case COM_IMPRIME:
-					printf("print(");
-					printNo(cmd->opr.op[0]);
-					printf(")");
-					break;
-				case COM_LER:
-					printf("read(");
-					printNo(cmd->opr.op[0]);
-					printf(")");
-					break;
-				case COM_PARA:
-					printf("for(");
-					printNo(cmd->opr.op[0]);
-					printf(";");
-					printNo(cmd->opr.op[1]);
-					printf(";");
-					printNo(cmd->opr.op[2]);
-					printf("){\n");
-					printComandos(cmd->opr.rep->cmds);
-					printf("}");
-				case COM_FACA:
-					printf("do{\n");
-					printComandos(cmd->opr.rep->cmds);
-					printf("}while(");
-					printNo(cmd->opr.op[0]);
-					printf(")");
 			}
-			break;
+			cmd = cmd->prox;
+		}
+		f = f->prox;
 	}
+	return funcao;
 }
-
-void printComandos(Item *cmds){
-	printNo(cmds->arv);
-	printf(";\n");
-	if (cmds->prox != NULL)
-		printComandos(cmds->prox);
-}
-
-void printBloco(Bloco *blc){
-	printf("{\n");
-	if (blc->decl)
-		printDeclaracoes(blc->decl);
-	if (blc->cmds)
-		printComandos(blc->cmds);
-	printf("}\n");
-}
-
-void printFuncao(Funcao *f){
-	printPrograma(f);
-	printf("%s ", getIdTipo(f->no->id.tipo));
-	printf("%s", f->no->id.name);
-	
-	printf("(");
-	if (f->prms != NULL)
-		printParametros(f->prms);
-	printf(")");
-
-	if (f->blc != NULL)
-		printBloco(f->blc);
-	
-
-	printf("\n");
-	if (f->prox != NULL)
-		printFuncao(f->prox);
-} */
