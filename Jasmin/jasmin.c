@@ -441,6 +441,8 @@ void printFuncao(Funcao *f, FILE *file){
 		printParametros(f->prms, file);
 	if (f->blc != NULL)
 		printBloco(f->blc, file);
+	if (f->no->id.tipo == typeVoid)
+		fprintf(file, "return\n");
 	fprintf(file, ".end method\n\n");
 	if (f->prox != NULL)
 		printFuncao(f->prox, file);
@@ -460,7 +462,7 @@ void printPrograma(Funcao *fun){
     // write_code(concat(".source ", source_file");
 	fprintf(f, ".class public output\n.super java/lang/Object\n.method public <init>()V\naload_0\ninvokenonvirtual java/lang/Object/<init>()V\nreturn\n.end method\n\n");
 
-    fprintf(f, ".method public static output_int(I)V\n.limit locals 5\n.limit stack 5\ngetstatic java/lang/System/out Ljava/io/PrintStream;\niload_0\ninvokevirtual java/io/PrintStream/print(I)V\nreturn\n.end method\n\n.method public static output_float(F)V\n.limit locals 5\n.limit stack 5\ngetstatic java/lang/System/out Ljava/io/PrintStream;\nfload 0  ; the argument to function\ninvokevirtual java/io/PrintStream/print(F)V\nreturn\n.end method\n\n.method public static output_str(Ljava/lang/String;)V\n.limit locals 5\n.limit stack 5\ngetstatic java/lang/System/out Ljava/io/PrintStream;\naload 0\ninvokevirtual java/io/PrintStream/print(Ljava/lang/String;)V\nreturn\n.end method\n\n");
+    fprintf(f, ".method public static output_int(I)V\n.limit locals 5\n.limit stack 5\ngetstatic java/lang/System/out Ljava/io/PrintStream;\niload_0\ninvokevirtual java/io/PrintStream/println(I)V\nreturn\n.end method\n\n.method public static output_float(F)V\n.limit locals 5\n.limit stack 5\ngetstatic java/lang/System/out Ljava/io/PrintStream;\nfload 0  ; the argument to function\ninvokevirtual java/io/PrintStream/println(F)V\nreturn\n.end method\n\n.method public static output_str(Ljava/lang/String;)V\n.limit locals 5\n.limit stack 5\ngetstatic java/lang/System/out Ljava/io/PrintStream;\naload 0\ninvokevirtual java/io/PrintStream/println(Ljava/lang/String;)V\nreturn\n.end method\n\n");
     printFuncao(fun, f);
     fclose(f);
 }
