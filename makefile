@@ -9,6 +9,8 @@ lex.yy.c: expr.l
 run: 
 	clear
 	./expr
+	
+java:
 	java -jar Jasmin/jasmin.jar Jasmin/output.j
 	java output
 

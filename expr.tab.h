@@ -98,20 +98,6 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 #include "tipoNo.h"
 #include "tipoNo.h"
-#include "tipoNo.h"
-#include "tipoNo.h"
-#include "tipoNo.h"
-#include "tipoNo.h"
-#include "tipoNo.h"
-#include "tipoNo.h"
-#include "tipoNo.h"
-#include "tipoNo.h"
-#include "tipoNo.h"
-#include "tipoNo.h"
-#include "tipoNo.h"
-#include "tipoNo.h"
-#include "tipoNo.h"
-#include "tipoNo.h"
 union YYSTYPE
 {
 #line 44 "expr.y"

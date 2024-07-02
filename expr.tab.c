@@ -2675,29 +2675,7 @@ void detectaErros(int opr, tipoNo *no){
 				exit(1);
 			}
 			detectaFloatInt(no);
-		} else if (opr == 1){
-			if (temp_fun->no){
-				if (!strcmp(no->opr.op[0]->id.name, temp_fun->no->id.name)){
-					comparaParametros(temp_fun->no->id.name, temp_fun->prms, no->opr.op[1]);
-					return;
-				}
-			}
-			Funcao *f = tbl_fun;
-			while (f != NULL){
-				if (!strcmp(f->no->id.name, no->opr.op[0]->id.name)){
-					if (getNumItems(f->prms) > getNumOperandos(no->opr.op[1])){
-						printf("Número de parâmetros passados está abaixo do número de parâmetros da função %s\n", no->opr.op[0]->id.name);
-						exit(1);
-					} else if (getNumItems(f->prms) < getNumOperandos(no->opr.op[1])){
-						printf("Número de parâmetros passados excede o número de parâmetros da função %s\n", no->opr.op[0]->id.name);
-						exit(1);
-					}
-					comparaParametros(no->opr.op[0]->id.name, f->prms, no->opr.op[1]);
-					return;
-				}
-				f = f->prox;
-			}
-		}	
+		}
 	}
 }
 
@@ -3019,6 +2997,21 @@ Funcao* posVerifica(Funcao *funcao){
 								}
 							}
 							break;
+					}
+					break;
+				
+				case 1: // Chama função
+					Funcao* f1 = funcao;
+					while(f1 != NULL){
+						if (!strcmp(cmd->arv->opr.op[0]->id.name, f1->no->id.name)){
+							if (cmd->arv->opr.nOps > 0){
+								comparaParametros(f1->no->id.name, f1->prms, cmd->arv->opr.op[1]);
+							} else if(cmd->arv->opr.nOps == 0 && f1->prms != NULL){
+								printf("Número de parâmetros passados para a função %s está abaixo do número de parâmetros\n", f1->no->id.name);
+								exit(1);
+							}
+						}
+						f1 = f1->prox;
 					}
 					break;
 			}
